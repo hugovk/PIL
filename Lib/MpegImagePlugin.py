@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: MpegImagePlugin.py,v 1.3 1996/12/16 18:50:23 fl Exp fl $
+# $Id: MpegImagePlugin.py,v 1.4 1997/01/14 16:38:36 fl Exp $
 #
 # MPEG file handling
 #
@@ -67,7 +67,7 @@ class MpegImageFile(ImageFile.ImageFile):
 
 
 # --------------------------------------------------------------------
-# Registty stuff
+# Registry stuff
 
 Image.register_open("MPEG", MpegImageFile)
 

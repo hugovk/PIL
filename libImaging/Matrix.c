@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library
- * $Id: Matrix.c,v 1.3 1996/12/16 18:51:03 fl Exp fl $
+ * $Id: Matrix.c,v 1.3 1996/12/16 18:51:03 fl Exp $
  *
  * colour and luminance matrix transforms
  *

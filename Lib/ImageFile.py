@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: ImageFile.py,v 1.9 1996/12/16 18:50:23 fl Exp fl $
+# $Id: ImageFile.py,v 1.10 1997/01/14 16:38:36 fl Exp $
 #
 # base class for image file handlers
 #
@@ -11,13 +11,14 @@
 #	96-04-30 fl	Added encoders.
 #	96-10-04 fl	Added update_idletasks hook.
 #	96-12-14 fl	Added load helpers
+#	97-01-11 fl	Added save speedup (via encode_to_file)
 #
-# Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
+# Copyright (c) Fredrik Lundh 1995-97.  All rights reserved.
 #
 
 
 import Image
-import traceback
+import traceback, sys
 
 MAXBLOCK = 65536
 
@@ -33,50 +34,33 @@ def update_idletasks(self, bytes):
 # Helpers
 
 def _getdecoder(d, e, a, ac):
-    # argument
-    if a == None:
-	a = ()
-    elif type(a) != type(()):
-	a = (a,)
-    # decoder (FIXME: reorganize!)
-    if d == "gif":
-	return apply(Image.core.gif_decoder, a)
-    if d == "jpeg":
-	return apply(Image.core.jpeg_decoder, a + ac)
-    if d == "tiff_lzw":
-	return apply(Image.core.lzw_decoder, a)
-    if d == "packbits":
-	return apply(Image.core.packbits_decoder, a)
-    if d == "pcd":
-	return apply(Image.core.pcd_decoder, a)
-    if d == "pcx":
-	return apply(Image.core.pcx_decoder, a)
-    if d == "raw":
-	return apply(Image.core.raw_decoder, a)
-    if d == "xbm":
-	return apply(Image.core.xbm_decoder, a)
-    if d == "zip":
-	return apply(Image.core.zip_decoder, a)
-    raise IOError, "decoder %s not available" % d
 
-def _getencoder(d, e, a):
-    # argument
+    # tweak arguments
     if a == None:
 	a = ()
     elif type(a) != type(()):
 	a = (a,)
-    # decoder (FIXME: reorganize!)
-    if d == "eps":
-	return apply(Image.core.eps_encoder, a)
-    if d == "gif":
-	return apply(Image.core.gif_encoder, a)
-    if d == "jpeg":
-	return apply(Image.core.jpeg_encoder, a)
-    if d == "raw":
-	return apply(Image.core.raw_encoder, a)
-    if d == "xbm":
-	return apply(Image.core.xbm_encoder, a)
-    raise IOError, "encoder %s not available" % d
+
+    try:
+	# get decoder
+	decoder = getattr(Image.core, d + "_decoder")
+	return apply(decoder, a + ac)
+    except AttributeError:
+	raise IOError, "decoder %s not available" % d
+
+def _getencoder(d, e, a, ac):
+    # tweak arguments
+    if a == None:
+	a = ()
+    elif type(a) != type(()):
+	a = (a,)
+
+    try:
+	# get encoder
+	encoder = getattr(Image.core, d + "_encoder")
+	return apply(encoder, a + ac)
+    except AttributeError:
+	raise IOError, "encoder %s not available" % d
 
 def _tilesort(t1, t2):
     # sort on offset
@@ -98,9 +82,9 @@ class ImageFile(Image.Image):
 	self.tile = None
 	self.info = {}
 
-	# FIXME: this is a hack to test JPEG decoder configuration
 	self.decoderconfig = ()
-	
+	self.decodermaxblock = MAXBLOCK
+
         if type(fp) == type(""):
 	    self.fp = open(fp, "rb")
 	    self.filename = fp
@@ -141,17 +125,21 @@ class ImageFile(Image.Image):
     def load(self):
 	"Load image data based on tile list"
 
+	Image.Image.load(self)
+
 	if self.tile == None:
 	    raise IOError, "cannot load this image"
 	if not self.tile:
 	    return
 
-	# create image
-	self.im = Image.core.new(self.mode, self.size)
+	# create image (but only if necessary)
+	if not self.im or\
+	    self.im.mode != self.mode or self.im.size != self.size:
+	    self.im = Image.core.new(self.mode, self.size)
 
 	# create palette (optional)
-	if self.mode == "P" and type(self.palette) == type(()):
-	    self.im.putpalette(self.palette[0], self.palette[1])
+	if self.mode == "P" and self.palette:
+	    self.im.putpalette(self.palette.rawmode, self.palette.data)
 
 	# process tiles in file order
 	self.tile.sort(_tilesort)
@@ -166,7 +154,7 @@ class ImageFile(Image.Image):
 		b = self.tile_prefix
 	    t = len(b)
 	    while 1:
-		s = self.load_read(MAXBLOCK)
+		s = self.load_read(self.decodermaxblock)
 		if not s:
 		    self.tile = []
 		    raise IOError, "image file is truncated, %d bytes left" % len(b)
@@ -190,6 +178,9 @@ class ImageFile(Image.Image):
 
 	self.load_end()
 
+    #
+    # FIXME: don't like these.  make them go away...
+
     def load_end(self):
 	# may be overridden
 	pass
@@ -211,18 +202,34 @@ def _save(im, fp, tile):
     "Helper to save image based on tile list"
 
     im.load()
+    if not hasattr(im, "encoderconfig"):
+	im.encoderconfig = ()
     tile.sort(_tilesort)
     bufsize = max(MAXBLOCK, im.size[0] * 4) # see RawEncode.c
-    for e, b, o, a in tile:
-	e = _getencoder(e, b, a)
-	if o > 0:
-	    fp.seek(o, 0)
-	e.setimage(im.im, b)
-	while 1:
-	    l, s, d = e.encode(bufsize)
-	    fp.write(d[:l])
-	    if s:
-		break
-	del e
-	if s < 0:
-	    raise IOError, "encoder error %d when writing image file" % s
+    try:
+	fh = fp.fileno()
+	fp.flush()
+    except AttributeError:
+	# compress to Python file-compatible object
+	for e, b, o, a in tile:
+	    e = _getencoder(e, b, a, im.encoderconfig)
+	    if o > 0:
+		fp.seek(o, 0)
+	    e.setimage(im.im, b)
+	    while 1:
+		l, s, d = e.encode(bufsize)
+		fp.write(d)
+		if s:
+		    break
+	    if s < 0:
+		raise IOError, "encoder error %d when writing image file" % s
+    else:
+	# slight speedup: compress to real file object
+	for e, b, o, a in tile:
+	    e = _getencoder(e, b, a, im.encoderconfig)
+	    if o > 0:
+		fp.seek(o, 0)
+	    e.setimage(im.im, b)
+	    s = e.encode_to_file(fh, bufsize)
+	    if s < 0:
+		raise IOError, "encoder error %d when writing image file" % s

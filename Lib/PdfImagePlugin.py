@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: PdfImagePlugin.py,v 1.4 1996/12/16 18:50:23 fl Exp fl $
+# $Id: PdfImagePlugin.py,v 1.4 1996/12/16 18:50:23 fl Exp $
 #
 # PDF (Acrobat) file handling
 #

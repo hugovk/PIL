@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library
-# $Id: GbrImagePlugin.py,v 1.3 1996/11/10 17:52:14 fredrik Exp $
+# $Id: GbrImagePlugin.py,v 1.4 1997/01/14 16:38:36 fl Exp $
 #
 # load a GIMP brush file
 #
@@ -14,6 +14,9 @@ import Image, ImageFile
 
 def i32(c):
     return ord(c[3]) + (ord(c[2])<<8) + (ord(c[1])<<16) + (ord(c[0])<<24)
+
+def _accept(prefix):
+    return i32(prefix) >= 20 and i32(prefix[4:8]) == 1
 
 class GbrImageFile(ImageFile.ImageFile):
 
@@ -52,6 +55,9 @@ class GbrImageFile(ImageFile.ImageFile):
 	self.data = ""
 
 
-Image.register_open("GBR", GbrImageFile)
+#
+# registry
+
+Image.register_open("GBR", GbrImageFile, _accept)
 
 Image.register_extension("GBR", ".gbr")

@@ -1,13 +1,14 @@
 #
 # The Python Imaging Library.
-# $Id: ImagePalette.py,v 1.4 1996/11/10 17:52:14 fredrik Exp $
+# $Id: ImagePalette.py,v 1.5 1997/01/14 16:38:36 fl Exp $
 #
 # image palette object
 #
 # History:
 #	96-03-11 fl	Rewritten.
+#	97-01-03 fl	Up and running.
 #
-# Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+# Copyright (c) Fredrik Lundh 1996-97.  All rights reserved.
 #
 
 import array
@@ -36,6 +37,14 @@ class ImagePalette:
 	        fp.write(" %d" % self.palette[j])
 	    fp.write("\n")
         fp.close()
+
+# --------------------------------------------------------------------
+# Internal
+
+class raw:
+    def __init__(self, rawmode, data):
+	self.rawmode = rawmode
+	self.data = data
 
 # --------------------------------------------------------------------
 # Factories

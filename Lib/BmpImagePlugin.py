@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: BmpImagePlugin.py,v 1.6 1996/12/16 18:50:23 fl Exp fl $
+# $Id: BmpImagePlugin.py,v 1.7 1997/01/14 16:38:36 fl Exp $
 #
 # BMP file handler
 #
@@ -18,7 +18,7 @@ __version__ = "0.1"
 
 
 import array
-import Image, ImageFile
+import Image, ImageFile, ImagePalette
 
 
 #
@@ -39,6 +39,8 @@ BIT2MODE = {
     24: ("RGB", "BGR")
 }
 
+def _accept(prefix):
+    return prefix[:2] == "BM"
 
 class BmpImageFile(ImageFile.ImageFile):
 
@@ -84,9 +86,9 @@ class BmpImageFile(ImageFile.ImageFile):
 	if self.mode != "RGB":
 	    colors = 1<<bits
 	    if lutsize == 3:
-		self.palette = "BGR", self.fp.read(colors*3)
+		self.palette = ImagePalette.raw("BGR", self.fp.read(colors*3))
 	    else:
-		self.palette = "BGRX", self.fp.read(colors*4)
+		self.palette = ImagePalette.raw("BGRX", self.fp.read(colors*4))
 	    if self.mode == "L":
 		self.mode = "P"
 
@@ -97,7 +99,6 @@ class BmpImageFile(ImageFile.ImageFile):
 		     (0, 0) + self.size,
 		     offset,
 		     (rawmode, ((self.size[0]*bits+31)>>3)&(-4), -1))]
-
 
     def _open(self):
 
@@ -156,9 +157,14 @@ def _save(im, fp, filename):
 
     fp.write("\000" * (header - 40))	# padding (for OS/2 format)
 
-    # FIXME: write palette
-    for i in range(colors):
-	fp.write(chr(i) * 4)
+    if im.mode == "1":
+	for i in (0, 255):
+	    fp.write(chr(i) * 4)
+    elif im.mode == "L":
+	for i in range(256):
+	    fp.write(chr(i) * 4)
+    elif im.mode == "P":
+	fp.write(im.im.getpalette("BGRX"))
 
     ImageFile._save(im, fp, [("raw", (0,0)+im.size, 0, (rawmode, stride, -1))])
 
@@ -166,7 +172,7 @@ def _save(im, fp, filename):
 # --------------------------------------------------------------------
 # Registry
 
-Image.register_open(BmpImageFile.format, BmpImageFile)
+Image.register_open(BmpImageFile.format, BmpImageFile, _accept)
 Image.register_save(BmpImageFile.format, _save)
 
 Image.register_extension(BmpImageFile.format, ".bmp")

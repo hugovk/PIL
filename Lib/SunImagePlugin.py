@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: SunImagePlugin.py,v 1.3 1996/11/10 17:52:14 fredrik Exp $
+# $Id: SunImagePlugin.py,v 1.4 1997/01/14 16:38:36 fl Exp $
 #
 # Sun image file handling
 #
@@ -24,6 +24,10 @@ def i16(c):
 
 def i32(c):
     return ord(c[3]) + (ord(c[2])<<8) + (ord(c[1])<<16) + (ord(c[0])<<24)
+
+
+def _accept(prefix):
+    return i32(prefix) == 0x59a66a95
 
 
 class SunImageFile(ImageFile.ImageFile):
@@ -57,7 +61,7 @@ class SunImageFile(ImageFile.ImageFile):
 	if i32(s[24:28]) != 0:
 	    length = i32(s[28:32])
 	    offset = offset + length
-	    self.palette = "RGB;L", self.fp.read(length)
+	    self.palette = ImagePalette.raw("RGB;L", self.fp.read(length))
 	    if self.mode == "L":
 		self.mode = "P"
 
@@ -68,6 +72,9 @@ class SunImageFile(ImageFile.ImageFile):
 	elif compression == 2:
 	    self.tile = [("sun_rle", (0,0)+self.size, offset, rawmode)]
 
-Image.register_open("SUN", SunImageFile)
+#
+# registry
+
+Image.register_open("SUN", SunImageFile, _accept)
 
 Image.register_extension("SUN", ".ras")

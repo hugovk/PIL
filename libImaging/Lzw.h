@@ -1,9 +1,8 @@
-/* $Id: Lzw.h,v 1.1 1996/05/09 21:20:43 fredrik Exp $
- *
+/*
  * The Python Imaging Library.
+ * $Id: Lzw.h,v 1.1 1996/05/09 21:20:43 fredrik Exp $
  *
- * File:
- *	Lzw.h -- Declarations for a fast, suspendable LZW decoder.
+ * declarations for the TIFF LZW decoder.
  *
  * Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
  */
@@ -14,10 +13,15 @@
 #define	LZWBITS	    12
 
 #define	LZWTABLE    (1<<LZWBITS)
-#define	LZWSTACK    (1<<LZWBITS)
+#define	LZWBUFFER   (1<<LZWBITS)
 
 
 typedef struct {
+
+    /* CONFIGURATION */
+
+    /* Filter type */
+    int filter;
 
     /* PRIVATE CONTEXT (set by decoder) */
 
@@ -36,9 +40,9 @@ typedef struct {
     int lastcode;
     unsigned char lastdata;
 
-    /* Stack */
-    int stackindex;
-    unsigned char stack[LZWTABLE];
+    /* History buffer */
+    int bufferindex;
+    unsigned char buffer[LZWTABLE];
 
     /* Symbol table */
     unsigned INT16 link[LZWTABLE];
@@ -46,7 +50,3 @@ typedef struct {
     int next;
 
 } LZWSTATE;
-
-
-extern int LzwDecode(LZWSTATE *state);
-

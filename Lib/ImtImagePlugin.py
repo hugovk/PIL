@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: ImtImagePlugin.py,v 1.1 1996/12/16 18:50:23 fl Exp fl $
+# $Id: ImtImagePlugin.py,v 1.2 1997/01/14 16:38:36 fl Exp $
 #
 # IM Tools support for PIL
 #
@@ -29,6 +29,13 @@ class ImtImageFile(ImageFile.ImageFile):
 
     def _open(self):
 
+	# Quick rejection: if there's not a LF among the first
+	# 100 bytes, this is (probably) not a text header.
+
+	if not "\n" in self.fp.read(100):
+	    raise SyntaxError, "not an IM file"
+	self.fp.seek(0)
+
 	xsize = ysize = 0
 
 	while 1:
@@ -49,6 +56,7 @@ class ImtImageFile(ImageFile.ImageFile):
 	    else:
 
 		# read key/value pair
+		# FIXME: dangerous, may read whole file
 		s = s + self.fp.readline()
 		if len(s) == 1 or len(s) > 100:
 		    break

@@ -1,24 +1,39 @@
 
 The Python Imaging Library
-$Id: README,v 1.7 1996/12/16 18:50:17 fl Exp fl $
+$Id: README,v 1.9 1997/01/14 18:01:06 fl Exp fl $
 
-Release 0.2b3 (December 14, 1996)
+Release 0.2b4 (January 10, 1997)
 
 ====================================================================
-The Python Imaging Library 0.2b3
+The Python Imaging Library 0.2b4
 ====================================================================
 
 This is a beta release of the Python Imaging Library (PIL).  Many
 features planned for 0.2 are still not being distributed, and some of
-the new stuff in this release may not work as expected.  But if
-you're using 0.1b1 or 0.2a1, its definitely time to upgrade.
+the new stuff in this release may not work as expected.
 
 News highlights:
 
-+ PIL now reads many versions of PNG, MNG and WMF files.  Expect
-  full read/write support for PNG files real soon now.
++ Plugged a number of serious memory leaks; PIL leaked lots of
+  memory when loading PNG and tiled/striped TIFF images, and
+  even more when saving images in *any* format.
 
-+ PIL now renders interlaced GIF files correctly.
++ PIL now reads nearly all formats that previous versions could
+  only identify.  This includes FLI/FLC, MSP, PSD, TIFF w. pre-
+  dictor, TGA, and XPM.  Decoders for compressed versions of SUN
+  and TGA have also been added, but they are completely untested
+  (sample files would be much appreciated).
+
++ PIL now writes BMP, uncompressed GIF, uncompressed MSP, and PNG.
+
++ PIL now handles ARG, FLI, and GIF animations.  Use the "player"
+  script to view an animation.  The "gifmaker" script can be
+  used to create GIF animations.
+
++ PIL now allows you to control the quality when writing JPEG
+  files.  You can also write progressive JPEG files.
+
++ The "image2py" script converts an image to a Python module.
 
 For more information on these and other changes, see the CHANGES
 document.
@@ -80,9 +95,9 @@ that platform, use "acc" or "gcc" instead.
 
 5. Go back to the Imaging directory.
 
-   If you have the IJG JPEG or ZLIB libraries, or wish to install Python
-   in a non-standard place, copy the "Setup.in" file to "Setup" and edit
-   it according to the instructions in it.
+   If you don't have the IJG JPEG or ZLIB libraries, or wish to install
+   Python in a non-standard place, copy the "Setup.in" file to "Setup"
+   and edit it according to the instructions in it.
 
 
 6. Edit Makefile.pre.in and build a Makefile following the instructions
@@ -117,31 +132,35 @@ that platform, use "acc" or "gcc" instead.
 
 * Adding Tkinter support
 
-1. Add the following lines to tkappinit.c (part of the standard Python
-   distribution).  See the other examples in that file for details.
+1. Add the following lines to tkappinit.c (part of the standard
+   Python distribution), after the MOREBUTTONS stuff:
 
-		extern void TkImaging_Init(void);
-		TkImaging_Init();
+	{
+	    extern void TkImaging_Init(void);
+	    TkImaging_Init();
+	}
 
    This registers a image type called "PyImagingCore", which is
    use to communicate between PIL and Tk's PhotoImage handler.
 
-2. Compile Python's _tkinter.c with the WITH_APPINIT flag set.
+2. Compile Python's _tkinter.c with the WITH_APPINIT flag set
+   (see the Setup file for details).
 
-3. Link the _tkinter module with _tkinter.c and tkappinit.c (you have
-   to edit Python's Setup file to get this effect).
+3. Link the _tkinter module with _tkinter.c and tkappinit.c (you
+   have to edit Python's Setup file to get this effect).
 
 
 --------------------------------------------------------------------
 Build instructions for Windows
 --------------------------------------------------------------------
 
+--------------------------------------------------------------------
 NOTE: If possible, use the prebuilt PIL distribution for Windows.
 It includes the IJG JPEG and ZLIB libraries, and has been tested
 with Python 1.4 as well as with Mark Hammond's PythonWin.  To build
 the library yourself, you need Visual C++ 4.0 or later, and a locally
 compiled version of the 1.4 distribution.
-
+--------------------------------------------------------------------
 
 PIL is shipped with a Visual C++ project makefile.  It contains
 subprojects for the IJG JPEG and ZLIB libraries as well.  Unless
@@ -173,7 +192,9 @@ somewhat to fit your configuration.
 
 * Adding Tkinter support
 
-See the Unix section.
+See the Unix section.  Instead of modifying the Setup file, you have
+to add tkappinit.c to the project file, and -DWITH_APPINIT to the
+_tkinter.c compile options.
 
 --------------------------------------------------------------------
 NOTE: If you use Tk 4.2, you may wish to install the booster patch
@@ -186,12 +207,11 @@ displays.  See the description in the Tk subdirectory for details.
 Software License
 --------------------------------------------------------------------
 
-(No warranty, not many restrictions, just don't pretend you wrote
-this stuff yourself.  If you use PIL in any spectacular and/or
-commercial application, why not drop me an e-mail or a postcard ;-)
+The Python Imaging Library is Copyright (c) 1995-97 by Fredrik Lundh.
 
-The Python Imaging Library is Copyright (c) 1995-96 Fredrik Lundh.
-All rights reserved.
+By obtaining, using, and/or copying this software and/or its
+associated documentation, you agree that you have read, understood,
+and will comply with the following terms and conditions:
 
 Permission to use, copy, modify, and distribute this software and its
 associated documentation for any purpose and without fee is hereby

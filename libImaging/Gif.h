@@ -14,7 +14,7 @@
 #define	GIFBITS	    12
 
 #define	GIFTABLE    (1<<GIFBITS)
-#define	GIFSTACK    (1<<GIFBITS)
+#define	GIFBUFFER   (1<<GIFBITS)
 
 
 typedef struct {
@@ -32,7 +32,6 @@ typedef struct {
      * 3rd pass: start at line 2, lines are 2 pixels high, step 4 pixels
      * 4th pass: start at line 1, lines are 1 pixels high, step 2 pixels
      */
-    /* FIXME: interlaced images are not yet supported */
     int interlace;
 
     /* PRIVATE CONTEXT (set by decoder) */
@@ -56,13 +55,40 @@ typedef struct {
     int lastcode;
     unsigned char lastdata;
 
-    /* Stack */
-    int stackindex;
-    unsigned char stack[GIFTABLE];
+    /* History buffer */
+    int bufferindex;
+    unsigned char buffer[GIFTABLE];
 
     /* Symbol table */
     unsigned INT16 link[GIFTABLE];
     unsigned char data[GIFTABLE];
     int next;
 
-} GIFSTATE;
+} GIFDECODERSTATE;
+
+
+typedef struct {
+
+    /* CONFIGURATION */
+
+    /* Initial number of bits. The caller should clear all fields in
+       this structure and set this field before calling the encoder
+       the first time. */
+    int bits;
+
+    /* NOTE: the expanding encoder ignores this field */
+
+    /* PRIVATE CONTEXT (set by encoder) */
+
+    /* End of file processing state */
+    int eof; /* 1=end detected, 2=flush bit buffer, 3=flush block and quit */
+
+    /* Output bit buffer */
+    INT32 bitbuffer;
+    int bitcount;
+
+    /* Output byte buffer */
+    UINT8 block[256];
+    int blocksize;
+
+} GIFENCODERSTATE;

@@ -1,6 +1,9 @@
 #
 # The Python Imaging Library
-# $Id: thresholder.py,v 1.1 1996/12/16 18:51:31 fl Exp fl $
+# $Id$
+#
+# this demo script illustrates how a 1-bit BitmapImage can be used
+# as a dynamically updated overlay
 #
 
 from Tkinter import *
@@ -28,14 +31,18 @@ class UI(Frame):
 	scale.bind("<ButtonRelease-1>", self.redraw)
 	scale.pack()
  
-	self.redraw()
+	# uncomment the following line for instant feedback (might
+	# be too slow on some platforms)
+	# self.redraw()
 
     def update(self, value):
 	self.value = eval(value)
 
+	self.redraw()
+
     def redraw(self, event = None):
 
-	# create overlay
+	# create overlay (note the explicit conversion to mode "1")
 	im = self.image.point(lambda v,t=self.value: v>=t, "1")
 	self.overlay = ImageTk.BitmapImage(im, foreground="green")
 

@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: JpegImagePlugin.py,v 1.7 1996/12/16 18:50:23 fl Exp fl $
+# $Id: JpegImagePlugin.py,v 1.8 1997/01/14 16:38:36 fl Exp $
 #
 # JPEG (JFIF) file handling
 #
@@ -12,12 +12,13 @@
 #	95-09-13 fl	Added full parser
 #	96-03-25 fl	Added hack to use the IJG command line utilities
 #	96-05-05 fl	Workaround Photoshop 2.5 CMYK polarity bug
-#	96-05-28 fl	Added draft support, JFIF version
+# 0.1	96-05-28 fl	Added draft support, JFIF version
+# 0.2	96-12-30 fl	Added encoder options, added progression property
 #
 # Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
 #
 
-__version__ = "0.1"
+__version__ = "0.2"
 
 import array, string
 import Image, ImageFile
@@ -74,6 +75,9 @@ def SOF(self, marker):
     else:
 	raise SyntaxError, "cannot handle %d-layer images" % self.layers
 
+    if marker in [0xFFC2, 0xFFC6, 0xFFCA, 0xFFCE]:
+	self.info["progression"] = 1
+
     for i in range(6, len(s), 3):
 	t = s[i:i+3]
 	# 4-tuples: id, vsamp, hsamp, qtable
@@ -85,7 +89,7 @@ def DQT(self, marker):
     # only.  Note that there might be more than one table in
     # each marker.
 
-    # The quantization tables can be used to estimate the
+    # FIXME: The quantization tables can be used to estimate the
     # compression quality.
 
     s = self.fp.read(i16(self.fp.read(2))-2)
@@ -170,6 +174,9 @@ MARKER = {
     0xFFFE: ("COM", "Comment", Skip)
 }
 
+
+def _accept(prefix):
+    return prefix[0] == "\377"
 
 class JpegImageFile(ImageFile.ImageFile):
 
@@ -260,9 +267,21 @@ class JpegImageFile(ImageFile.ImageFile):
 	self.tile = []
 
 
+def _fetch(dict, key, default = 0):
+    try:
+	return dict[key]
+    except KeyError:
+	return default
+
 def _save(im, fp, filename):
     if im.mode not in ["L", "RGB", "CMYK"]:
 	raise IOError, "cannot write mode %s as JPEG" % im.mode
+    # get keyword arguments
+    im.encoderconfig = (_fetch(im.encoderinfo, "quality", 0),
+			im.encoderinfo.has_key("progressive"),
+			_fetch(im.encoderinfo, "smooth", 0),
+			im.encoderinfo.has_key("optimize"),
+			_fetch(im.encoderinfo, "streamtype", 0))
     ImageFile._save(im, fp, [("jpeg", (0,0)+im.size, 0, im.mode)])
 
 def _save_hack(im, fp, filename):
@@ -273,10 +292,10 @@ def _save_hack(im, fp, filename):
     try: os.unlink(file)
     except: pass
 
-# --------------------------------------------------------------------
+# -------------------------------------------------------------------q-
 # Registry stuff
 
-Image.register_open("JPEG", JpegImageFile)
+Image.register_open("JPEG", JpegImageFile, _accept)
 Image.register_save("JPEG", _save)
 
 Image.register_extension("JPEG", ".jfif")

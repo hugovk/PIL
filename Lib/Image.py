@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: Image.py,v 1.14 1996/12/16 18:50:23 fl Exp fl $
+# $Id: Image.py,v 1.16 1997/01/14 18:01:12 fl Exp $
 #
 # the Image class wrapper
 #
@@ -13,8 +13,9 @@
 #	96-11-04 fl	PIL release 0.2b1
 #	96-12-08 fl	PIL release 0.2b2
 #	96-12-16 fl	PIL release 0.2b3
+#	97-01-14 fl	PIL release 0.2b4
 #
-# Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
+# Copyright (c) Fredrik Lundh 1995-97.  All rights reserved.
 #
 
 class _imaging_not_installed:
@@ -57,8 +58,6 @@ PERSPECTIVE = 2 # Not yet implemented
 #
 # Registries
 
-_initialized = 0
-
 ID = []
 OPEN = {}
 MIME = {}
@@ -68,6 +67,8 @@ EXTENSION = {}
 #
 # Helpers
 
+_initialized = 0
+
 def init():
     "Load file format drivers.  Called automatically by open and save."
 
@@ -75,23 +76,25 @@ def init():
     if _initialized:
 	return
 
-    _initialized = 1
-
-    import glob, os, sys
-    for p in sys.path:
-	for f in glob.glob(os.path.join(p, "*ImagePlugin.py")):
-	    p, f = os.path.split(f)
-	    f, e = os.path.splitext(f)
-	    try:
-		sys.path.insert(0, p)
+    import os, sys
+    for p in filter(os.path.isabs, filter(os.path.isdir, sys.path)):
+	for f in os.listdir(p):
+	    if f[-14:] == "ImagePlugin.py":
+		p, f = os.path.split(f)
+		f, e = os.path.splitext(f)
 		try:
-		    exec "import " + f
-		finally:
-		    del sys.path[0]
-	    except ImportError:
-		if Image.DEBUG:
-		    print "Image: failed to import", f, ":", sys.exc_value
+		    sys.path.insert(0, p)
+		    try:
+			__import__(f)
+		    finally:
+			del sys.path[0]
+		except ImportError:
+		    if DEBUG:
+			print "Image: failed to import",
+			print f, ":", sys.exc_value
 
+    if OPEN or SAVE:
+	_initialized = 1
 
 # --------------------------------------------------------------------
 # Implementation wrapper
@@ -109,6 +112,11 @@ class Image:
 	self.size = (0,0)
 	self.palette = None
 	self.info = {}
+
+    def __setattr__(self, id, value):
+	if id == "palette":
+	    pass # print "set", id, value
+	self.__dict__[id] = value
 
     def _makeself(self, im):
 	new = Image()
@@ -152,7 +160,8 @@ class Image:
 	self.im.fromstring(buf)
 
     def load(self):
-	pass
+	if self.im and self.palette:
+	    self.im.putpalette(self.palette.rawmode, self.palette.data)
 
     #
     # function wrappers
@@ -185,7 +194,19 @@ class Image:
 	self.load()
 	if box == None:
 	    return self.copy()
-	im = self.im.crop(box)
+
+	# the C implementation of crop is broken, so we implement
+	# it by pasting into empty image instead.
+
+	size = box[2]-box[0], box[3]-box[1]
+
+	im = core.new(self.mode, size)
+	im.paste(self.im, (-box[0], -box[1],
+		 self.size[0]-box[0],
+		 self.size[1]-box[1]))
+
+	# im = self.im.crop(box)
+
 	return self._makeself(im)
 
     def draft(self, mode, size):
@@ -225,6 +246,13 @@ class Image:
 
     	self.load()
 	return self.im[int(x + y * self.size[0])]
+
+    def getprojection(self):
+	"Get projection to x and y axes"
+
+    	self.load()
+	x, y = self.im.getprojection()
+	return map(ord, x), map(ord, y)
 
     def histogram(self):
         "Take histogram of image"
@@ -267,6 +295,20 @@ class Image:
 	im = self.im.point(lut, mode)
 	return self._makeself(im)
 
+    def putalpha(self, im):
+        "Set alpha layer"
+
+	if self.mode != "RGBA" or im.mode not in ["1", "L"]:
+	    raise ValueError, "illegal image mode"
+
+	im.load()
+	self.load()
+
+	if im.mode == "1":
+	    im = im.convert("L")
+
+	self.im.putband(im.im, 3)
+
     def putdata(self, data, scale = 1.0, offset = 0.0):
 	"Put data from a sequence object into an image."
 
@@ -304,6 +346,11 @@ class Image:
 	        format = EXTENSION[string.lower(os.path.splitext(filename)[1])]
 	    except KeyError, v:
 	        raise IOError, "cannot determine format for %s files" % v
+
+	self.encoderinfo = params
+	self.encoderconfig = ()
+
+	self.load()
 
 	try:
 	    SAVE[string.upper(format)](self, fp, filename)
@@ -392,6 +439,15 @@ def new(mode, size, color = None):
     if color == None:
 	return Image()._makeself(core.new(mode, size))
 
+    if type(color) == type(()):
+	# convert colour tuple to integer value
+	if len(color) == 3:
+	    color = color[0] + (color[1]<<8) + (color[2]<<16)
+	elif len(color) == 4:
+	    color = color[0] + (color[1]<<8) + (color[2]<<16) + (color[3]<<24)
+	else:
+	    color = color[0]
+
     return Image()._makeself(core.fill(mode, size, color))
 
 def open(fp, mode = "r"):
@@ -409,10 +465,14 @@ def open(fp, mode = "r"):
 
     init()
 
+    prefix = fp.read(16)
+
     for i in ID:
 	try:
-	    fp.seek(0)
-	    return OPEN[i](fp, filename)
+	    factory, accept = OPEN[i]
+	    if not accept or accept(prefix):
+		fp.seek(0)
+		return factory(fp, filename)
 	except SyntaxError:
 	    pass
 
@@ -460,9 +520,10 @@ def merge(mode, bands):
 # --------------------------------------------------------------------
 # Plugin registry
 
-def register_open(id, driver):
-    ID.append(string.upper(id))
-    OPEN[string.upper(id)] = driver
+def register_open(id, factory, accept = None):
+    id = string.upper(id)
+    ID.append(id)
+    OPEN[id] = factory, accept
 
 def register_mime(id, mimetype):
     MIME[string.upper(id)] = mimetype
@@ -471,7 +532,7 @@ def register_save(id, driver):
     SAVE[string.upper(id)] = driver
 
 def register_extension(id, extension):
-    EXTENSION[string.lower(extension)] = id
+    EXTENSION[string.lower(extension)] = string.upper(id)
 
 
 # --------------------------------------------------------------------

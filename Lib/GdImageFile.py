@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: GdImageFile.py,v 1.4 1996/11/10 17:52:14 fredrik Exp $
+# $Id: GdImageFile.py,v 1.5 1997/01/14 16:38:36 fl Exp $
 #
 # GD file handling
 #
@@ -23,7 +23,7 @@
 __version__ = "0.1"
 
 import string
-import Image, ImageFile
+import Image, ImageFile, ImagePalette
 
 def i16(c):
     return ord(c[1]) + (ord(c[0])<<8)
@@ -47,7 +47,7 @@ class GdImageFile(ImageFile.ImageFile):
 	if tindex < 256:
 	    self.info["transparent"] = tindex
 
-	self.palette = "RGB", s[7:]
+	self.palette = ImagePalette.raw("RGB", s[7:])
 
 	self.tile = [("raw", (0,0)+self.size, 775, ("L", 0, -1))]
 

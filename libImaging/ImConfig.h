@@ -16,7 +16,7 @@
 /* Define if you have the Greg Ward's mpeg library (-lmpeg).  */
 #undef HAVE_LIBMPEG
 
-/* Define if you have the zlib compression library (-lzlib).  */
+/* Define if you have the zlib compression library (-lz).  */
 #define HAVE_LIBZ
 
 /* -------------------------------------------------------------------- */

@@ -1,14 +1,16 @@
 /*
  * The Python Imaging Library.
- * $Id: JpegEncode.c,v 1.4 1996/12/16 18:51:03 fl Exp fl $
+ * $Id: JpegEncode.c,v 1.5 1997/01/14 16:40:04 fl Exp $
  *
  * coder for JPEG data
  *
  * history:
  *	96-05-06 fl	created
  *	96-07-16 fl	don't drop last block of encoded data
+ *	96-12-30 fl	added quality and progressive settings
+ *	97-01-08 fl	added streamtype settings
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996-97.  All rights reserved.
  */
 
 
@@ -125,8 +127,31 @@ ImagingJpegEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	    state->errcode = IMAGING_CODEC_CONFIG;
 	    return -1;
 	}
+
+	/* Compressor configuration */
 	jpeg_set_defaults(&context->cinfo);
-	jpeg_start_compress(&context->cinfo, TRUE);
+	if (context->quality > 0)
+	    jpeg_set_quality(&context->cinfo, context->quality, 1);
+	if (context->progressive)
+	    jpeg_simple_progression(&context->cinfo);
+	context->cinfo.smoothing_factor = context->smooth;
+	context->cinfo.optimize_coding = (boolean) context->optimize;
+
+	switch (context->streamtype) {
+	case 1:
+	    /* tables only -- not yet implemented */
+	    state->errcode = IMAGING_CODEC_CONFIG;
+	    return -1;
+	case 2:
+	    /* image only */
+	    jpeg_suppress_tables(&context->cinfo, TRUE);
+	    jpeg_start_compress(&context->cinfo, FALSE);
+	    break;
+	default:
+	    /* interchange stream */
+	    jpeg_start_compress(&context->cinfo, TRUE);
+	    break;
+	}
 	state->state++;
 	/* fall through */
 

@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: ZipDecode.c,v 1.1 1996/12/16 18:51:03 fl Exp fl $
+ * $Id: ZipDecode.c,v 1.2 1997/01/14 16:40:04 fl Exp $
  *
  * decoder for ZIP (deflated) image data.
  *
@@ -49,11 +49,11 @@ ImagingZipDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	memset(context->previous, 0, state->bytes+1);
 
 	/* Setup decompression context */
-	context->d_stream.zalloc = (alloc_func)0;
-	context->d_stream.zfree = (free_func)0;
-	context->d_stream.opaque = (voidpf)0;
+	context->z_stream.zalloc = (alloc_func)0;
+	context->z_stream.zfree = (free_func)0;
+	context->z_stream.opaque = (voidpf)0;
 
-	err = inflateInit(&context->d_stream);
+	err = inflateInit(&context->z_stream);
 	if (err < 0) {
 	    state->errcode == IMAGING_CODEC_CONFIG;
 	    return -1;
@@ -65,16 +65,16 @@ ImagingZipDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
     }
 
     /* Setup the source buffer */
-    context->d_stream.next_in = buf;
-    context->d_stream.avail_in = bytes;
+    context->z_stream.next_in = buf;
+    context->z_stream.avail_in = bytes;
 
     /* Decompress what we've got this far */
-    while (context->d_stream.avail_in > 0) {
+    while (context->z_stream.avail_in > 0) {
 
-	context->d_stream.next_out = state->buffer;
-	context->d_stream.avail_out = state->bytes+1;
+	context->z_stream.next_out = state->buffer;
+	context->z_stream.avail_out = state->bytes+1;
 
-	err = inflate(&context->d_stream, Z_NO_FLUSH);
+	err = inflate(&context->z_stream, Z_NO_FLUSH);
 
 	if (err < 0) {
 	    /* Something went wrong inside the compression library */
@@ -84,11 +84,12 @@ ImagingZipDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 		state->errcode = IMAGING_CODEC_MEMORY;
 	    else
 		state->errcode = IMAGING_CODEC_CONFIG;
-	    inflateEnd(&context->d_stream);
+	    free(context->previous);
+	    inflateEnd(&context->z_stream);
 	    return -1;
 	}
 
-	n = state->bytes+1 - context->d_stream.avail_out;
+	n = state->bytes+1 - context->z_stream.avail_out;
 
 	if (n < state->bytes+1) {
 	    /* FIXME: if n is not zero, we're in trouble.  But can
@@ -146,9 +147,9 @@ ImagingZipDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	    }
 	    break;
 	default:
-	    state->errcode = IMAGING_CODEC_BROKEN;
+	    state->errcode = IMAGING_CODEC_UNKNOWN;
 	    free(context->previous);
-	    inflateEnd(&context->d_stream);
+	    inflateEnd(&context->z_stream);
 	    return -1;
 	}
 
@@ -165,8 +166,8 @@ ImagingZipDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	    /* if (state->y < state->ysize || err != Z_STREAM_END)
 		state->errcode = IMAGING_CODEC_BROKEN; */
 
-	    inflateEnd(&context->d_stream);
 	    free(context->previous);
+	    inflateEnd(&context->z_stream);
 	    return -1; /* end of file (errcode=0) */
 
 	}

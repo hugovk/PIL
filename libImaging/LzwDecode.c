@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: LzwDecode.c,v 1.4 1996/11/07 12:11:30 fredrik Exp $
+ * $Id: LzwDecode.c,v 1.5 1997/01/14 16:40:04 fl Exp $
  *
  * a fast, suspendable LZW decoder
  *
@@ -17,10 +17,11 @@
  *	  start at 9 bits.
  *
  * history:
- *	95-09-13 fl	Created (derived from gifdecod.c)
+ *	95-09-13 fl	Created (derived from GifDecode.c)
  *	96-03-28 fl	Revised API, integrated with PIL
+ *	97-01-05 fl	Added filter support, added extra consistency checks
  *
- * Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1995-97.  All rights reserved.
  */
 
 
@@ -38,17 +39,17 @@ ImagingLzwDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
     unsigned char *p;
     int c, i;
     int thiscode;
-    LZWSTATE *lzwstate = (LZWSTATE*) state->context;
+    LZWSTATE *context = (LZWSTATE*) state->context;
 
     unsigned char *ptr = buf;
 
     if (!state->state) {
 
 	/* Clear code */
-	lzwstate->clear = 1 << 8;
+	context->clear = 1 << 8;
 
 	/* End code */
-	lzwstate->end = lzwstate->clear + 1;
+	context->end = context->clear + 1;
 
 	state->state = 1;
     }
@@ -58,31 +59,31 @@ ImagingLzwDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	if (state->state == 1) {
 
 	    /* First free entry in table */
-	    lzwstate->next = lzwstate->clear + 2;
+	    context->next = context->clear + 2;
 
 	    /* Initial code size */
-	    lzwstate->codesize = 8 + 1;
-	    lzwstate->codemask = (1 << lzwstate->codesize) - 1;
+	    context->codesize = 8 + 1;
+	    context->codemask = (1 << context->codesize) - 1;
 
-	    /* Stack pointer.  The stack goes backwards, thus
-	       allowing us to return multiple bytes. */
-	    lzwstate->stackindex = LZWSTACK;
+	    /* Buffer pointer.  We fill the buffer from right, which
+	       allows us to return all of it in one operation. */
+	    context->bufferindex = LZWBUFFER;
 
 	    state->state = 2;
 	}
 
-	if (lzwstate->stackindex < LZWSTACK) {
+	if (context->bufferindex < LZWBUFFER) {
 
-	    /* Return whole stack in one chunk */
-	    i = LZWSTACK - lzwstate->stackindex;
-	    p = &lzwstate->stack[lzwstate->stackindex];
+	    /* Return whole buffer in one chunk */
+	    i = LZWBUFFER - context->bufferindex;
+	    p = &context->buffer[context->bufferindex];
 
-	    lzwstate->stackindex = LZWSTACK;
+	    context->bufferindex = LZWBUFFER;
 
 	} else {
 
 	    /* Get current symbol */
-	    while (lzwstate->bitcount < lzwstate->codesize) {
+	    while (context->bitcount < context->codesize) {
 
 		if (bytes < 1)
 		    return ptr - buf;;
@@ -91,90 +92,102 @@ ImagingLzwDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 		c = *ptr++; bytes--;
 
 		/* New bits are shifted in from from the right. */
-		lzwstate->bitbuffer = (lzwstate->bitbuffer << 8) | c;
-		lzwstate->bitcount += 8;
+		context->bitbuffer = (context->bitbuffer << 8) | c;
+		context->bitcount += 8;
 
 	    }
 
 	    /* Extract current symbol from bit buffer. */
-	    c = (lzwstate->bitbuffer >> (lzwstate->bitcount -
-					 lzwstate->codesize))
-		& lzwstate->codemask;
+	    c = (context->bitbuffer >> (context->bitcount -
+					 context->codesize))
+		& context->codemask;
 
 	    /* Adjust buffer */
-	    lzwstate->bitcount -= lzwstate->codesize;
+	    context->bitcount -= context->codesize;
 
 	    /* If c is less than clear, it's a data byte.  Otherwise,
 	       it's either clear/end or a code symbol which should be
 	       expanded. */
 
-	    if (c == lzwstate->clear) {
+	    if (c == context->clear) {
 		if (state->state != 2)
 		    state->state = 1;
 		continue;
 	    }
 
-	    if (c == lzwstate->end)
+	    if (c == context->end)
 		break;
 
 	    i = 1;
-	    p = &lzwstate->lastdata;
+	    p = &context->lastdata;
 
 	    if (state->state == 2) {
 
 		/* First valid symbol after clear; use as is */
-		if (c > lzwstate->clear) {
+		if (c > context->clear) {
 		    state->errcode = IMAGING_CODEC_BROKEN;
-		    c = 0;
+		    return -1;
 		}
 
-		lzwstate->lastdata = lzwstate->lastcode = c;
+		context->lastdata = context->lastcode = c;
 		state->state = 3;
 
 	    } else {
 
 		thiscode = c;
 
-		if (c > lzwstate->next) {
+		if (c > context->next) {
 		    state->errcode = IMAGING_CODEC_BROKEN;
-		    thiscode = 0;
+		    return -1;
 		}
 
-		if (c == lzwstate->next) {
+		if (c == context->next) {
 
 		    /* c == next is allowed, by some strange reason */
-		    lzwstate->stack[--lzwstate->stackindex] = lzwstate->lastdata;
-		    c = lzwstate->lastcode;
+		    if (context->bufferindex <= 0) {
+			state->errcode = IMAGING_CODEC_BROKEN;
+			return -1;
+		    }
+
+		    context->buffer[--context->bufferindex] = context->lastdata;
+		    c = context->lastcode;
 		}
 
-		while (c >= lzwstate->clear) {
+		while (c >= context->clear) {
 
-		    /* This was a symbol. Push data string to stack. */
-		    lzwstate->stack[--lzwstate->stackindex] = lzwstate->data[c];
-		    c = lzwstate->link[c];
+		    /* Copy data string to buffer (beginning from right) */
+
+		    if (context->bufferindex <= 0 || c >= LZWTABLE) {
+			state->errcode = IMAGING_CODEC_BROKEN;
+			return -1;
+		    }
+
+		    context->buffer[--context->bufferindex] =
+			context->data[c];
+		    c = context->link[c];
 		}
 
-		lzwstate->lastdata = c;
+		context->lastdata = c;
 
-		if (lzwstate->next < LZWTABLE) {
+		if (context->next < LZWTABLE) {
 
 		    /* While we still have room for it, add this
 		       symbol to the table. */
-		    lzwstate->data[lzwstate->next] = c;
-		    lzwstate->link[lzwstate->next] = lzwstate->lastcode;
+		    context->data[context->next] = c;
+		    context->link[context->next] = context->lastcode;
 
-		    lzwstate->next++;
+		    context->next++;
 
-		    if (lzwstate->next == lzwstate->codemask &&
-			lzwstate->codesize < LZWBITS) {
+		    if (context->next == context->codemask &&
+			context->codesize < LZWBITS) {
 
 			/* Expand code size */
-			lzwstate->codesize++;
-			lzwstate->codemask = (1 << lzwstate->codesize) - 1;
+			context->codesize++;
+			context->codemask = (1 << context->codesize) - 1;
 
 		    }
 		}
-		lzwstate->lastcode = thiscode;
+		context->lastcode = thiscode;
 	    }
 	}
 
@@ -184,6 +197,17 @@ ImagingLzwDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	    state->buffer[state->x] = p[c];
 
 	    if (++state->x >= state->bytes) {
+
+		int x, bpp;
+
+		/* Apply filter */
+		switch (context->filter) {
+		case 2:
+		    /* Horizontal differing ("prior") */
+		    bpp = (state->bits + 7) / 8;
+		    for (x = bpp; x < state->bytes; x++)
+			state->buffer[x] += state->buffer[x-bpp];
+		}
 
 		/* Got a full line, unpack it */
 		state->shuffle((UINT8*) im->image[state->y + state->yoff] +

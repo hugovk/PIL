@@ -76,15 +76,18 @@ CLEAN :
 	-@erase "$(INTDIR)\File.obj"
 	-@erase "$(INTDIR)\Fill.obj"
 	-@erase "$(INTDIR)\Filter.obj"
+	-@erase "$(INTDIR)\FliDecode.obj"
 	-@erase "$(INTDIR)\Geometry.obj"
 	-@erase "$(INTDIR)\GetBBox.obj"
 	-@erase "$(INTDIR)\GifDecode.obj"
+	-@erase "$(INTDIR)\GifEncode.obj"
 	-@erase "$(INTDIR)\HexDecode.obj"
 	-@erase "$(INTDIR)\Histo.obj"
 	-@erase "$(INTDIR)\JpegDecode.obj"
 	-@erase "$(INTDIR)\JpegEncode.obj"
 	-@erase "$(INTDIR)\LzwDecode.obj"
 	-@erase "$(INTDIR)\Matrix.obj"
+	-@erase "$(INTDIR)\MspDecode.obj"
 	-@erase "$(INTDIR)\Negative.obj"
 	-@erase "$(INTDIR)\Offset.obj"
 	-@erase "$(INTDIR)\Pack.obj"
@@ -100,10 +103,13 @@ CLEAN :
 	-@erase "$(INTDIR)\RawEncode.obj"
 	-@erase "$(INTDIR)\Storage.obj"
 	-@erase "$(INTDIR)\String.obj"
+	-@erase "$(INTDIR)\SunRleDecode.obj"
+	-@erase "$(INTDIR)\TgaRleDecode.obj"
 	-@erase "$(INTDIR)\Unpack.obj"
 	-@erase "$(INTDIR)\XbmDecode.obj"
 	-@erase "$(INTDIR)\XbmEncode.obj"
 	-@erase "$(INTDIR)\ZipDecode.obj"
+	-@erase "$(INTDIR)\ZipEncode.obj"
 	-@erase "$(OUTDIR)\_imaging.exp"
 	-@erase "$(OUTDIR)\_imaging.lib"
 	-@erase ".\_imaging.dll"
@@ -179,15 +185,18 @@ LINK32_OBJS= \
 	"$(INTDIR)\File.obj" \
 	"$(INTDIR)\Fill.obj" \
 	"$(INTDIR)\Filter.obj" \
+	"$(INTDIR)\FliDecode.obj" \
 	"$(INTDIR)\Geometry.obj" \
 	"$(INTDIR)\GetBBox.obj" \
 	"$(INTDIR)\GifDecode.obj" \
+	"$(INTDIR)\GifEncode.obj" \
 	"$(INTDIR)\HexDecode.obj" \
 	"$(INTDIR)\Histo.obj" \
 	"$(INTDIR)\JpegDecode.obj" \
 	"$(INTDIR)\JpegEncode.obj" \
 	"$(INTDIR)\LzwDecode.obj" \
 	"$(INTDIR)\Matrix.obj" \
+	"$(INTDIR)\MspDecode.obj" \
 	"$(INTDIR)\Negative.obj" \
 	"$(INTDIR)\Offset.obj" \
 	"$(INTDIR)\Pack.obj" \
@@ -203,10 +212,13 @@ LINK32_OBJS= \
 	"$(INTDIR)\RawEncode.obj" \
 	"$(INTDIR)\Storage.obj" \
 	"$(INTDIR)\String.obj" \
+	"$(INTDIR)\SunRleDecode.obj" \
+	"$(INTDIR)\TgaRleDecode.obj" \
 	"$(INTDIR)\Unpack.obj" \
 	"$(INTDIR)\XbmDecode.obj" \
 	"$(INTDIR)\XbmEncode.obj" \
 	"$(INTDIR)\ZipDecode.obj" \
+	"$(INTDIR)\ZipEncode.obj" \
 	"..\vc40\python14.lib" \
 	".\jpeg-6\jpeg.lib" \
 	".\zlib\zlib.lib"
@@ -251,15 +263,18 @@ CLEAN :
 	-@erase "$(INTDIR)\File.obj"
 	-@erase "$(INTDIR)\Fill.obj"
 	-@erase "$(INTDIR)\Filter.obj"
+	-@erase "$(INTDIR)\FliDecode.obj"
 	-@erase "$(INTDIR)\Geometry.obj"
 	-@erase "$(INTDIR)\GetBBox.obj"
 	-@erase "$(INTDIR)\GifDecode.obj"
+	-@erase "$(INTDIR)\GifEncode.obj"
 	-@erase "$(INTDIR)\HexDecode.obj"
 	-@erase "$(INTDIR)\Histo.obj"
 	-@erase "$(INTDIR)\JpegDecode.obj"
 	-@erase "$(INTDIR)\JpegEncode.obj"
 	-@erase "$(INTDIR)\LzwDecode.obj"
 	-@erase "$(INTDIR)\Matrix.obj"
+	-@erase "$(INTDIR)\MspDecode.obj"
 	-@erase "$(INTDIR)\Negative.obj"
 	-@erase "$(INTDIR)\Offset.obj"
 	-@erase "$(INTDIR)\Pack.obj"
@@ -275,12 +290,15 @@ CLEAN :
 	-@erase "$(INTDIR)\RawEncode.obj"
 	-@erase "$(INTDIR)\Storage.obj"
 	-@erase "$(INTDIR)\String.obj"
+	-@erase "$(INTDIR)\SunRleDecode.obj"
+	-@erase "$(INTDIR)\TgaRleDecode.obj"
 	-@erase "$(INTDIR)\Unpack.obj"
 	-@erase "$(INTDIR)\vc40.idb"
 	-@erase "$(INTDIR)\vc40.pdb"
 	-@erase "$(INTDIR)\XbmDecode.obj"
 	-@erase "$(INTDIR)\XbmEncode.obj"
 	-@erase "$(INTDIR)\ZipDecode.obj"
+	-@erase "$(INTDIR)\ZipEncode.obj"
 	-@erase "$(OUTDIR)\_imaging.exp"
 	-@erase "$(OUTDIR)\_imaging.lib"
 	-@erase "$(OUTDIR)\_imaging.pdb"
@@ -358,15 +376,18 @@ LINK32_OBJS= \
 	"$(INTDIR)\File.obj" \
 	"$(INTDIR)\Fill.obj" \
 	"$(INTDIR)\Filter.obj" \
+	"$(INTDIR)\FliDecode.obj" \
 	"$(INTDIR)\Geometry.obj" \
 	"$(INTDIR)\GetBBox.obj" \
 	"$(INTDIR)\GifDecode.obj" \
+	"$(INTDIR)\GifEncode.obj" \
 	"$(INTDIR)\HexDecode.obj" \
 	"$(INTDIR)\Histo.obj" \
 	"$(INTDIR)\JpegDecode.obj" \
 	"$(INTDIR)\JpegEncode.obj" \
 	"$(INTDIR)\LzwDecode.obj" \
 	"$(INTDIR)\Matrix.obj" \
+	"$(INTDIR)\MspDecode.obj" \
 	"$(INTDIR)\Negative.obj" \
 	"$(INTDIR)\Offset.obj" \
 	"$(INTDIR)\Pack.obj" \
@@ -382,10 +403,13 @@ LINK32_OBJS= \
 	"$(INTDIR)\RawEncode.obj" \
 	"$(INTDIR)\Storage.obj" \
 	"$(INTDIR)\String.obj" \
+	"$(INTDIR)\SunRleDecode.obj" \
+	"$(INTDIR)\TgaRleDecode.obj" \
 	"$(INTDIR)\Unpack.obj" \
 	"$(INTDIR)\XbmDecode.obj" \
 	"$(INTDIR)\XbmEncode.obj" \
 	"$(INTDIR)\ZipDecode.obj" \
+	"$(INTDIR)\ZipEncode.obj" \
 	"..\vc40\python14.lib" \
 	".\jpeg-6\jpeg.lib" \
 	".\zlib\zlib.lib"
@@ -941,1360 +965,812 @@ SOURCE=..\vc40\python14.lib
 # Begin Source File
 
 SOURCE=.\encode.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
-NODEP_CPP_ENCOD=\
-	".\Imaging.h"\
-	".\Jpeg.h"\
-	".\Python.h"\
+DEP_CPP_ENCOD=\
+	"..\Include\abstract.h"\
+	"..\Include\accessobject.h"\
+	"..\Include\allobjects.h"\
+	"..\Include\bltinmodule.h"\
+	"..\Include\ceval.h"\
+	"..\Include\classobject.h"\
+	"..\Include\cobject.h"\
+	"..\Include\complexobject.h"\
+	"..\Include\fileobject.h"\
+	"..\Include\floatobject.h"\
+	"..\Include\funcobject.h"\
+	"..\Include\import.h"\
+	"..\Include\intobject.h"\
+	"..\Include\intrcheck.h"\
+	"..\Include\listobject.h"\
+	"..\Include\longobject.h"\
+	"..\Include\mappingobject.h"\
+	"..\Include\methodobject.h"\
+	"..\Include\modsupport.h"\
+	"..\Include\moduleobject.h"\
+	"..\Include\mymalloc.h"\
+	"..\Include\myproto.h"\
+	"..\Include\object.h"\
+	"..\Include\objimpl.h"\
+	"..\Include\pydebug.h"\
+	"..\Include\pyerrors.h"\
+	"..\Include\pythonrun.h"\
+	"..\Include\rangeobject.h"\
+	"..\Include\rename2.h"\
+	"..\Include\sliceobject.h"\
+	"..\Include\stringobject.h"\
+	"..\Include\sysmodule.h"\
+	"..\Include\thread.h"\
+	"..\Include\traceback.h"\
+	"..\Include\tupleobject.h"\
+	".\../Include\Python.h"\
+	".\../PC\config.h"\
+	".\./jpeg-6\jpeglib.h"\
+	".\./libImaging\Imaging.h"\
+	".\./libImaging\Jpeg.h"\
+	".\./libImaging\Zip.h"\
+	".\./zlib\zlib.h"\
+	".\Jpeg-6\jconfig.h"\
+	".\Jpeg-6\jerror.h"\
+	".\Jpeg-6\jmorecfg.h"\
+	".\Jpeg-6\jpegint.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
+	".\zlib\zconf.h"\
 	
 
-"$(INTDIR)\encode.obj" : $(SOURCE) "$(INTDIR)"
+"$(INTDIR)\encode.obj" : $(SOURCE) $(DEP_CPP_ENCOD) "$(INTDIR)"
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-NODEP_CPP_ENCOD=\
-	".\Imaging.h"\
-	".\Jpeg.h"\
-	".\Python.h"\
-	
-
-"$(INTDIR)\encode.obj" : $(SOURCE) "$(INTDIR)"
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\decode.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
-NODEP_CPP_DECOD=\
-	".\Gif.h"\
-	".\Imaging.h"\
-	".\Jpeg.h"\
-	".\Lzw.h"\
-	".\Python.h"\
-	".\Raw.h"\
-	".\Zip.h"\
+DEP_CPP_DECOD=\
+	"..\Include\abstract.h"\
+	"..\Include\accessobject.h"\
+	"..\Include\allobjects.h"\
+	"..\Include\bltinmodule.h"\
+	"..\Include\ceval.h"\
+	"..\Include\classobject.h"\
+	"..\Include\cobject.h"\
+	"..\Include\complexobject.h"\
+	"..\Include\fileobject.h"\
+	"..\Include\floatobject.h"\
+	"..\Include\funcobject.h"\
+	"..\Include\import.h"\
+	"..\Include\intobject.h"\
+	"..\Include\intrcheck.h"\
+	"..\Include\listobject.h"\
+	"..\Include\longobject.h"\
+	"..\Include\mappingobject.h"\
+	"..\Include\methodobject.h"\
+	"..\Include\modsupport.h"\
+	"..\Include\moduleobject.h"\
+	"..\Include\mymalloc.h"\
+	"..\Include\myproto.h"\
+	"..\Include\object.h"\
+	"..\Include\objimpl.h"\
+	"..\Include\pydebug.h"\
+	"..\Include\pyerrors.h"\
+	"..\Include\pythonrun.h"\
+	"..\Include\rangeobject.h"\
+	"..\Include\rename2.h"\
+	"..\Include\sliceobject.h"\
+	"..\Include\stringobject.h"\
+	"..\Include\sysmodule.h"\
+	"..\Include\thread.h"\
+	"..\Include\traceback.h"\
+	"..\Include\tupleobject.h"\
+	".\../Include\Python.h"\
+	".\../PC\config.h"\
+	".\./jpeg-6\jpeglib.h"\
+	".\./libImaging\Gif.h"\
+	".\./libImaging\Imaging.h"\
+	".\./libImaging\Jpeg.h"\
+	".\./libImaging\Lzw.h"\
+	".\./libImaging\Raw.h"\
+	".\./libImaging\Zip.h"\
+	".\./zlib\zlib.h"\
+	".\Jpeg-6\jconfig.h"\
+	".\Jpeg-6\jerror.h"\
+	".\Jpeg-6\jmorecfg.h"\
+	".\Jpeg-6\jpegint.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
+	".\zlib\zconf.h"\
 	
 
-"$(INTDIR)\decode.obj" : $(SOURCE) "$(INTDIR)"
+"$(INTDIR)\decode.obj" : $(SOURCE) $(DEP_CPP_DECOD) "$(INTDIR)"
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-NODEP_CPP_DECOD=\
-	".\Gif.h"\
-	".\Imaging.h"\
-	".\Jpeg.h"\
-	".\Lzw.h"\
-	".\Python.h"\
-	".\Raw.h"\
-	".\Zip.h"\
-	
-
-"$(INTDIR)\decode.obj" : $(SOURCE) "$(INTDIR)"
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\display.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
-NODEP_CPP_DISPL=\
-	".\Imaging.h"\
-	".\ImDib.h"\
-	".\Python.h"\
+DEP_CPP_DISPL=\
+	"..\Include\abstract.h"\
+	"..\Include\accessobject.h"\
+	"..\Include\allobjects.h"\
+	"..\Include\bltinmodule.h"\
+	"..\Include\ceval.h"\
+	"..\Include\classobject.h"\
+	"..\Include\cobject.h"\
+	"..\Include\complexobject.h"\
+	"..\Include\fileobject.h"\
+	"..\Include\floatobject.h"\
+	"..\Include\funcobject.h"\
+	"..\Include\import.h"\
+	"..\Include\intobject.h"\
+	"..\Include\intrcheck.h"\
+	"..\Include\listobject.h"\
+	"..\Include\longobject.h"\
+	"..\Include\mappingobject.h"\
+	"..\Include\methodobject.h"\
+	"..\Include\modsupport.h"\
+	"..\Include\moduleobject.h"\
+	"..\Include\mymalloc.h"\
+	"..\Include\myproto.h"\
+	"..\Include\object.h"\
+	"..\Include\objimpl.h"\
+	"..\Include\pydebug.h"\
+	"..\Include\pyerrors.h"\
+	"..\Include\pythonrun.h"\
+	"..\Include\rangeobject.h"\
+	"..\Include\rename2.h"\
+	"..\Include\sliceobject.h"\
+	"..\Include\stringobject.h"\
+	"..\Include\sysmodule.h"\
+	"..\Include\thread.h"\
+	"..\Include\traceback.h"\
+	"..\Include\tupleobject.h"\
+	".\../Include\Python.h"\
+	".\../PC\config.h"\
+	".\./libImaging\Imaging.h"\
+	".\./libImaging\ImDib.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
-"$(INTDIR)\display.obj" : $(SOURCE) "$(INTDIR)"
+"$(INTDIR)\display.obj" : $(SOURCE) $(DEP_CPP_DISPL) "$(INTDIR)"
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-NODEP_CPP_DISPL=\
-	".\Imaging.h"\
-	".\ImDib.h"\
-	".\Python.h"\
-	
-
-"$(INTDIR)\display.obj" : $(SOURCE) "$(INTDIR)"
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\_imagingmodule.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
-NODEP_CPP__IMAG=\
-	".\Imaging.h"\
-	".\Python.h"\
+DEP_CPP__IMAG=\
+	"..\Include\abstract.h"\
+	"..\Include\accessobject.h"\
+	"..\Include\allobjects.h"\
+	"..\Include\bltinmodule.h"\
+	"..\Include\ceval.h"\
+	"..\Include\classobject.h"\
+	"..\Include\cobject.h"\
+	"..\Include\complexobject.h"\
+	"..\Include\fileobject.h"\
+	"..\Include\floatobject.h"\
+	"..\Include\funcobject.h"\
+	"..\Include\import.h"\
+	"..\Include\intobject.h"\
+	"..\Include\intrcheck.h"\
+	"..\Include\listobject.h"\
+	"..\Include\longobject.h"\
+	"..\Include\mappingobject.h"\
+	"..\Include\methodobject.h"\
+	"..\Include\modsupport.h"\
+	"..\Include\moduleobject.h"\
+	"..\Include\mymalloc.h"\
+	"..\Include\myproto.h"\
+	"..\Include\object.h"\
+	"..\Include\objimpl.h"\
+	"..\Include\pydebug.h"\
+	"..\Include\pyerrors.h"\
+	"..\Include\pythonrun.h"\
+	"..\Include\rangeobject.h"\
+	"..\Include\rename2.h"\
+	"..\Include\sliceobject.h"\
+	"..\Include\stringobject.h"\
+	"..\Include\sysmodule.h"\
+	"..\Include\thread.h"\
+	"..\Include\traceback.h"\
+	"..\Include\tupleobject.h"\
+	".\../Include\Python.h"\
+	".\../PC\config.h"\
+	".\./libImaging\Imaging.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
-"$(INTDIR)\_imagingmodule.obj" : $(SOURCE) "$(INTDIR)"
+"$(INTDIR)\_imagingmodule.obj" : $(SOURCE) $(DEP_CPP__IMAG) "$(INTDIR)"
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-NODEP_CPP__IMAG=\
-	".\Imaging.h"\
-	".\Python.h"\
-	
-
-"$(INTDIR)\_imagingmodule.obj" : $(SOURCE) "$(INTDIR)"
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\XbmEncode.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_XBMEN=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\XbmEncode.obj" : $(SOURCE) $(DEP_CPP_XBMEN) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_XBMEN=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\XbmEncode.obj" : $(SOURCE) $(DEP_CPP_XBMEN) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Blend.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_BLEND=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Blend.obj" : $(SOURCE) $(DEP_CPP_BLEND) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_BLEND=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Blend.obj" : $(SOURCE) $(DEP_CPP_BLEND) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Chops.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_CHOPS=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Chops.obj" : $(SOURCE) $(DEP_CPP_CHOPS) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_CHOPS=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Chops.obj" : $(SOURCE) $(DEP_CPP_CHOPS) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Convert.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_CONVE=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Convert.obj" : $(SOURCE) $(DEP_CPP_CONVE) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_CONVE=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Convert.obj" : $(SOURCE) $(DEP_CPP_CONVE) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Copy.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_COPY_=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Copy.obj" : $(SOURCE) $(DEP_CPP_COPY_) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_COPY_=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Copy.obj" : $(SOURCE) $(DEP_CPP_COPY_) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Crop.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_CROP_=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Crop.obj" : $(SOURCE) $(DEP_CPP_CROP_) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_CROP_=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Crop.obj" : $(SOURCE) $(DEP_CPP_CROP_) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Dib.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_DIB_C=\
 	".\./libImaging\Imaging.h"\
 	".\./libImaging\ImDib.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Dib.obj" : $(SOURCE) $(DEP_CPP_DIB_C) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_DIB_C=\
-	".\./libImaging\Imaging.h"\
-	".\./libImaging\ImDib.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Dib.obj" : $(SOURCE) $(DEP_CPP_DIB_C) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Draw.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_DRAW_=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Draw.obj" : $(SOURCE) $(DEP_CPP_DRAW_) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_DRAW_=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Draw.obj" : $(SOURCE) $(DEP_CPP_DRAW_) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\EpsEncode.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_EPSEN=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\EpsEncode.obj" : $(SOURCE) $(DEP_CPP_EPSEN) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_EPSEN=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\EpsEncode.obj" : $(SOURCE) $(DEP_CPP_EPSEN) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\File.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_FILE_=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\File.obj" : $(SOURCE) $(DEP_CPP_FILE_) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_FILE_=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\File.obj" : $(SOURCE) $(DEP_CPP_FILE_) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Fill.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_FILL_=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Fill.obj" : $(SOURCE) $(DEP_CPP_FILL_) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_FILL_=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Fill.obj" : $(SOURCE) $(DEP_CPP_FILL_) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Filter.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_FILTE=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Filter.obj" : $(SOURCE) $(DEP_CPP_FILTE) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_FILTE=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Filter.obj" : $(SOURCE) $(DEP_CPP_FILTE) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Geometry.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_GEOME=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Geometry.obj" : $(SOURCE) $(DEP_CPP_GEOME) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_GEOME=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Geometry.obj" : $(SOURCE) $(DEP_CPP_GEOME) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\GetBBox.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_GETBB=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\GetBBox.obj" : $(SOURCE) $(DEP_CPP_GETBB) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_GETBB=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\GetBBox.obj" : $(SOURCE) $(DEP_CPP_GETBB) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\GifDecode.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_GIFDE=\
 	".\./libImaging\Gif.h"\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\GifDecode.obj" : $(SOURCE) $(DEP_CPP_GIFDE) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_GIFDE=\
-	".\./libImaging\Gif.h"\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\GifDecode.obj" : $(SOURCE) $(DEP_CPP_GIFDE) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\HexDecode.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_HEXDE=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\HexDecode.obj" : $(SOURCE) $(DEP_CPP_HEXDE) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_HEXDE=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\HexDecode.obj" : $(SOURCE) $(DEP_CPP_HEXDE) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Histo.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_HISTO=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Histo.obj" : $(SOURCE) $(DEP_CPP_HISTO) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_HISTO=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Histo.obj" : $(SOURCE) $(DEP_CPP_HISTO) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\JpegDecode.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_JPEGD=\
+	".\./jpeg-6\jpeglib.h"\
 	".\./libImaging\Imaging.h"\
 	".\./libImaging\Jpeg.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\Jpeg-6\jconfig.h"\
+	".\Jpeg-6\jerror.h"\
+	".\Jpeg-6\jmorecfg.h"\
+	".\Jpeg-6\jpegint.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\JpegDecode.obj" : $(SOURCE) $(DEP_CPP_JPEGD) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_JPEGD=\
-	".\./libImaging\Imaging.h"\
-	".\./libImaging\Jpeg.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-NODEP_CPP_JPEGD=\
-	".\libImaging\jpeglib.h"\
-	
-
-"$(INTDIR)\JpegDecode.obj" : $(SOURCE) $(DEP_CPP_JPEGD) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\JpegEncode.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_JPEGE=\
+	".\./jpeg-6\jpeglib.h"\
 	".\./libImaging\Imaging.h"\
 	".\./libImaging\Jpeg.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\Jpeg-6\jconfig.h"\
+	".\Jpeg-6\jerror.h"\
+	".\Jpeg-6\jmorecfg.h"\
+	".\Jpeg-6\jpegint.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\JpegEncode.obj" : $(SOURCE) $(DEP_CPP_JPEGE) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_JPEGE=\
-	".\./libImaging\Imaging.h"\
-	".\./libImaging\Jpeg.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-NODEP_CPP_JPEGE=\
-	".\libImaging\jpeglib.h"\
-	
-
-"$(INTDIR)\JpegEncode.obj" : $(SOURCE) $(DEP_CPP_JPEGE) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\LzwDecode.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_LZWDE=\
 	".\./libImaging\Imaging.h"\
 	".\./libImaging\Lzw.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\LzwDecode.obj" : $(SOURCE) $(DEP_CPP_LZWDE) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_LZWDE=\
-	".\./libImaging\Imaging.h"\
-	".\./libImaging\Lzw.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\LzwDecode.obj" : $(SOURCE) $(DEP_CPP_LZWDE) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Matrix.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_MATRI=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Matrix.obj" : $(SOURCE) $(DEP_CPP_MATRI) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_MATRI=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Matrix.obj" : $(SOURCE) $(DEP_CPP_MATRI) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Negative.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_NEGAT=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Negative.obj" : $(SOURCE) $(DEP_CPP_NEGAT) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_NEGAT=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Negative.obj" : $(SOURCE) $(DEP_CPP_NEGAT) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Offset.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_OFFSE=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Offset.obj" : $(SOURCE) $(DEP_CPP_OFFSE) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_OFFSE=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Offset.obj" : $(SOURCE) $(DEP_CPP_OFFSE) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Pack.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_PACK_=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Pack.obj" : $(SOURCE) $(DEP_CPP_PACK_) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_PACK_=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Pack.obj" : $(SOURCE) $(DEP_CPP_PACK_) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\PackDecode.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_PACKD=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\PackDecode.obj" : $(SOURCE) $(DEP_CPP_PACKD) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_PACKD=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\PackDecode.obj" : $(SOURCE) $(DEP_CPP_PACKD) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Palette.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_PALET=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Palette.obj" : $(SOURCE) $(DEP_CPP_PALET) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_PALET=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Palette.obj" : $(SOURCE) $(DEP_CPP_PALET) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Paste.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_PASTE=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Paste.obj" : $(SOURCE) $(DEP_CPP_PASTE) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_PASTE=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Paste.obj" : $(SOURCE) $(DEP_CPP_PASTE) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\PcdDecode.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_PCDDE=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\PcdDecode.obj" : $(SOURCE) $(DEP_CPP_PCDDE) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_PCDDE=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\PcdDecode.obj" : $(SOURCE) $(DEP_CPP_PCDDE) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\PcxDecode.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_PCXDE=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\PcxDecode.obj" : $(SOURCE) $(DEP_CPP_PCXDE) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_PCXDE=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\PcxDecode.obj" : $(SOURCE) $(DEP_CPP_PCXDE) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Point.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_POINT=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Point.obj" : $(SOURCE) $(DEP_CPP_POINT) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_POINT=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Point.obj" : $(SOURCE) $(DEP_CPP_POINT) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Quantize.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_QUANT=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Quantize.obj" : $(SOURCE) $(DEP_CPP_QUANT) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_QUANT=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Quantize.obj" : $(SOURCE) $(DEP_CPP_QUANT) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\RawDecode.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_RAWDE=\
 	".\./libImaging\Imaging.h"\
 	".\./libImaging\Raw.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\RawDecode.obj" : $(SOURCE) $(DEP_CPP_RAWDE) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_RAWDE=\
-	".\./libImaging\Imaging.h"\
-	".\./libImaging\Raw.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\RawDecode.obj" : $(SOURCE) $(DEP_CPP_RAWDE) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\RawEncode.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_RAWEN=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\RawEncode.obj" : $(SOURCE) $(DEP_CPP_RAWEN) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_RAWEN=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\RawEncode.obj" : $(SOURCE) $(DEP_CPP_RAWEN) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Storage.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_STORA=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Storage.obj" : $(SOURCE) $(DEP_CPP_STORA) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_STORA=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Storage.obj" : $(SOURCE) $(DEP_CPP_STORA) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\String.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_STRIN=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\String.obj" : $(SOURCE) $(DEP_CPP_STRIN) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_STRIN=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\String.obj" : $(SOURCE) $(DEP_CPP_STRIN) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Unpack.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_UNPAC=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Unpack.obj" : $(SOURCE) $(DEP_CPP_UNPAC) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_UNPAC=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Unpack.obj" : $(SOURCE) $(DEP_CPP_UNPAC) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\XbmDecode.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_XBMDE=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\XbmDecode.obj" : $(SOURCE) $(DEP_CPP_XBMDE) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_XBMDE=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\XbmDecode.obj" : $(SOURCE) $(DEP_CPP_XBMDE) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Bands.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_BANDS=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Bands.obj" : $(SOURCE) $(DEP_CPP_BANDS) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_BANDS=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Bands.obj" : $(SOURCE) $(DEP_CPP_BANDS) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
@@ -2313,98 +1789,45 @@ SOURCE=.\_imaging.def
 # Begin Source File
 
 SOURCE=.\path.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 NODEP_CPP_PATH_=\
 	".\Python.h"\
 	
 
 "$(INTDIR)\path.obj" : $(SOURCE) "$(INTDIR)"
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-NODEP_CPP_PATH_=\
-	".\Python.h"\
-	
-
-"$(INTDIR)\path.obj" : $(SOURCE) "$(INTDIR)"
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\Crc32.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_CRC32=\
 	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
 	
 
 "$(INTDIR)\Crc32.obj" : $(SOURCE) $(DEP_CPP_CRC32) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_CRC32=\
-	".\./libImaging\Imaging.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\Crc32.obj" : $(SOURCE) $(DEP_CPP_CRC32) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\libimaging\ZipDecode.c
-
-!IF  "$(CFG)" == "_imaging - Win32 Release"
-
 DEP_CPP_ZIPDE=\
 	".\./libImaging\Imaging.h"\
 	".\./libImaging\Zip.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-NODEP_CPP_ZIPDE=\
-	".\libimaging\zlib.h"\
+	".\./zlib\zlib.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
+	".\zlib\zconf.h"\
 	
 
 "$(INTDIR)\ZipDecode.obj" : $(SOURCE) $(DEP_CPP_ZIPDE) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
-
-DEP_CPP_ZIPDE=\
-	".\./libImaging\Imaging.h"\
-	".\./libImaging\Zip.h"\
-	".\libImaging\ImConfig.h"\
-	".\libImaging\ImPlatform.h"\
-	
-NODEP_CPP_ZIPDE=\
-	".\libimaging\zlib.h"\
-	
-
-"$(INTDIR)\ZipDecode.obj" : $(SOURCE) $(DEP_CPP_ZIPDE) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
@@ -2412,15 +1835,15 @@ NODEP_CPP_ZIPDE=\
 
 # Project_Dep_Name "jpeg"
 
-!IF  "$(CFG)" == "_imaging - Win32 Debug"
-
-"jpeg - Win32 Debug" : 
-   $(MAKE) /$(MAKEFLAGS) /F ".\_imaging.mak" CFG="jpeg - Win32 Debug" 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Release"
+!IF  "$(CFG)" == "_imaging - Win32 Release"
 
 "jpeg - Win32 Release" : 
    $(MAKE) /$(MAKEFLAGS) /F ".\_imaging.mak" CFG="jpeg - Win32 Release" 
+
+!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
+
+"jpeg - Win32 Debug" : 
+   $(MAKE) /$(MAKEFLAGS) /F ".\_imaging.mak" CFG="jpeg - Win32 Debug" 
 
 !ENDIF 
 
@@ -2430,19 +1853,112 @@ NODEP_CPP_ZIPDE=\
 
 # Project_Dep_Name "zlib"
 
-!IF  "$(CFG)" == "_imaging - Win32 Debug"
-
-"zlib - Win32 Debug" : 
-   $(MAKE) /$(MAKEFLAGS) /F ".\_imaging.mak" CFG="zlib - Win32 Debug" 
-
-!ELSEIF  "$(CFG)" == "_imaging - Win32 Release"
+!IF  "$(CFG)" == "_imaging - Win32 Release"
 
 "zlib - Win32 Release" : 
    $(MAKE) /$(MAKEFLAGS) /F ".\_imaging.mak" CFG="zlib - Win32 Release" 
 
+!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
+
+"zlib - Win32 Debug" : 
+   $(MAKE) /$(MAKEFLAGS) /F ".\_imaging.mak" CFG="zlib - Win32 Debug" 
+
 !ENDIF 
 
 # End Project Dependency
+################################################################################
+# Begin Source File
+
+SOURCE=.\libimaging\ZipEncode.c
+DEP_CPP_ZIPEN=\
+	".\./libImaging\Imaging.h"\
+	".\./libImaging\Zip.h"\
+	".\./zlib\zlib.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
+	".\zlib\zconf.h"\
+	
+
+"$(INTDIR)\ZipEncode.obj" : $(SOURCE) $(DEP_CPP_ZIPEN) "$(INTDIR)"
+   $(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+# End Source File
+################################################################################
+# Begin Source File
+
+SOURCE=.\libimaging\FliDecode.c
+DEP_CPP_FLIDE=\
+	".\./libImaging\Imaging.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
+	
+
+"$(INTDIR)\FliDecode.obj" : $(SOURCE) $(DEP_CPP_FLIDE) "$(INTDIR)"
+   $(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+# End Source File
+################################################################################
+# Begin Source File
+
+SOURCE=.\libimaging\MspDecode.c
+DEP_CPP_MSPDE=\
+	".\./libImaging\Imaging.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
+	
+
+"$(INTDIR)\MspDecode.obj" : $(SOURCE) $(DEP_CPP_MSPDE) "$(INTDIR)"
+   $(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+# End Source File
+################################################################################
+# Begin Source File
+
+SOURCE=.\libimaging\SunRleDecode.c
+DEP_CPP_SUNRL=\
+	".\./libImaging\Imaging.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
+	
+
+"$(INTDIR)\SunRleDecode.obj" : $(SOURCE) $(DEP_CPP_SUNRL) "$(INTDIR)"
+   $(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+# End Source File
+################################################################################
+# Begin Source File
+
+SOURCE=.\libimaging\TgaRleDecode.c
+DEP_CPP_TGARL=\
+	".\./libImaging\Imaging.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
+	
+
+"$(INTDIR)\TgaRleDecode.obj" : $(SOURCE) $(DEP_CPP_TGARL) "$(INTDIR)"
+   $(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+# End Source File
+################################################################################
+# Begin Source File
+
+SOURCE=.\libimaging\GifEncode.c
+DEP_CPP_GIFEN=\
+	".\./libImaging\Imaging.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
+	
+
+"$(INTDIR)\GifEncode.obj" : $(SOURCE) $(DEP_CPP_GIFEN) "$(INTDIR)"
+   $(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+# End Source File
 # End Target
 ################################################################################
 # Begin Target
@@ -2460,9 +1976,6 @@ NODEP_CPP_ZIPDE=\
 # Begin Source File
 
 SOURCE=.\zlib\adler32.c
-
-!IF  "$(CFG)" == "zlib - Win32 Release"
-
 DEP_CPP_ADLER=\
 	".\./zlib\zlib.h"\
 	".\zlib\zconf.h"\
@@ -2471,28 +1984,12 @@ DEP_CPP_ADLER=\
 "$(INTDIR)\adler32.obj" : $(SOURCE) $(DEP_CPP_ADLER) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "zlib - Win32 Debug"
-
-DEP_CPP_ADLER=\
-	".\./zlib\zlib.h"\
-	".\zlib\zconf.h"\
-	
-
-"$(INTDIR)\adler32.obj" : $(SOURCE) $(DEP_CPP_ADLER) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\zlib\compress.c
-
-!IF  "$(CFG)" == "zlib - Win32 Release"
-
 DEP_CPP_COMPR=\
 	".\./zlib\zlib.h"\
 	".\zlib\zconf.h"\
@@ -2501,19 +1998,6 @@ DEP_CPP_COMPR=\
 "$(INTDIR)\compress.obj" : $(SOURCE) $(DEP_CPP_COMPR) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "zlib - Win32 Debug"
-
-DEP_CPP_COMPR=\
-	".\./zlib\zlib.h"\
-	".\zlib\zconf.h"\
-	
-
-"$(INTDIR)\compress.obj" : $(SOURCE) $(DEP_CPP_COMPR) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
@@ -2534,7 +2018,9 @@ DEP_CPP_DEFLA=\
 !ELSEIF  "$(CFG)" == "zlib - Win32 Debug"
 
 DEP_CPP_DEFLA=\
+	".\./zlib\zlib.h"\
 	".\zlib\deflate.h"\
+	".\zlib\zconf.h"\
 	".\zlib\zutil.h"\
 	
 
@@ -2549,9 +2035,6 @@ DEP_CPP_DEFLA=\
 # Begin Source File
 
 SOURCE=.\zlib\gzio.c
-
-!IF  "$(CFG)" == "zlib - Win32 Release"
-
 DEP_CPP_GZIO_=\
 	".\./zlib\zlib.h"\
 	".\zlib\zconf.h"\
@@ -2561,27 +2044,12 @@ DEP_CPP_GZIO_=\
 "$(INTDIR)\gzio.obj" : $(SOURCE) $(DEP_CPP_GZIO_) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "zlib - Win32 Debug"
-
-DEP_CPP_GZIO_=\
-	".\zlib\zutil.h"\
-	
-
-"$(INTDIR)\gzio.obj" : $(SOURCE) $(DEP_CPP_GZIO_) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\zlib\infblock.c
-
-!IF  "$(CFG)" == "zlib - Win32 Release"
-
 DEP_CPP_INFBL=\
 	".\./zlib\zlib.h"\
 	".\zlib\infblock.h"\
@@ -2595,31 +2063,12 @@ DEP_CPP_INFBL=\
 "$(INTDIR)\infblock.obj" : $(SOURCE) $(DEP_CPP_INFBL) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "zlib - Win32 Debug"
-
-DEP_CPP_INFBL=\
-	".\zlib\infblock.h"\
-	".\zlib\infcodes.h"\
-	".\zlib\inftrees.h"\
-	".\zlib\infutil.h"\
-	".\zlib\zutil.h"\
-	
-
-"$(INTDIR)\infblock.obj" : $(SOURCE) $(DEP_CPP_INFBL) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\zlib\infcodes.c
-
-!IF  "$(CFG)" == "zlib - Win32 Release"
-
 DEP_CPP_INFCO=\
 	".\./zlib\zlib.h"\
 	".\zlib\infblock.h"\
@@ -2634,32 +2083,12 @@ DEP_CPP_INFCO=\
 "$(INTDIR)\infcodes.obj" : $(SOURCE) $(DEP_CPP_INFCO) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "zlib - Win32 Debug"
-
-DEP_CPP_INFCO=\
-	".\zlib\infblock.h"\
-	".\zlib\infcodes.h"\
-	".\zlib\inffast.h"\
-	".\zlib\inftrees.h"\
-	".\zlib\infutil.h"\
-	".\zlib\zutil.h"\
-	
-
-"$(INTDIR)\infcodes.obj" : $(SOURCE) $(DEP_CPP_INFCO) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\zlib\inffast.c
-
-!IF  "$(CFG)" == "zlib - Win32 Release"
-
 DEP_CPP_INFFA=\
 	".\./zlib\zlib.h"\
 	".\zlib\infblock.h"\
@@ -2674,32 +2103,12 @@ DEP_CPP_INFFA=\
 "$(INTDIR)\inffast.obj" : $(SOURCE) $(DEP_CPP_INFFA) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "zlib - Win32 Debug"
-
-DEP_CPP_INFFA=\
-	".\zlib\infblock.h"\
-	".\zlib\infcodes.h"\
-	".\zlib\inffast.h"\
-	".\zlib\inftrees.h"\
-	".\zlib\infutil.h"\
-	".\zlib\zutil.h"\
-	
-
-"$(INTDIR)\inffast.obj" : $(SOURCE) $(DEP_CPP_INFFA) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\zlib\inflate.c
-
-!IF  "$(CFG)" == "zlib - Win32 Release"
-
 DEP_CPP_INFLA=\
 	".\./zlib\zlib.h"\
 	".\zlib\infblock.h"\
@@ -2710,28 +2119,12 @@ DEP_CPP_INFLA=\
 "$(INTDIR)\inflate.obj" : $(SOURCE) $(DEP_CPP_INFLA) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "zlib - Win32 Debug"
-
-DEP_CPP_INFLA=\
-	".\zlib\infblock.h"\
-	".\zlib\zutil.h"\
-	
-
-"$(INTDIR)\inflate.obj" : $(SOURCE) $(DEP_CPP_INFLA) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\zlib\inftrees.c
-
-!IF  "$(CFG)" == "zlib - Win32 Release"
-
 DEP_CPP_INFTR=\
 	".\./zlib\zlib.h"\
 	".\zlib\inftrees.h"\
@@ -2742,28 +2135,12 @@ DEP_CPP_INFTR=\
 "$(INTDIR)\inftrees.obj" : $(SOURCE) $(DEP_CPP_INFTR) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "zlib - Win32 Debug"
-
-DEP_CPP_INFTR=\
-	".\zlib\inftrees.h"\
-	".\zlib\zutil.h"\
-	
-
-"$(INTDIR)\inftrees.obj" : $(SOURCE) $(DEP_CPP_INFTR) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\zlib\infutil.c
-
-!IF  "$(CFG)" == "zlib - Win32 Release"
-
 DEP_CPP_INFUT=\
 	".\./zlib\zlib.h"\
 	".\zlib\infblock.h"\
@@ -2777,22 +2154,6 @@ DEP_CPP_INFUT=\
 "$(INTDIR)\infutil.obj" : $(SOURCE) $(DEP_CPP_INFUT) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "zlib - Win32 Debug"
-
-DEP_CPP_INFUT=\
-	".\zlib\infblock.h"\
-	".\zlib\infcodes.h"\
-	".\zlib\inftrees.h"\
-	".\zlib\infutil.h"\
-	".\zlib\zutil.h"\
-	
-
-"$(INTDIR)\infutil.obj" : $(SOURCE) $(DEP_CPP_INFUT) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
@@ -2813,7 +2174,9 @@ DEP_CPP_TREES=\
 !ELSEIF  "$(CFG)" == "zlib - Win32 Debug"
 
 DEP_CPP_TREES=\
+	".\./zlib\zlib.h"\
 	".\zlib\deflate.h"\
+	".\zlib\zconf.h"\
 	".\zlib\zutil.h"\
 	
 
@@ -2828,9 +2191,6 @@ DEP_CPP_TREES=\
 # Begin Source File
 
 SOURCE=.\zlib\uncompr.c
-
-!IF  "$(CFG)" == "zlib - Win32 Release"
-
 DEP_CPP_UNCOM=\
 	".\./zlib\zlib.h"\
 	".\zlib\zconf.h"\
@@ -2839,28 +2199,12 @@ DEP_CPP_UNCOM=\
 "$(INTDIR)\uncompr.obj" : $(SOURCE) $(DEP_CPP_UNCOM) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "zlib - Win32 Debug"
-
-DEP_CPP_UNCOM=\
-	".\./zlib\zlib.h"\
-	".\zlib\zconf.h"\
-	
-
-"$(INTDIR)\uncompr.obj" : $(SOURCE) $(DEP_CPP_UNCOM) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\zlib\zutil.c
-
-!IF  "$(CFG)" == "zlib - Win32 Release"
-
 DEP_CPP_ZUTIL=\
 	".\./zlib\zlib.h"\
 	".\zlib\zconf.h"\
@@ -2870,18 +2214,6 @@ DEP_CPP_ZUTIL=\
 "$(INTDIR)\zutil.obj" : $(SOURCE) $(DEP_CPP_ZUTIL) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "zlib - Win32 Debug"
-
-DEP_CPP_ZUTIL=\
-	".\zlib\zutil.h"\
-	
-
-"$(INTDIR)\zutil.obj" : $(SOURCE) $(DEP_CPP_ZUTIL) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 # End Source File
 # End Target
@@ -2902,12 +2234,12 @@ DEP_CPP_ZUTIL=\
 
 SOURCE=".\Jpeg-6\Jcapimin.c"
 DEP_CPP_JCAPI=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2921,12 +2253,12 @@ DEP_CPP_JCAPI=\
 
 SOURCE=".\Jpeg-6\Jcapistd.c"
 DEP_CPP_JCAPIS=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2940,12 +2272,12 @@ DEP_CPP_JCAPIS=\
 
 SOURCE=".\Jpeg-6\Jccoefct.c"
 DEP_CPP_JCCOE=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2959,12 +2291,12 @@ DEP_CPP_JCCOE=\
 
 SOURCE=".\Jpeg-6\Jccolor.c"
 DEP_CPP_JCCOL=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2978,13 +2310,13 @@ DEP_CPP_JCCOL=\
 
 SOURCE=".\Jpeg-6\Jcdctmgr.c"
 DEP_CPP_JCDCT=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jdct.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2998,13 +2330,13 @@ DEP_CPP_JCDCT=\
 
 SOURCE=".\Jpeg-6\Jchuff.c"
 DEP_CPP_JCHUF=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jchuff.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3018,12 +2350,12 @@ DEP_CPP_JCHUF=\
 
 SOURCE=".\Jpeg-6\Jcinit.c"
 DEP_CPP_JCINI=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3037,12 +2369,12 @@ DEP_CPP_JCINI=\
 
 SOURCE=".\Jpeg-6\Jcmainct.c"
 DEP_CPP_JCMAI=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3056,12 +2388,12 @@ DEP_CPP_JCMAI=\
 
 SOURCE=".\Jpeg-6\Jcmarker.c"
 DEP_CPP_JCMAR=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3075,12 +2407,12 @@ DEP_CPP_JCMAR=\
 
 SOURCE=".\Jpeg-6\Jcmaster.c"
 DEP_CPP_JCMAS=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3094,12 +2426,12 @@ DEP_CPP_JCMAS=\
 
 SOURCE=".\Jpeg-6\Jcomapi.c"
 DEP_CPP_JCOMA=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3113,12 +2445,12 @@ DEP_CPP_JCOMA=\
 
 SOURCE=".\Jpeg-6\Jcparam.c"
 DEP_CPP_JCPAR=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3132,13 +2464,13 @@ DEP_CPP_JCPAR=\
 
 SOURCE=".\Jpeg-6\Jcphuff.c"
 DEP_CPP_JCPHU=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jchuff.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3152,12 +2484,12 @@ DEP_CPP_JCPHU=\
 
 SOURCE=".\Jpeg-6\Jcprepct.c"
 DEP_CPP_JCPRE=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3171,12 +2503,12 @@ DEP_CPP_JCPRE=\
 
 SOURCE=".\Jpeg-6\Jcsample.c"
 DEP_CPP_JCSAM=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3190,12 +2522,12 @@ DEP_CPP_JCSAM=\
 
 SOURCE=".\Jpeg-6\Jctrans.c"
 DEP_CPP_JCTRA=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3209,12 +2541,12 @@ DEP_CPP_JCTRA=\
 
 SOURCE=".\Jpeg-6\Jdapimin.c"
 DEP_CPP_JDAPI=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3228,12 +2560,12 @@ DEP_CPP_JDAPI=\
 
 SOURCE=".\Jpeg-6\Jdapistd.c"
 DEP_CPP_JDAPIS=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3247,12 +2579,12 @@ DEP_CPP_JDAPIS=\
 
 SOURCE=".\Jpeg-6\Jdatadst.c"
 DEP_CPP_JDATA=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3266,12 +2598,12 @@ DEP_CPP_JDATA=\
 
 SOURCE=".\Jpeg-6\Jdatasrc.c"
 DEP_CPP_JDATAS=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3285,12 +2617,12 @@ DEP_CPP_JDATAS=\
 
 SOURCE=".\Jpeg-6\Jdcoefct.c"
 DEP_CPP_JDCOE=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3304,12 +2636,12 @@ DEP_CPP_JDCOE=\
 
 SOURCE=".\Jpeg-6\Jdcolor.c"
 DEP_CPP_JDCOL=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3323,13 +2655,13 @@ DEP_CPP_JDCOL=\
 
 SOURCE=".\Jpeg-6\Jddctmgr.c"
 DEP_CPP_JDDCT=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jdct.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3343,13 +2675,13 @@ DEP_CPP_JDDCT=\
 
 SOURCE=".\Jpeg-6\Jdhuff.c"
 DEP_CPP_JDHUF=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jdhuff.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3363,12 +2695,12 @@ DEP_CPP_JDHUF=\
 
 SOURCE=".\Jpeg-6\Jdinput.c"
 DEP_CPP_JDINP=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3382,12 +2714,12 @@ DEP_CPP_JDINP=\
 
 SOURCE=".\Jpeg-6\Jdmainct.c"
 DEP_CPP_JDMAI=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3401,12 +2733,12 @@ DEP_CPP_JDMAI=\
 
 SOURCE=".\Jpeg-6\Jdmarker.c"
 DEP_CPP_JDMAR=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3420,12 +2752,12 @@ DEP_CPP_JDMAR=\
 
 SOURCE=".\Jpeg-6\Jdmaster.c"
 DEP_CPP_JDMAS=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3439,12 +2771,12 @@ DEP_CPP_JDMAS=\
 
 SOURCE=".\Jpeg-6\Jdmerge.c"
 DEP_CPP_JDMER=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3458,13 +2790,13 @@ DEP_CPP_JDMER=\
 
 SOURCE=".\Jpeg-6\Jdphuff.c"
 DEP_CPP_JDPHU=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jdhuff.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3478,12 +2810,12 @@ DEP_CPP_JDPHU=\
 
 SOURCE=".\Jpeg-6\Jdpostct.c"
 DEP_CPP_JDPOS=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3497,12 +2829,12 @@ DEP_CPP_JDPOS=\
 
 SOURCE=".\Jpeg-6\Jdsample.c"
 DEP_CPP_JDSAM=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3516,12 +2848,12 @@ DEP_CPP_JDSAM=\
 
 SOURCE=".\Jpeg-6\Jdtrans.c"
 DEP_CPP_JDTRA=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3535,12 +2867,12 @@ DEP_CPP_JDTRA=\
 
 SOURCE=".\Jpeg-6\Jerror.c"
 DEP_CPP_JERRO=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jversion.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
@@ -3555,13 +2887,13 @@ DEP_CPP_JERRO=\
 
 SOURCE=".\Jpeg-6\Jfdctflt.c"
 DEP_CPP_JFDCT=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jdct.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3575,13 +2907,13 @@ DEP_CPP_JFDCT=\
 
 SOURCE=".\Jpeg-6\Jfdctfst.c"
 DEP_CPP_JFDCTF=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jdct.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3595,13 +2927,13 @@ DEP_CPP_JFDCTF=\
 
 SOURCE=".\Jpeg-6\Jfdctint.c"
 DEP_CPP_JFDCTI=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jdct.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3615,13 +2947,13 @@ DEP_CPP_JFDCTI=\
 
 SOURCE=".\Jpeg-6\Jidctflt.c"
 DEP_CPP_JIDCT=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jdct.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3635,13 +2967,13 @@ DEP_CPP_JIDCT=\
 
 SOURCE=".\Jpeg-6\Jidctfst.c"
 DEP_CPP_JIDCTF=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jdct.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3655,13 +2987,13 @@ DEP_CPP_JIDCTF=\
 
 SOURCE=".\Jpeg-6\Jidctint.c"
 DEP_CPP_JIDCTI=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jdct.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3675,13 +3007,13 @@ DEP_CPP_JIDCTI=\
 
 SOURCE=".\Jpeg-6\Jidctred.c"
 DEP_CPP_JIDCTR=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jdct.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3695,13 +3027,13 @@ DEP_CPP_JIDCTR=\
 
 SOURCE=".\Jpeg-6\Jmemnobs.c"
 DEP_CPP_JMEMN=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmemsys.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3715,6 +3047,7 @@ DEP_CPP_JMEMN=\
 
 SOURCE=".\Jpeg-6\Jpegtran.c"
 DEP_CPP_JPEGT=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\cderror.h"\
 	".\Jpeg-6\cdjpeg.h"\
 	".\Jpeg-6\jconfig.h"\
@@ -3722,7 +3055,6 @@ DEP_CPP_JPEGT=\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jversion.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
@@ -3737,12 +3069,12 @@ DEP_CPP_JPEGT=\
 
 SOURCE=".\Jpeg-6\Jquant1.c"
 DEP_CPP_JQUAN=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3756,12 +3088,12 @@ DEP_CPP_JQUAN=\
 
 SOURCE=".\Jpeg-6\Jquant2.c"
 DEP_CPP_JQUANT=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3775,12 +3107,12 @@ DEP_CPP_JQUANT=\
 
 SOURCE=".\Jpeg-6\Jutils.c"
 DEP_CPP_JUTIL=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3794,13 +3126,13 @@ DEP_CPP_JUTIL=\
 
 SOURCE=".\Jpeg-6\Jmemmgr.c"
 DEP_CPP_JMEMM=\
+	".\./jpeg-6\jpeglib.h"\
 	".\Jpeg-6\jconfig.h"\
 	".\Jpeg-6\jerror.h"\
 	".\Jpeg-6\jinclude.h"\
 	".\Jpeg-6\jmemsys.h"\
 	".\Jpeg-6\jmorecfg.h"\
 	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jpeglib.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 

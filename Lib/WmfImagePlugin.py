@@ -2,7 +2,7 @@
 # THIS IS WORK IN PROGRESS.
 #
 # The Python Imaging Library.
-# $Id: WmfImagePlugin.py,v 1.1 1996/12/16 18:50:23 fl Exp fl $
+# $Id: WmfImagePlugin.py,v 1.2 1997/01/14 16:38:36 fl Exp $
 #
 # WMF support for PIL
 #
@@ -112,6 +112,9 @@ for k, v in vars().items():
 #
 # --------------------------------------------------------------------
 # Read WMF file
+
+def _accept(prefix):
+    return prefix[:6] == "\327\315\306\232\000\000"
 
 class WmfImageFile(ImageFile.ImageFile):
 
@@ -268,6 +271,6 @@ class WmfImageFile(ImageFile.ImageFile):
 # --------------------------------------------------------------------
 # Registry stuff
 
-Image.register_open("WMF", WmfImageFile)
+Image.register_open("WMF", WmfImageFile, _accept)
 
 Image.register_extension("WMF", ".wmf")

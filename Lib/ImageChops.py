@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: ImageChops.py,v 1.7 1996/12/16 18:50:23 fl Exp fl $
+# $Id: ImageChops.py,v 1.8 1997/01/14 16:38:36 fl Exp $
 #
 # standard channel operations
 #
@@ -87,12 +87,12 @@ def add_modulo(image1, image2):
     image2.load()
     return Image.Image()._makeself(image1.im.chop_add_modulo(image2.im))
 
-def subtract_modulo(image1, image2, scale = 1.0, offset = 0):
+def subtract_modulo(image1, image2):
     "Subtract two images without clipping"
 
     image1.load()
     image2.load()
-    return Image.Image()._makeself(image1.im.chop_subtract_modulo(image2.im))							   scale, offset))
+    return Image.Image()._makeself(image1.im.chop_subtract_modulo(image2.im))
 
 def logical_and(image1, image2):
     "Logical and between two images"

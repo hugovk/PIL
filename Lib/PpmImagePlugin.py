@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: PpmImagePlugin.py,v 1.6 1996/11/10 17:52:14 fredrik Exp $
+# $Id: PpmImagePlugin.py,v 1.7 1997/01/14 16:38:36 fl Exp $
 #
 # PPM support for PIL
 #
@@ -32,6 +32,9 @@ MODES = {
     "PyRGBA": "RGBA",
     "PyCMYK": "CMYK"
 }
+
+def _accept(prefix):
+    return prefix[0] == "P"
 
 class PpmImageFile(ImageFile.ImageFile):
 
@@ -111,7 +114,7 @@ def _save(im, fp, filename):
 #
 # --------------------------------------------------------------------
 
-Image.register_open("PPM", PpmImageFile)
+Image.register_open("PPM", PpmImageFile, _accept)
 Image.register_save("PPM", _save)
 
 Image.register_extension("PPM", ".pbm")

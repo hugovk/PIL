@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: RawEncode.c,v 1.3 1996/11/07 12:11:30 fredrik Exp $
+ * $Id: RawEncode.c,v 1.4 1997/01/14 16:40:04 fl Exp $
  *
  * coder for raw data
  *
@@ -10,12 +10,11 @@
  *	for this problem in ImageFile.py, but it should be solved
  *	here instead.
  *
- *	FIXME: Padding is not supported.
- *
  * history:
  *	96-04-30 fl	created
+ *	97-01-03 fl	fixed padding
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996-97.  All rights reserved.
  */
 
 
@@ -29,7 +28,24 @@ ImagingRawEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 
     if (!state->state) {
 
-	state->bytes = (state->xsize * state->bits + 7) / 8;
+	/* The "count" field holds the stride, if specified.  Fix
+	   things up so "bytes" is the full size, and "count" the
+	   packed size */
+
+	if (state->count > 0) {
+	    int bytes = state->count;
+
+	    /* stride must not be less than real size */
+	    if (state->count < state->bytes) {
+		state->errcode = IMAGING_CODEC_CONFIG;
+		return -1;
+	    }
+	    state->count = state->bytes;
+	    state->bytes = bytes;
+	} else
+	    state->count = state->bytes;
+
+	/* The "ystep" field specifies the orientation */
 
 	if (state->ystep < 0) {
 	    state->y = state->ysize-1;
@@ -42,7 +58,7 @@ ImagingRawEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
     }
 
     if (bytes < state->bytes) {
-	state->errcode = IMAGING_CODEC_MEMORY;
+	state->errcode = IMAGING_CODEC_CONFIG;
 	return 0;
     }
 
@@ -52,6 +68,10 @@ ImagingRawEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 
 	state->shuffle(ptr, (UINT8*) im->image[state->y + state->yoff] +
 		       state->xoff * im->pixelsize, state->xsize);
+
+	if (state->bytes > state->count)
+	    /* zero-pad the buffer, if necessary */
+	    memset(ptr + state->count, 0, state->bytes - state->count);
 
 	ptr += state->bytes;
 	bytes -= state->bytes;

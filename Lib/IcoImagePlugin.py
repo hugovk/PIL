@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: IcoImagePlugin.py,v 1.3 1996/12/16 18:50:23 fl Exp fl $
+# $Id: IcoImagePlugin.py,v 1.4 1997/01/14 16:38:36 fl Exp $
 #
 # Windows Icon support for PIL
 #
@@ -31,6 +31,10 @@ def i32(c):
     return ord(c[0]) + (ord(c[1])<<8) + (ord(c[2])<<16) + (ord(c[3])<<24)
 
 
+def _accept(prefix):
+    return prefix[:4] == "\0\0\1\0"
+
+
 class IcoImageFile(BmpImagePlugin.BmpImageFile):
 
     format = "ICO"
@@ -40,7 +44,7 @@ class IcoImageFile(BmpImagePlugin.BmpImageFile):
 
 	# check magic
 	s = self.fp.read(6)
-	if i16(s[0:]) != 0 or i16(s[2:]) != 1:
+	if not _accept(s):
 	    raise SyntaxError, "not an ICO file"
 
 	# pick the largest icon in the file
@@ -74,6 +78,6 @@ class IcoImageFile(BmpImagePlugin.BmpImageFile):
 #
 # --------------------------------------------------------------------
 
-Image.register_open("ICO", IcoImageFile)
+Image.register_open("ICO", IcoImageFile, _accept)
 
 Image.register_extension("ICO", ".ico")

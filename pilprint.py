@@ -1,7 +1,7 @@
 #! /usr/local/bin/python
 #
 # The Python Imaging Library.
-# $Id: pilprint.py,v 1.2 1996/12/16 18:49:51 fl Exp fl $
+# $Id: pilprint.py,v 1.1 1996/10/04 19:40:40 fredrik Exp $
 #
 # print image files to postscript printer
 #

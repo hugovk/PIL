@@ -1,17 +1,149 @@
 
 The Python Imaging Library
-$Id: CHANGES,v 1.10 1996/12/16 18:50:17 fl Exp fl $
+$Id: CHANGES,v 1.12 1997/01/14 18:01:06 fl Exp fl $
 
-This is release 0.2b3 (96-12-14)
+This is release 0.2b4 (January 10, 97)
 
-*** Changes from release 0.1b1 to 0.2b3 ***
+*** Changes from release 0.1b1 to 0.2b4 ***
 
-ACKNOWLEDGEMENTS: David Ascher, Phil Austin, Jan Blom, Jack Jansen,
-Richard Jones, Fredrik Nehr, Mark Hammond, Bertil Reinhammar, Joel
-Shprentz, and others have contributed bug reports, ideas, and
-inspiration for new features (many of which are yet to come).
+ACKNOWLEDGEMENTS: David Ascher, Phil Austin, Anthony Baxter, Jan
+Blom, Fred Drake, Robin Friedrich, Jack Jansen, Richard Jones,
+Fredrik Nehr, Mark Hammond, Bertil Reinhammar, Joel Shprentz, Ivan
+Tkatchev, and others have contributed bug reports, ideas, and
+inspiration for new features (many of which are yet to come ;-).
 
 Here's what's new this far in PIL 0.2:
+
+(0.2b4 released)
+
++ PIL only scans fully-qualified directory names in the path when
+  looking for plugins.
+  *** WARNING: MAY BREAK EXISTING CODE ***
+
++ Faster implementation of "save" used when filename is given,
+  or when file object has "fileno" and "flush" methods.
+
++ Fixed the "crop" method not to crash if the region extends
+  outside the source image.
+
++ Eliminated a very serious memory leak in the "save" function,
+  which caused PIL to leak encoding buffers.
+
++ The GIF decoder doesn't crash if the code is set to an illegal
+  value.  This could happen since another bug didn't handle local
+  palettes properly if they didn't have the same size as the
+  global palette (not very common).
+
++ Added predictor support (TIFF 6.0 section 14) to the TIFF decoder.
+
++ Fixed palette and padding problems in BMP driver.  Now properly
+  writes "1", "L", "P" and "RGB" images.
+
++ Fixed getpixel()/getdata() to return correct pixel values.
+
++ Added PSD (PhotoShop) read support.  Reads both uncompressed
+  and compressed images of most types.
+
++ Added GIF write support (writes "uncompressed" GIF files only,
+  due to unresolvable licensing issues).  The "gifmaker.py" script
+  can be used to create GIF animations.
+
++ Reads 8-bit "L" and "P" TGA images.  Also reads 16-bit "RGB"
+  images.
+
++ Added FLI/FLC read support.  This driver has only been tested
+  on a few FLI samples.
+
++ Reads 2-bit and 4-bit PCX images.
+
++ Added MSP read and write support.  Both version 1 and 2 can be
+  read, but only version 1 (uncompressed) files are written.
+
++ Fixed a bug in the FLI/FLC identification code that caused the
+  driver to raise an exception when parsing valid FLI/FLC files.
+
++ Improved performance when loading file format plugins, and when
+  opening files.
+
++ Added GIF animation support, via the "seek" and "tell" methods.
+  You can use "player.py" to play an animated GIF file.
+
++ Removed MNG support, since the spec is changing faster than I
+  can change the code.  I've added support for the experimental
+  ARG format instead.  Contact me for more information on this
+  format.
+
++ Added keyword options to the "save" method.  The following options
+  are currently supported:
+
+      format	option		description
+      --------------------------------------------------------
+      JPEG	optimize	minimize output file at the
+				expense of compression speed.
+
+      JPEG	progressive	enable progressive output. the
+				option value is ignored.
+
+      JPEG	quality		set compression quality (1-100).
+				the default value is 75.
+
+      JPEG	smooth		smooth dithered images.  value
+				is strengh (1-100).  default is
+				off (0).
+
+      PNG	optimize	minimize output file at the
+				expense of compression speed.
+
+  Expect more options in future releases.  Also note that
+  file writers silently ignore unknown options.
+
++ Plugged memory leaks in the PNG and TIFF decoders.
+
++ Added PNG write support.
+
++ (internal) RGB unpackers and converters now set the pad byte
+  to 255 (full opacity).
+
++ Properly handles the "transparency" property for GIF, PNG
+  and XPM files.
+
++ Added a "putalpha" method, allowing you to attach a "1" or "L"
+  image as the alpha layer to an "RGBA" image.
+
++ Various improvements to the sample scripts:
+
+  "pilconvert"  Carries out some extra tricks in order to make
+		the resulting file as small as possible.
+
+  "explode"	(NEW) Split an image sequence into individual frames.
+
+  "gifmaker"	(NEW) Convert a sequence file into a GIF animation.
+		Note that the GIF encoder create "uncompressed" GIF
+		files, so animations created by this script are
+		rather large (typically 2-5 times the compressed
+		sizes).
+
+  "image2py"	(NEW) Convert a single image to a python module.  See
+		comments in this script for details.
+
+  "player"	If multiple images are given on the command line,
+		they are interpreted as frames in a sequence.  The
+		script assumes that they all have the same size.
+		Also note that this script now can play FLI/FLC
+		and GIF animations.
+
+		This player can also execute embedded Python
+		animation applets (ARG format only).
+
+  "viewer"	Transparent images ("P" with transparency property,
+		and "RGBA") are superimposed on the standard Tk back-
+		ground.
+
++ Fixed colour argument to "new".  For multilayer images, pass a
+  tuple: (Red, Green, Blue), (Red, Green, Blue, Alpha), or (Cyan,
+  Magenta, Yellow, Black).
+
++ Added XPM (X pixmap) read support.
 
 (0.2b3 released)
 
@@ -23,9 +155,7 @@ Here's what's new this far in PIL 0.2:
   as is this driver.  More information, including sample files,
   can be found at <ftp://swrinde.nde.swri.edu/pub/mng>
 
-+ Added Jack's Mac patches.
-
-+ Added "verify" method to images loaded from file.  This method
++ Added a "verify" method to images loaded from file.  This method
   scans the file for errors, without actually decoding the image
   data, and raises a suitable exception if it finds any problems.
   Currently implemented for PNG and MNG files only.
@@ -69,7 +199,7 @@ Here's what's new this far in PIL 0.2:
   BitmapImage class; use the "foreground" option to set the colour
   of the overlay.
 
-+ Added the "putdata" method to the Image class.  This can be used to
++ Added a "putdata" method to the Image class.  This can be used to
   load a 1-layer image with data from a sequence object or a string.
   An optional floating point scale and offset can be used to adjust
   the data to fit into the 8-bit pixel range.  Also see the "getdata"
@@ -151,7 +281,7 @@ Here's what's new this far in PIL 0.2:
 + Properly writes EPS files (and properly prints images to postscript
   printers as well).
 
-+ Loads 4-bit BMP files, as well as 4 and 8-bit Windows ICO and CUR
++ Reads 4-bit BMP files, as well as 4 and 8-bit Windows ICO and CUR
   files.  Cursor animations are not supported.
 
 + Fixed alignment problems in the Sun raster loader.
@@ -166,7 +296,7 @@ Here's what's new this far in PIL 0.2:
 + Added raster conversion for EPS files.  This requires GNU or Aladdin
   Ghostscript, and probably works on UNIX only.
 
-+ Loads PhotoCD (PCD) images.  The base resolution (768x512) can be
++ Reads PhotoCD (PCD) images.  The base resolution (768x512) can be
   read from a PhotoCD file.
 
 + Eliminated some compiler warnings.  Bindings now compile cleanly in C++
@@ -182,9 +312,9 @@ Here's what's new this far in PIL 0.2:
 
 + Fixed 90 and 270 degree rotation of rectangular images.
 
-+ Properly loads 8-bit TIFF palette-color images.
++ Properly reads 8-bit TIFF palette-color images.
 
-+ Loads plane separated RGB and CMYK TIFF images.
++ Reads plane separated RGB and CMYK TIFF images.
 
 + Added driver debug mode.  This is enabled by setting Image.DEBUG
   to a non-zero value.  Try the -D option to "pilfile.py" and see what
@@ -196,11 +326,6 @@ Here's what's new this far in PIL 0.2:
   should refer to the binding module as "Image.core".
 
 *** Changes from release 0.0 to 0.1b1 ***
-
-ACKNOWLEDGEMENTS: Jack Jansen reorganized the original distribution to
-make PIL compatible with other extensions.  He also provided an
-interface to his own img library (see "ImgExtImagePlugin.py" for
-details)
 
 + A handbook is available (distributed separately).
 

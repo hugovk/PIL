@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: SgiImagePlugin.py,v 1.2 1996/11/10 17:52:14 fredrik Exp $
+# $Id: SgiImagePlugin.py,v 1.3 1997/01/14 16:38:36 fl Exp $
 #
 # SGI image file handling
 #
@@ -26,6 +26,10 @@ def i16(c):
 
 def i32(c):
     return ord(c[3]) + (ord(c[2])<<8) + (ord(c[1])<<16) + (ord(c[0])<<24)
+
+
+def _accept(prefix):
+    return i16(prefix) == 474
 
 
 class SgiImageFile(ImageFile.ImageFile):
@@ -70,8 +74,10 @@ class SgiImageFile(ImageFile.ImageFile):
 	if compression == 1:
 	    self.tile = [("sgi_rle", (0,0)+self.size, 512, (self.mode, 0, 1))]
 
+#
+# registry
 
-Image.register_open("SGI", SgiImageFile)
+Image.register_open("SGI", SgiImageFile, _accept)
 
 Image.register_extension("SGI", ".bw")
 Image.register_extension("SGI", ".rgb")

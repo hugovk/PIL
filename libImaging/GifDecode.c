@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: GifDecode.c,v 1.6 1996/12/16 18:51:03 fl Exp fl $
+ * $Id: GifDecode.c,v 1.7 1997/01/14 16:40:04 fl Exp $
  *
  * a fast, suspendable GIF decoder
  *
@@ -11,8 +11,9 @@
  *	96-03-28 fl	Revised API, integrated with PIL
  *	96-12-10 fl	Added interlace support
  *	96-12-16 fl	Fixed premature termination bug introduced by last fix
+ *	97-01-05 fl	Don't mess up on bogus configuration
  *
- * Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1995-97.  All rights reserved.
  */
 
 
@@ -24,24 +25,24 @@
 #include "Gif.h"
 
 
-#define NEWLINE(state, gifstate) {\
+#define NEWLINE(state, context) {\
     state->x = 0;\
-    state->y += gifstate->step;\
+    state->y += context->step;\
     if (state->y >= state->ysize)\
-	switch (gifstate->interlace) {\
+	switch (context->interlace) {\
 	case 1:\
-	    gifstate->repeat = state->y = 4;\
-	    gifstate->interlace = 2;\
+	    context->repeat = state->y = 4;\
+	    context->interlace = 2;\
 	    break;\
 	case 2:\
-	    gifstate->step = 4;\
-	    gifstate->repeat = state->y = 2;\
-	    gifstate->interlace = 3;\
+	    context->step = 4;\
+	    context->repeat = state->y = 2;\
+	    context->interlace = 3;\
 	    break;\
 	case 3:\
-	    gifstate->step = 2;\
-	    gifstate->repeat = state->y = 1;\
-	    gifstate->interlace = 0;\
+	    context->step = 2;\
+	    context->repeat = state->y = 1;\
+	    context->interlace = 0;\
 	    break;\
 	default:\
 	    return -1;\
@@ -55,26 +56,30 @@ ImagingGifDecode(Imaging im, ImagingCodecState state, UINT8* buffer, int bytes)
     unsigned char *p;
     int c, i;
     int thiscode;
-    GIFSTATE *gifstate = (GIFSTATE*) state->context;
+    GIFDECODERSTATE *context = (GIFDECODERSTATE*) state->context;
 
-    unsigned char *ptr = buffer;
+    UINT8 *ptr = buffer;
 
     if (!state->state) {
 
 	/* Initialise state */
+	if (context->bits < 0 || context->bits > 8) {
+	    state->errcode = IMAGING_CODEC_CONFIG;
+	    return -1;
+	}
 					
 	/* Clear code */
-	gifstate->clear = 1 << gifstate->bits;
+	context->clear = 1 << context->bits;
 
 	/* End code */
-	gifstate->end = gifstate->clear + 1;
+	context->end = context->clear + 1;
 
 	/* Interlace */
-	if (gifstate->interlace) {
-	    gifstate->interlace = 1;
-	    gifstate->step = gifstate->repeat = 8;
+	if (context->interlace) {
+	    context->interlace = 1;
+	    context->step = context->repeat = 8;
 	} else
-	    gifstate->step = 1;
+	    context->step = 1;
 
 	state->state = 1;
     }
@@ -84,43 +89,43 @@ ImagingGifDecode(Imaging im, ImagingCodecState state, UINT8* buffer, int bytes)
 	if (state->state == 1) {
 
 	    /* First free entry in table */
-	    gifstate->next = gifstate->clear + 2;
+	    context->next = context->clear + 2;
 
 	    /* Initial code size */
-	    gifstate->codesize = gifstate->bits + 1;
-	    gifstate->codemask = (1 << gifstate->codesize) - 1;
+	    context->codesize = context->bits + 1;
+	    context->codemask = (1 << context->codesize) - 1;
 
-	    /* Stack pointer.  The stack goes backwards, thus
-	       allowing us to return multiple bytes. */
-	    gifstate->stackindex = GIFSTACK;
+	    /* Buffer pointer.  We fill the buffer from right, which
+	       allows us to return all of it in one operation. */
+	    context->bufferindex = GIFBUFFER;
 
 	    state->state = 2;
 	}
 
-	if (gifstate->stackindex < GIFSTACK) {
+	if (context->bufferindex < GIFBUFFER) {
 
-	    /* Return whole stack in one chunk */
-	    i = GIFSTACK - gifstate->stackindex;
-	    p = &gifstate->stack[gifstate->stackindex];
+	    /* Return whole buffer in one chunk */
+	    i = GIFBUFFER - context->bufferindex;
+	    p = &context->buffer[context->bufferindex];
 
-	    gifstate->stackindex = GIFSTACK;
+	    context->bufferindex = GIFBUFFER;
 
 	} else {
 
 	    /* Get current symbol */
 
-	    while (gifstate->bitcount < gifstate->codesize) {
+	    while (context->bitcount < context->codesize) {
 
-		if (gifstate->blocksize > 0) {
+		if (context->blocksize > 0) {
 
 		    /* Read next byte */
 		    c = *ptr++; bytes--;
 
-		    gifstate->blocksize--;
+		    context->blocksize--;
 
 		    /* New bits are shifted in from from the left. */
-		    gifstate->bitbuffer |= (INT32) c << gifstate->bitcount;
-		    gifstate->bitcount += 8;
+		    context->bitbuffer |= (INT32) c << context->bitcount;
+		    context->bitcount += 8;
 
 		} else {
 
@@ -133,7 +138,7 @@ ImagingGifDecode(Imaging im, ImagingCodecState state, UINT8* buffer, int bytes)
 		    if (bytes < c+1)
 			return ptr - buffer;
 
-		    gifstate->blocksize = c;
+		    context->blocksize = c;
 
 		    ptr++; bytes--;
 
@@ -141,85 +146,102 @@ ImagingGifDecode(Imaging im, ImagingCodecState state, UINT8* buffer, int bytes)
 	    }
 
 	    /* Extract current symbol from bit buffer. */
-	    c = (int) gifstate->bitbuffer & gifstate->codemask;
+	    c = (int) context->bitbuffer & context->codemask;
 
 	    /* Adjust buffer */
-	    gifstate->bitbuffer >>= gifstate->codesize;
-	    gifstate->bitcount -= gifstate->codesize;
+	    context->bitbuffer >>= context->codesize;
+	    context->bitcount -= context->codesize;
 
 	    /* If c is less than clear, it's a data byte.  Otherwise,
 	       it's either clear/end or a code symbol which should be
 	       expanded. */
 
-	    if (c == gifstate->clear) {
+	    if (c == context->clear) {
 		if (state->state != 2)
 		    state->state = 1;
 		continue;
 	    }
 
-	    if (c == gifstate->end)
+	    if (c == context->end)
 		break;
 
 	    i = 1;
-	    p = &gifstate->lastdata;
+	    p = &context->lastdata;
 
 	    if (state->state == 2) {
 
 		/* First valid symbol after clear; use as is */
-		if (c > gifstate->clear) {
+		if (c > context->clear) {
 		    state->errcode = IMAGING_CODEC_BROKEN;
-		    c = 0; /* Continue anyway */
+		    return -1;
 		}
 
-		gifstate->lastdata = gifstate->lastcode = c;
+		context->lastdata = context->lastcode = c;
 		state->state = 3;
 
 	    } else {
 
 		thiscode = c;
 
-		if (c > gifstate->next) {
+		if (c > context->next) {
 		    state->errcode = IMAGING_CODEC_BROKEN;
-		    thiscode = 0; /* continue anyway */
+		    return -1;
 		}
 
-		if (c == gifstate->next) {
+		if (c == context->next) {
 
 		    /* c == next is allowed. not sure why. */
-		    gifstate->stack[--gifstate->stackindex] =
-			gifstate->lastdata;
-		    c = gifstate->lastcode;
-		}
 
-		while (c >= gifstate->clear) {
-
-		    /* This was a symbol. Push data string to stack. */
-		    gifstate->stack[--gifstate->stackindex] =
-			gifstate->data[c];
-		    c = gifstate->link[c];
-		}
-
-		gifstate->lastdata = c;
-
-		if (gifstate->next < GIFTABLE) {
-
-		    /* While we still have room for it, add this
-		       symbol to the table. */
-		    gifstate->data[gifstate->next] = c;
-		    gifstate->link[gifstate->next] = gifstate->lastcode;
-
-		    if (gifstate->next == gifstate->codemask &&
-			gifstate->codesize < GIFBITS) {
-
-			/* Expand code size */
-			gifstate->codesize++;
-			gifstate->codemask = (1 << gifstate->codesize) - 1;
+		    if (context->bufferindex <= 0) {
+			state->errcode = IMAGING_CODEC_BROKEN;
+			return -1;
 		    }
 
-		    gifstate->next++;
+		    context->buffer[--context->bufferindex] =
+			context->lastdata;
+
+		    c = context->lastcode;
 
 		}
-		gifstate->lastcode = thiscode;
+
+		while (c >= context->clear) {
+
+		    /* Copy data string to buffer (beginning from right) */
+
+		    if (context->bufferindex <= 0 || c >= GIFTABLE) {
+			state->errcode = IMAGING_CODEC_BROKEN;
+			return -1;
+		    }
+
+		    context->buffer[--context->bufferindex] =
+			context->data[c];
+
+		    c = context->link[c];
+		}
+
+		context->lastdata = c;
+
+		if (context->next < GIFTABLE) {
+
+		    /* We'll only add this symbol if we have room
+		       for it (take advise, Netscape!) */
+		    context->data[context->next] = c;
+		    context->link[context->next] = context->lastcode;
+
+		    if (context->next == context->codemask &&
+			context->codesize < GIFBITS) {
+
+			/* Expand code size */
+			context->codesize++;
+			context->codemask = (1 << context->codesize) - 1;
+		    }
+
+		    context->next++;
+
+		}
+
+		context->lastcode = thiscode;
+
 	    }
 	}
 
@@ -232,6 +254,8 @@ ImagingGifDecode(Imaging im, ImagingCodecState state, UINT8* buffer, int bytes)
 	/* To squeeze some extra pixels out every second, we test
 	   for some common cases and handle them separately. */ 
 
+	/* FIXME: should we handle the transparency index in here??? */
+
 	if (i == 1) {
 	    if (state->x < state->xsize-1) {
 		/* Single pixel, not at the end of the line. */
@@ -242,10 +266,10 @@ ImagingGifDecode(Imaging im, ImagingCodecState state, UINT8* buffer, int bytes)
 	} else if (state->x + i <= state->xsize) {
 	    /* This string fits into current line. */
 	    memcpy(im->image8[state->y+state->yoff] + state->x +
-		   state->xoff, p, i);
+	    	   state->xoff, p, i);
 	    state->x += i;
 	    if (state->x == state->xsize) {
-		NEWLINE(state, gifstate);
+		NEWLINE(state, context);
 	    }
 	    continue;
 	}
@@ -254,7 +278,7 @@ ImagingGifDecode(Imaging im, ImagingCodecState state, UINT8* buffer, int bytes)
 	for (c = 0; c < i; c++) {
 	    im->image8[state->y+state->yoff][state->x+state->xoff] = p[c];
 	    if (++state->x >= state->xsize) {
-		NEWLINE(state, gifstate);
+		NEWLINE(state, context);
 	    }
 	}
     }

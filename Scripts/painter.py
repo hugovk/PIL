@@ -1,15 +1,11 @@
 #
 # The Python Imaging Library
-# $Id: painter.py,v 1.1 1996/12/16 18:51:31 fl Exp fl $
+# $Id$
 #
 # this demo script illustrates pasting into an already displayed
 # photoimage.  note that the current version of Tk updates the whole
-# image everytime we paste, so to get decent performance, we create
-# a set of tiles.
-#
-# to be fixed:
-# - the tiling code assumes that the image size is a multiple of
-#   the tile size
+# image everytime we paste, so to get decent performance, we split
+# the image into a set of tiles.
 #
 
 from Tkinter import *
@@ -26,9 +22,10 @@ class PaintCanvas(Canvas):
 	# fill the canvas
 	self.tile = {}
 	self.tilesize = tilesize = 32
-	for x in range(0, image.size[0], tilesize):
-	    for y in range(0, image.size[1], tilesize):
-		box = x, y, x+tilesize, y+tilesize
+	xsize, ysize = image.size
+	for x in range(0, xsize, tilesize):
+	    for y in range(0, ysize, tilesize):
+		box = x, y, min(xsize, x+tilesize), min(ysize, y+tilesize)
 		tile = ImageTk.PhotoImage(image.crop(box))
 		self.create_image(x, y, image=tile, anchor=NW)
 		self.tile[(x,y)] = box, tile
@@ -39,13 +36,7 @@ class PaintCanvas(Canvas):
 
     def paint(self, event):
 	xy = event.x - 10, event.y - 10, event.x + 10, event.y + 10
-	#
-	# NOTES:
-	# im = self.image.crop(xy) may crash if the region extends
-	# outside the image.  the transform(EXTENT) method provides
-	# a workaround:
-	im = self.image.transform((xy[2]-xy[0], xy[3]-xy[1]),
-			          Image.EXTENT, xy)
+	im = self.image.crop(xy)
 
 	# process the image in some fashion
         im = im.convert("L")

@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: TiffImagePlugin.py,v 1.5 1996/12/16 18:50:23 fl Exp fl $
+# $Id: TiffImagePlugin.py,v 1.6 1997/01/14 16:38:36 fl Exp $
 #
 # TIFF file handling
 #
@@ -23,15 +23,16 @@
 #
 # History:
 #	95-09-01 fl	Created
-#	96-05-04 fl	Handle JpegTables tag (experimental)
-#	96-05-18 fl	Fixed palette support.
+#	96-05-04 fl	Handle JpegTables tag (tag 347, experimental)
+#	96-05-18 fl	Fixed palette support (tag 320)
+#	97-01-05 fl	Fixed predictor support (tag 317)
 #
 # Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
 #
 
-__version__ = "0.1"
+__version__ = "0.4"
 
-import Image, ImageFile
+import Image, ImageFile, ImagePalette
 
 import string
 
@@ -71,7 +72,9 @@ RMODE = {
     (1, (8,)): ("L", "L"),
     (1, (16,)): ("L", "L;16B"),
     (2, (8,8,8)): ("RGB", "RGB"),
+    (2, (8,8,8,8)): ("RGBA", "RGBA"),
     (2, (16,16,16)): ("RGB", "RGB;16B"),
+    (2, (16,16,16,16)): ("RGB", "RGBA;16B"),
     (3, (1,)): ("P", "P;1"),
     (3, (2,)): ("P", "P;2"),
     (3, (4,)): ("P", "P;4"),
@@ -79,6 +82,11 @@ RMODE = {
     (5, (8,8,8,8)): ("CMYK", "CMYK"),
     (6, (8,8,8)): ("RGB", "RGB"), # YCC, actually
 }
+
+
+def _accept(prefix):
+    return prefix[:2] in ["MM", "II"]
+
 
 class TiffImageFile(ImageFile.ImageFile):
 
@@ -133,6 +141,10 @@ class TiffImageFile(ImageFile.ImageFile):
 	    if self._compression == "jpeg" and self.tag.has_key(347):
 		# Hack to handle abbreviated JPEG headers
 		self.tile_prefix = self.tag[347]
+	    elif self._compression == "tiff_lzw" and self.tag.has_key(317):
+		# Section 14: Differencing Predictor
+		self.decoderconfig = (self.tag[317][0],)
+
 	return args
 
     def _setup(self):
@@ -218,7 +230,7 @@ class TiffImageFile(ImageFile.ImageFile):
 	# fixup palette descriptor
 	if self.mode == "P":
 	    palette = map(lambda a: chr(a / 256), self.tag[320])
-	    self.palette = "RGB;L", string.join(palette, "")
+	    self.palette = ImagePalette.raw("RGB;L", string.join(palette, ""))
 
     # ----------------------------------------------------------------
     # TIFF tag parser
@@ -377,7 +389,7 @@ def _save(im, fp, filename):
 # --------------------------------------------------------------------
 # Register
 
-Image.register_open("TIFF", TiffImageFile)
+Image.register_open("TIFF", TiffImageFile, _accept)
 Image.register_save("TIFF", _save)
 
 Image.register_extension("TIFF", ".tif")

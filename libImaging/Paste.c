@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library
- * $Id: Paste.c,v 1.4 1996/12/16 18:51:03 fl Exp fl $
+ * $Id: Paste.c,v 1.4 1996/12/16 18:51:03 fl Exp $
  *
  * paste region into image, using mask image
  *

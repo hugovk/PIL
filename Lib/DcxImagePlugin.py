@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: DcxImagePlugin.py,v 1.2 1996/11/10 17:52:14 fredrik Exp $
+# $Id: DcxImagePlugin.py,v 1.3 1997/01/14 16:38:36 fl Exp $
 #
 # DCX file handling
 #
@@ -20,18 +20,19 @@
 __version__ = "0.1"
 
 
-import array
 import Image, ImageFile
 
 from PcxImagePlugin import PcxImageFile
 
 
-def i16(c):
-    return ord(c[0]) + (ord(c[1])<<8)
+MAGIC = 0x3ADE68B1 # QUIZ: what's this value, then?
+
 
 def i32(c):
     return ord(c[0]) + (ord(c[1])<<8) + (ord(c[2])<<16) + (ord(c[3])<<24)
 
+def _accept(prefix):
+    return i32(prefix) == MAGIC
 
 class DcxImageFile(PcxImageFile):
 
@@ -42,7 +43,7 @@ class DcxImageFile(PcxImageFile):
 
 	# Header
 	s = self.fp.read(4)
-	if i32(s) != 0x3ADE68B1: # QUIZ: what's this, then?
+	if i32(s) != MAGIC:
 	    raise SyntaxError, "not a DCX file"
 
 	# Component directory
@@ -66,6 +67,6 @@ class DcxImageFile(PcxImageFile):
 	return self.frame
 
 
-Image.register_open("DCX", DcxImageFile)
+Image.register_open("DCX", DcxImageFile, _accept)
 
 Image.register_extension("DCX", ".dcx")

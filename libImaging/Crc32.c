@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library
- * $Id: Crc32.c,v 1.1 1996/12/16 18:51:03 fl Exp fl $
+ * $Id: Crc32.c,v 1.1 1996/12/16 18:51:03 fl Exp $
  *
  * calculate ISO 3307 checksum
  *

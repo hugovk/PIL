@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: coretest.c,v 1.9 1996/12/16 18:51:03 fl Exp fl $
+ * $Id: coretest.c,v 1.9 1996/12/16 18:51:03 fl Exp $
  *
  * minimal test hack for the core library
  *

@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: ContainerIO.py,v 1.3 1996/12/16 18:50:23 fl Exp fl $
+# $Id: ContainerIO.py,v 1.3 1996/12/16 18:50:23 fl Exp $
 #
 # a class to read from a container file
 #

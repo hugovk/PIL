@@ -1,4 +1,4 @@
-/* $Id: ImPlatform.h,v 1.2 1996/12/16 18:51:03 fl Exp fl $
+/* $Id: ImPlatform.h,v 1.1 1996/03/25 08:46:34 fredrik Exp $
  *
  * The Python Imaging Library
  *

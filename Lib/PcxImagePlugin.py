@@ -1,17 +1,19 @@
 #
 # The Python Imaging Library.
-# $Id: PcxImagePlugin.py,v 1.5 1996/12/16 18:50:23 fl Exp fl $
+# $Id: PcxImagePlugin.py,v 1.6 1997/01/14 16:38:36 fl Exp $
 #
 # PCX file handling
 #
 # This format was used by the popular PaintBrush applications, from
-# ZSoft, Inc.
+# ZSoft, Inc.  It's also support by many MS-DOS and Windows applications,
+# including the PaintBrush program in Windows 3.
 #
 # History:
 #	95-09-01 fl	Created
 #	96-05-20 fl	Fixed RGB support
+#	97-01-03 fl	Fixed 2-bit and 4-bit support
 #
-# Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
+# Copyright (c) Fredrik Lundh 1995-97.  All rights reserved.
 #
 
 
@@ -19,12 +21,14 @@ __version__ = "0.1"
 
 
 import array
-import Image, ImageFile
+import Image, ImageFile, ImagePalette
 
 
 def i16(c):
     return ord(c[0]) + (ord(c[1])<<8)
 
+def _accept(prefix):
+    return ord(prefix[0]) == 10 and ord(prefix[1]) in [0, 2, 3, 5]
 
 class PcxImageFile(ImageFile.ImageFile):
 
@@ -35,27 +39,34 @@ class PcxImageFile(ImageFile.ImageFile):
 
 	# Header
 	s = self.fp.read(128)
-	if ord(s[0]) != 10 or ord(s[1]) not in [0, 2, 3, 5]:
+	if not _accept(s):
 	    raise SyntaxError, "not a PCX file"
- 
+
 	# Image
 	box = i16(s[4:]), i16(s[6:]), i16(s[8:])+1, i16(s[10:])+1
+	if box[2] <= box[0] or box[3] <= box[1]:
+	    raise SyntaxError, "bad PCX image size"
 
 	# Format
 	bits, planes, stride = ord(s[3]), ord(s[65]), i16(s[66:])
 	if bits == 1 and planes == 1:
 	    self.mode = rawmode = "1"
+	elif bits == 1 and planes == 2:
+	    self.mode = "P"
+	    rawmode = "P;2L"
+	    self.palette = ImagePalette.raw("RGB", s[16:64])
 	elif bits == 1 and planes == 4:
 	    self.mode = "P"
-	    rawmode = "L;4"
-	    self.palette = "RGB", s[16:64]
+	    rawmode = "P;4L"
+	    self.palette = ImagePalette.raw("RGB", s[16:64])
 	elif bits == 8 and planes == 1:
 	    self.mode = rawmode = "L"
 	    # FIXME: hey, this doesn't work with the incremental loader !!!
+	    # FIXME: should perhaps check version before looking for a palette
 	    self.fp.seek(-769, 2)
 	    s = self.fp.read(769)
 	    if ord(s[0]) == 12:
-		self.palette = "RGB", s[1:]
+		self.palette = ImagePalette.raw("RGB", s[1:])
 		self.mode = "P"
 	elif bits == 8 and planes == 3:
 	    self.mode = "RGB"
@@ -67,7 +78,9 @@ class PcxImageFile(ImageFile.ImageFile):
 
 	self.tile = [("pcx", box, 128, rawmode)]
 
+#
+# registry
 
-Image.register_open("PCX", PcxImageFile)
+Image.register_open("PCX", PcxImageFile, _accept)
 
 Image.register_extension("PCX", ".pcx")

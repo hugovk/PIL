@@ -1,21 +1,27 @@
-/* $Id: encode.c,v 1.5 1996/12/16 18:50:08 fl Exp fl $
+/* $Id: encode.c,v 1.6 1997/01/14 16:40:31 fl Exp $
  *
  * The Python Imaging Library.
  *
  * File:
- *	encoders.c -- experimental encoder interfaces for the Imaging library
+ *	encode.c -- experimental encoder interfaces for the Imaging library
  *
  * History:
  *	96-04-19 fl	Based on decoders.c
  *	96-05-12 fl	Compile cleanly as C++
+ *	96-12-30 fl	Plugged potential memory leak for tiled images
+ *	97-01-03 fl	Added GIF encoder
+ *	97-01-05 fl	Plugged encoder buffer leaks
+ *	97-01-11 fl	Added encode_to_file method
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996-97.  All rights reserved.
  */
 
 
 #include "Python.h"
 
 #include "Imaging.h"
+
+#include "Gif.h"
 
 
 /* -------------------------------------------------------------------- */
@@ -38,6 +44,8 @@ PyImaging_EncoderNew(int contextsize)
 {
     ImagingEncoderObject *encoder;
     void *context;
+
+    ImagingEncoderType.ob_type = &PyType_Type;
 
     encoder = PyObject_NEW(ImagingEncoderObject, &ImagingEncoderType);
     if (encoder == NULL)
@@ -80,10 +88,12 @@ static PyObject*
 _encode(ImagingEncoderObject* encoder, PyObject* args)
 {
     PyObject* buf;
-    int bufsize;
+    PyObject* result;
     int status;
 
-    bufsize = 16384;
+    /* Encode to a Python string (allocated by this method) */
+
+    int bufsize = 16384;
 
     if (!PyArg_ParseTuple(args, "|i", &bufsize))
 	return NULL;
@@ -95,7 +105,55 @@ _encode(ImagingEncoderObject* encoder, PyObject* args)
     status = encoder->encode(encoder->im, &encoder->state,
 			     (UINT8*) PyString_AsString(buf), bufsize);
 
-    return Py_BuildValue("iiO", status, encoder->state.errcode, buf);
+    /* adjust string length to avoid slicing in encoder */
+    _PyString_Resize(&buf, (status > 0) ? status : 0);
+
+    result = Py_BuildValue("iiO", status, encoder->state.errcode, buf);
+
+    Py_DECREF(buf); /* must release buffer!!! */
+
+    return result;
+}
+
+static PyObject* 
+_encode_to_file(ImagingEncoderObject* encoder, PyObject* args)
+{
+    UINT8* buf;
+    int status;
+
+    /* Encode to a file handle */
+
+    int fh;
+    int bufsize = 16384;
+
+    if (!PyArg_ParseTuple(args, "i|i", &fh, &bufsize))
+	return NULL;
+
+    /* Allocate an encoder buffer */
+    buf = (UINT8*) malloc(bufsize);
+    if (!buf) {
+	PyErr_NoMemory();
+	return NULL;
+    }
+
+    do {
+
+	/* This replaces the inner loop in the ImageFile _save
+	   function. */
+
+	status = encoder->encode(encoder->im, &encoder->state, buf, bufsize);
+
+	if (status > 0)
+	    if (write(fh, buf, status) < 0) {
+		free(buf);
+		return PyErr_SetFromErrno(PyExc_IOError);
+	    }
+
+    } while (encoder->state.errcode == 0);
+
+    free(buf);
+
+    return Py_BuildValue("i", encoder->state.errcode);
 }
 
 extern Imaging PyImaging_AsImaging(PyObject *op);
@@ -107,6 +165,8 @@ _setimage(ImagingEncoderObject* encoder, PyObject* args)
     Imaging im;
     ImagingCodecState state;
     int x0, y0, x1, y1;
+
+    /* Define where image data should be stored */
 
     x0 = y0 = x1 = y1 = 0;
 
@@ -152,6 +212,7 @@ _setimage(ImagingEncoderObject* encoder, PyObject* args)
     /* Keep a reference to the image object, to make sure it doesn't
        go away before we do */
     Py_INCREF(op);
+    Py_XDECREF(encoder->lock);
     encoder->lock = op;
 
     Py_INCREF(Py_None);
@@ -160,6 +221,7 @@ _setimage(ImagingEncoderObject* encoder, PyObject* args)
 
 static struct PyMethodDef methods[] = {
     {"encode", (PyCFunction)_encode, 1},
+    {"encode_to_file", (PyCFunction)_encode_to_file, 1},
     {"setimage", (PyCFunction)_setimage, 1},
     {NULL, NULL} /* sentinel */
 };
@@ -231,23 +293,45 @@ PyImaging_EpsEncoderNew(PyObject* self, PyObject* args)
 /* -------------------------------------------------------------------- */
 
 PyObject*
+PyImaging_GifEncoderNew(PyObject* self, PyObject* args)
+{
+    ImagingEncoderObject* encoder;
+
+    int bits = 8;
+
+    if (!PyArg_ParseTuple(args, "|i", &bits))
+	return NULL;
+
+    encoder = PyImaging_EncoderNew(sizeof(GIFENCODERSTATE));
+    if (encoder == NULL)
+	return NULL;
+
+    if (get_packer(encoder, "P") < 0)
+	return NULL;
+
+    encoder->encode = ImagingGifEncode;
+
+    ((GIFENCODERSTATE*)encoder->state.context)->bits = bits;
+
+    return (PyObject*) encoder;
+}
+
+
+/* -------------------------------------------------------------------- */
+/* RAW									*/
+/* -------------------------------------------------------------------- */
+
+PyObject*
 PyImaging_RawEncoderNew(PyObject* self, PyObject* args)
 {
     ImagingEncoderObject* encoder;
-    char *rawmode;
-    int stride, ystep;
 
-    stride = 0;
-    ystep = 1;
+    char *rawmode;
+    int stride = 0;
+    int ystep = 1;
 
     if (!PyArg_ParseTuple(args, "s|ii", &rawmode, &stride, &ystep))
 	return NULL;
-
-    if (stride != 0) {
-	PyErr_SetString(PyExc_SystemError,
-			"non-zero stride not yet supported");
-	return NULL;
-    }
 
     encoder = PyImaging_EncoderNew(0);
     if (encoder == NULL)
@@ -259,6 +343,7 @@ PyImaging_RawEncoderNew(PyObject* self, PyObject* args)
     encoder->encode = ImagingRawEncode;
 
     encoder->state.ystep = ystep;
+    encoder->state.count = stride;
 
     return (PyObject*) encoder;
 }
@@ -283,6 +368,49 @@ PyImaging_XbmEncoderNew(PyObject* self, PyObject* args)
 
     return (PyObject*) encoder;
 }
+
+/* -------------------------------------------------------------------- */
+/* ZIP									*/
+/* -------------------------------------------------------------------- */
+
+#ifdef HAVE_LIBZ
+
+#include "Zip.h"
+
+PyObject*
+PyImaging_ZipEncoderNew(PyObject* self, PyObject* args)
+{
+    ImagingEncoderObject* encoder;
+    char* rawmode;
+
+    int optimize = 0;
+    char* dictionary = NULL;
+    int dictionary_size = 0;
+
+    if (!PyArg_ParseTuple(args, "s|is#", &rawmode, &optimize,
+			  &dictionary, &dictionary_size))
+	return NULL;
+
+    encoder = PyImaging_EncoderNew(sizeof(ZIPSTATE));
+    if (encoder == NULL)
+	return NULL;
+
+    if (get_packer(encoder, rawmode) < 0)
+	return NULL;
+
+    encoder->encode = ImagingZipEncode;
+
+    if (rawmode[0] == 'P')
+	/* disable filtering */
+	((ZIPSTATE*)encoder->state.context)->palette = 1;
+
+    ((ZIPSTATE*)encoder->state.context)->optimize = optimize;
+    ((ZIPSTATE*)encoder->state.context)->dictionary = dictionary;
+    ((ZIPSTATE*)encoder->state.context)->dictionary_size = dictionary_size;
+
+    return (PyObject*) encoder;
+}
+#endif
 
 
 /* -------------------------------------------------------------------- */
@@ -311,7 +439,14 @@ PyImaging_JpegEncoderNew(PyObject* self, PyObject* args)
     ImagingEncoderObject* encoder;
     char *rawmode;
 
-    if (!PyArg_ParseTuple(args, "s", &rawmode))
+    int quality = 0;
+    int progressive = 0;
+    int smooth = 0;
+    int optimize = 0;
+    int streamtype = 0; /* 0=interchange, 1=tables only, 2=image only */
+
+    if (!PyArg_ParseTuple(args, "s|iiiii", &rawmode, &quality,
+			  &progressive, &smooth, &optimize, &streamtype))
 	return NULL;
 
     encoder = PyImaging_EncoderNew(sizeof(JPEGENCODERSTATE));
@@ -322,6 +457,12 @@ PyImaging_JpegEncoderNew(PyObject* self, PyObject* args)
 	return NULL;
 
     encoder->encode = ImagingJpegEncode;
+
+    ((JPEGENCODERSTATE*)encoder->state.context)->quality = quality;
+    ((JPEGENCODERSTATE*)encoder->state.context)->progressive = progressive;
+    ((JPEGENCODERSTATE*)encoder->state.context)->smooth = smooth;
+    ((JPEGENCODERSTATE*)encoder->state.context)->optimize = optimize;
+    ((JPEGENCODERSTATE*)encoder->state.context)->streamtype = streamtype;
 
     return (PyObject*) encoder;
 }

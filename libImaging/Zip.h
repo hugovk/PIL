@@ -1,9 +1,8 @@
-/* $Id: Zip.h,v 1.1 1996/12/16 18:51:03 fl Exp fl $
- *
+/*
  * The Python Imaging Library.
+ * $Id: Jpeg.h,v 1.2 1996/08/15 13:12:44 fredrik Exp $
  *
- * File:
- *	Zip.h -- Declarations for the ZIP codecs
+ * declarations for the ZIP codecs
  *
  * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
  */
@@ -16,11 +15,28 @@ typedef struct {
 
     /* CONFIGURATION */
 
+    /* Optimize (max compression) */
+    int optimize;
 
-    /* PRIVATE CONTEXT (set by decoder) */
+    /* Palette mode (disables filtering) FIXME: generalize */
+    int palette;
 
-    z_stream d_stream;		/* decompression stream */
+    /* Predefined dictionary (experimental) */
+    char* dictionary;
+    int dictionary_size;
 
-    UINT8 *previous;		/* previous line */
+    /* PRIVATE CONTEXT (set by decoder/encoder) */
+
+    z_stream z_stream;		/* (de)compression stream */
+
+    UINT8* previous;		/* previous line (allocated) */
+
+    /* Compressor specific stuff */
+    UINT8* prior;		/* filter storage (allocated) */
+    UINT8* up;
+    UINT8* average;
+    UINT8* paeth;
+
+    UINT8* output;		/* output data */
 
 } ZIPSTATE;

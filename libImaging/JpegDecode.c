@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: JpegDecode.c,v 1.5 1996/12/16 18:51:03 fl Exp fl $
+ * $Id: JpegDecode.c,v 1.5 1996/12/16 18:51:03 fl Exp $
  *
  * decoder for JPEG image data.
  *

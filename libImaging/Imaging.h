@@ -1,4 +1,4 @@
-/* $Id: Imaging.h,v 1.8 1996/12/16 18:51:03 fl Exp fl $
+/* $Id: Imaging.h,v 1.7 1996/10/04 19:41:06 fredrik Exp $
  *
  * The Python Imaging Library
  *
@@ -61,8 +61,8 @@ struct ImagingInstance {
 
     /* Format */
     char mode[4+1];	/* Band names ("1", "L", "P", "RGB", "RGBA", "CMYK") */
-    unsigned type;	/* Fixed to 0 in this version */
-    unsigned depth;	/* Fixed to 8 in this version */
+    unsigned type;	/* Always 0 in this version */
+    unsigned depth;	/* Always 8 in this version */
     unsigned bands;	/* Number of bands (1, 3, or 4) */
     unsigned xsize;	/* Image dimension. */
     unsigned ysize;
@@ -167,6 +167,7 @@ extern Imaging ImagingFlipLeftRight(Imaging im);
 extern Imaging ImagingFlipTopBottom(Imaging im);
 extern Imaging ImagingGetBand(Imaging im, int band);
 extern int ImagingGetBBox(Imaging im, int bbox[4]);
+extern int ImagingGetProjection(Imaging im, UINT8* xproj, UINT8* yproj);
 extern ImagingHistogram ImagingHisto(Imaging im);
 extern Imaging ImagingNegative(Imaging im);
 extern Imaging ImagingOffset(Imaging im, int xoffset, int yoffset);
@@ -260,7 +261,11 @@ typedef int (*ImagingCodec)(Imaging im, ImagingCodecState state,
 
 extern int ImagingEpsEncode(Imaging im, ImagingCodecState state,
 			    UINT8* buffer, int bytes);
+extern int ImagingFliDecode(Imaging im, ImagingCodecState state,
+			    UINT8* buffer, int bytes);
 extern int ImagingGifDecode(Imaging im, ImagingCodecState state,
+			    UINT8* buffer, int bytes);
+extern int ImagingGifEncode(Imaging im, ImagingCodecState state,
 			    UINT8* buffer, int bytes);
 extern int ImagingHexDecode(Imaging im, ImagingCodecState state,
 			    UINT8* buffer, int bytes);
@@ -276,6 +281,8 @@ extern int ImagingLzwDecode(Imaging im, ImagingCodecState state,
 extern int ImagingMpegDecode(Imaging im, ImagingCodecState state,
 			     UINT8* buffer, int bytes);
 #endif
+extern int ImagingMspDecode(Imaging im, ImagingCodecState state,
+			    UINT8* buffer, int bytes);
 extern int ImagingPackbitsDecode(Imaging im, ImagingCodecState state,
 				 UINT8* buffer, int bytes);
 extern int ImagingPcdDecode(Imaging im, ImagingCodecState state,
@@ -286,12 +293,18 @@ extern int ImagingRawDecode(Imaging im, ImagingCodecState state,
 			    UINT8* buffer, int bytes);
 extern int ImagingRawEncode(Imaging im, ImagingCodecState state,
 			    UINT8* buffer, int bytes);
+extern int ImagingSunRleDecode(Imaging im, ImagingCodecState state,
+			       UINT8* buffer, int bytes);
+extern int ImagingTgaRleDecode(Imaging im, ImagingCodecState state,
+			       UINT8* buffer, int bytes);
 extern int ImagingXbmDecode(Imaging im, ImagingCodecState state,
 			    UINT8* buffer, int bytes);
 extern int ImagingXbmEncode(Imaging im, ImagingCodecState state,
 			    UINT8* buffer, int bytes);
 #ifdef	HAVE_LIBZ
 extern int ImagingZipDecode(Imaging im, ImagingCodecState state,
+			    UINT8* buffer, int bytes);
+extern int ImagingZipEncode(Imaging im, ImagingCodecState state,
 			    UINT8* buffer, int bytes);
 #endif
 
@@ -322,6 +335,7 @@ struct ImagingCodecStateInstance {
 #define	IMAGING_CODEC_END	 1
 #define	IMAGING_CODEC_OVERRUN	-1
 #define	IMAGING_CODEC_BROKEN	-2
+#define	IMAGING_CODEC_UNKNOWN	-3
 #define	IMAGING_CODEC_CONFIG	-8
 #define	IMAGING_CODEC_MEMORY	-9
 

@@ -1,9 +1,8 @@
-/* $Id: Jpeg.h,v 1.2 1996/08/15 13:12:44 fredrik Exp $
- *
+/*
  * The Python Imaging Library.
+ * $Id: Jpeg.h,v 1.2 1996/08/15 13:12:44 fredrik Exp $
  *
- * File:
- *	Jpeg.h -- Declarations for the IJG JPEG interface.
+ * declarations for the IJG JPEG codec interface.
  *
  * Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
  */
@@ -63,7 +62,20 @@ typedef struct {
 
     /* CONFIGURATION */
 
-    /* (none) */
+    /* Quality (1-100, 0 means default) */
+    int quality;
+
+    /* Progressive mode */
+    int progressive;
+
+    /* Smoothing factor (1-100, 0 means none) */
+    int smooth;
+
+    /* Optimize Huffman tables (slow) */
+    int optimize;
+
+    /* Stream type (0=interchange, 1=tables only, 2=image only) */
+    int streamtype;
 
     /* PRIVATE CONTEXT (set by encoder) */
 

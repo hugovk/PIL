@@ -1,4 +1,4 @@
-/* $Id: tkImaging.c,v 1.1 1996/12/16 18:51:47 fl Exp fl $
+/* $Id: tkImaging.c,v 1.1 1996/05/09 22:11:39 fredrik Exp $
  *
  * The Python Imaging Library.
  *

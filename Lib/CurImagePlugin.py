@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: CurImagePlugin.py,v 1.3 1996/12/16 18:50:23 fl Exp fl $
+# $Id: CurImagePlugin.py,v 1.4 1997/01/14 16:38:36 fl Exp $
 #
 # Windows Cursor support for PIL
 #
@@ -31,6 +31,10 @@ def i32(c):
     return ord(c[0]) + (ord(c[1])<<8) + (ord(c[2])<<16) + (ord(c[3])<<24)
 
 
+def _accept(prefix):
+    return prefix[:4] == "\0\0\2\0"
+
+
 class CurImageFile(BmpImagePlugin.BmpImageFile):
 
     format = "CUR"
@@ -42,7 +46,7 @@ class CurImageFile(BmpImagePlugin.BmpImageFile):
 
 	# check magic
 	s = self.fp.read(6)
-	if i16(s[0:]) != 0 or i16(s[2:]) != 2:
+	if not _accept(s):
 	    raise SyntaxError, "not an CUR file"
 
 	# pick the largest cursor in the file
@@ -76,6 +80,6 @@ class CurImageFile(BmpImagePlugin.BmpImageFile):
 #
 # --------------------------------------------------------------------
 
-Image.register_open("CUR", CurImageFile)
+Image.register_open("CUR", CurImageFile, _accept)
 
 Image.register_extension("CUR", ".cur")

@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: Pack.c,v 1.4 1996/11/07 12:11:30 fredrik Exp $
+ * $Id: Pack.c,v 1.5 1997/01/14 16:40:04 fl Exp $
  *
  * code to pack raw data
  *
@@ -8,6 +8,7 @@
  *	96-04-30 fl	Created
  *	96-05-12 fl	Published a few RGB packers
  *	96-11-01 fl	More RGB packers (Tk booster stuff)
+ *	96-12-30 fl	Added P;1, P;2 and P;4 packers
  *
  * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
  */
@@ -95,6 +96,44 @@ pack1IR(UINT8* out, const UINT8* in, int pixels)
     }
     if (m != 1)
 	*out++ = b;
+}
+
+static void
+packP4(UINT8* out, const UINT8* in, int pixels)
+{
+    while (pixels >= 2) {
+	*out++ = (in[0] << 4) |
+		 (in[1] & 15);
+	in += 2; pixels -= 2;
+    }
+
+    if (pixels)
+	out[0] = (in[0] << 4);
+}
+
+static void
+packP2(UINT8* out, const UINT8* in, int pixels)
+{
+    while (pixels >= 4) {
+	*out++ = (in[0] << 6) |
+		 ((in[1] & 3) << 4) |
+		 ((in[2] & 3) << 2) |
+		 (in[3] & 3);
+	in += 4; pixels -= 4;
+    }
+
+    switch (pixels) {
+    case 3:
+	out[0] = (in[0] << 6) |
+		 ((in[1] & 3) << 4) |
+		 ((in[2] & 3) << 2);
+	break;
+    case 2:
+	out[0] = (in[0] << 6) |
+		 ((in[1] & 3) << 4);
+    case 1:
+	out[0] = (in[0] << 6);
+    }
 }
 
 void
@@ -188,6 +227,9 @@ static struct {
     {"L",   	8,	(ImagingShuffler) memcpy},
 
     /* palette */
+    {"P;1",	1,	pack1},
+    {"P;2",	2,	packP2},
+    {"P;4",	4,	packP4},
     {"P",	8,	(ImagingShuffler) memcpy},
 
     /* true colour */

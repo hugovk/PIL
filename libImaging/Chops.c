@@ -1,6 +1,6 @@
 /* 
  * The Python Imaging Library
- * $Id: Chops.c,v 1.7 1996/12/16 18:51:03 fl Exp fl $
+ * $Id: Chops.c,v 1.7 1996/12/16 18:51:03 fl Exp $
  *
  * basic channel operations
  *

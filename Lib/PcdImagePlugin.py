@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: PcdImagePlugin.py,v 1.3 1996/11/10 17:52:14 fredrik Exp $
+# $Id: PcdImagePlugin.py,v 1.4 1997/01/14 16:38:36 fl Exp $
 #
 # PCD file handling
 #
@@ -60,6 +60,9 @@ class PcdImageFile(ImageFile.ImageFile):
 	self.tile = [(d, e, o, a)]
 
 	return self
+
+#
+# registry
 
 Image.register_open("PCD", PcdImageFile)
 

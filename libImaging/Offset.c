@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library
- * $Id: Offset.c,v 1.3 1996/12/16 18:51:03 fl Exp fl $
+ * $Id: Offset.c,v 1.3 1996/12/16 18:51:03 fl Exp $
  *
  * offset an image in x and y directions
  *

@@ -1,20 +1,22 @@
 #
 # The Python Imaging Library.
-# $Id: ImImagePlugin.py,v 1.3 1996/12/16 18:50:23 fl Exp fl $
+# $Id: ImImagePlugin.py,v 1.4 1997/01/14 16:38:36 fl Exp $
 #
 # Restricted IFUNC IM file handling for PIL
 #
 # history:
 #	95-09-01 fl	Created.  
+#	97-01-03 fl	Save palette images
+#	97-01-08 fl	Added sequence support
 #
-# Copyright (c) Fredrik Lundh 1995.  All rights reserved.
+# Copyright (c) Fredrik Lundh 1995-97.  All rights reserved.
 #
 
 
-__version__ = "0.1"
+__version__ = "0.2"
 
 import regex, string
-import Image, ImageFile
+import Image, ImageFile, ImagePalette
 
 
 # --------------------------------------------------------------------
@@ -53,6 +55,13 @@ class ImImageFile(ImageFile.ImageFile):
 
     def _open(self):
 
+	# Quick rejection: if there's not a LF among the first
+	# 100 bytes, this is (probably) not a text header.
+
+	if not "\n" in self.fp.read(100):
+	    raise SyntaxError, "not an IM file"
+	self.fp.seek(0)
+
 	n = 0
 
 	# Default values
@@ -71,6 +80,7 @@ class ImImageFile(ImageFile.ImageFile):
 	    if not s or s[0] == chr(0) or s[0] == chr(26):
 		break
 
+	    # FIXME: risky; may read whole file if not a text file
 	    s = s + self.fp.readline()
 
 	    if len(s) > 100:
@@ -135,35 +145,71 @@ class ImImageFile(ImageFile.ImageFile):
 	    return
 
 	if self.info.has_key(LUT):
-	    self.palette = "RGB;L", self.fp.read(768)
+	    self.palette = ImagePalette.raw("RGB;L", self.fp.read(768))
 	    if self.mode == "L":
 		self.mode = "P"
 
-	offset = self.fp.tell()
+	self.frame = 0
+	self.rawmode = rawmode
+
+	self.offset = offs = self.fp.tell()
+
+	self.fp2 = self.fp # FIXME: hack
 
 	if rawmode in ["RGB;T", "RYB;T"]:
-	    # Old LabEye files.  Would be very surprised if anyone
-	    # would ever stumble upon such a file...
+	    # Old LabEye/3PC files.  Would be very surprised if anyone
+	    # ever stumbled upon such a file ;-)
 	    size = self.size[0] * self.size[1]
-	    self.tile = [("raw", (0,0)+self.size, offset, ("G", 0, -1)),
-			 ("raw", (0,0)+self.size, offset+size, ("R", 0, -1)),
-			 ("raw", (0,0)+self.size, offset+2*size, ("B", 0, -1))]
+	    self.tile = [("raw", (0,0)+self.size, offs, ("G", 0, -1)),
+			 ("raw", (0,0)+self.size, offs+size, ("R", 0, -1)),
+			 ("raw", (0,0)+self.size, offs+2*size, ("B", 0, -1))]
 	else:
-	    self.tile = [("raw", (0,0)+self.size, offset, (rawmode, 0, -1))]
+	    # LabEye/IFUNC files
+	    self.tile = [("raw", (0,0)+self.size, offs, (rawmode, 0, -1))]
+
+    def seek(self, frame):
+	
+	if frame < 0 or frame >= self.info[FRAMES]:
+	    raise EOFError, "seek outside sequence"
+
+	if self.frame == frame:
+	    return
+
+	self.frame = frame
+
+	if self.mode == "1":
+	    bits = 1
+	else:
+	    bits = 8 * len(self.mode)
+
+	size = ((self.size[0] * bits + 7) / 8) * self.size[1]
+	offs = self.offset + frame * size
+
+	self.fp = self.fp2
+
+	self.tile = [("raw", (0,0)+self.size, offs, (self.rawmode, 0, -1))]
+
+    def tell(self):
+	
+	return self.frame
 
 #
 # --------------------------------------------------------------------
 # Save IM files
 
 def _save(im, fp, filename):
-    if im.mode != "L":
-	raise ValueError, "Can only save greyscale images"
+    if im.mode not in ["L", "P"]:
+	raise ValueError, "Cannot save %s images as IM" % im.mode
 
     fp.write("Image type: Greyscale image\r\n")
     fp.write("Name: %s\r\n" % filename)
     fp.write("Image size (x*y): %d*%d\r\n" % im.size)
     fp.write("File size (no of images): 1\r\n")
+    if im.mode == "P":
+	fp.write("Lut: 1\r\n")
     fp.write("\000" * (511-fp.tell()) + "\032")
+    if im.mode == "P":
+	fp.write(im.im.getpalette("RGB;L")) # 768 bytes, line-interleaved
     ImageFile._save(im, fp, [("raw", (0,0)+im.size, 0, ("L", 0, -1))])
 
 #

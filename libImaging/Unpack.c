@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: Unpack.c,v 1.8 1996/12/16 18:51:03 fl Exp fl $
+ * $Id: Unpack.c,v 1.9 1997/01/14 16:40:04 fl Exp $
  *
  * code to unpack raw data from various file formats
  *
@@ -10,6 +10,8 @@
  *	96-05-12 fl	Published RGB unpackers
  *	96-05-27 fl	Added nibble unpacker
  *	96-12-10 fl	Added complete set of PNG unpackers
+ *	96-12-29 fl	Set alpha byte in RGB unpackers
+ *	97-01-05 fl	Added remaining TGA unpackers
  *
  * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
  */
@@ -228,6 +230,38 @@ unpackP4(UINT8* out, const UINT8* in, int pixels)
     }
 }
 
+static void
+unpackP2L(UINT8* out, const UINT8* in, int pixels)
+{
+    int i, j, m, s;
+    /* bit layers */
+    m = 128;
+    s = (pixels+7)/8;
+    for (i = j = 0; i < pixels; i++) {
+	out[i] = ((in[j] & m) ? 1 : 0) + ((in[j + s] & m) ? 2 : 0);
+	if ((m >>= 1) == 0) {
+	    m = 128;
+	    j++;
+	}
+    }
+}
+
+static void
+unpackP4L(UINT8* out, const UINT8* in, int pixels)
+{
+    int i, j, m, s;
+    /* bit layers (trust the optimizer ;-) */
+    m = 128;
+    s = (pixels+7)/8;
+    for (i = j = 0; i < pixels; i++) {
+	out[i] = ((in[j] & m) ? 1 : 0) + ((in[j + s] & m) ? 2 : 0) +
+		 ((in[j + 2*s] & m) ? 4 : 0) + ((in[j + 3*s] & m) ? 8 : 0);
+	if ((m >>= 1) == 0) {
+	    m = 128;
+	    j++;
+	}
+    }
+}
 
 /* Unpack to "RGB" image */
 
@@ -240,6 +274,7 @@ ImagingUnpackRGB(UINT8* out, const UINT8* in, int pixels)
 	out[R] = in[0];
 	out[G] = in[1];
 	out[B] = in[2];
+	out[A] = 255;
 	out += 4; in += 3;
     }
 }
@@ -253,6 +288,7 @@ unpackRGB16B(UINT8* out, const UINT8* in, int pixels)
 	out[R] = in[0];
 	out[G] = in[2];
 	out[B] = in[4];
+	out[A] = 255;
 	out += 4; in += 6;
     }
 }
@@ -266,6 +302,7 @@ unpackRGBL(UINT8* out, const UINT8* in, int pixels)
 	out[R] = in[i];
 	out[G] = in[i+pixels];
 	out[B] = in[i+pixels+pixels];
+	out[A] = 255;
 	out += 4;
     }
 }
@@ -280,7 +317,23 @@ ImagingUnpackBGR(UINT8* out, const UINT8* in, int pixels)
 	out[R] = in[2];
 	out[G] = in[1];
 	out[B] = in[0];
+	out[A] = 255;
 	out += 4; in += 3;
+    }
+}
+
+void
+ImagingUnpackBGR5(UINT8* out, const UINT8* in, int pixels)
+{
+    int i, pixel;
+    /* RGB, reversed bytes, 5 bits per pixel */
+    for (i = 0; i < pixels; i++) {
+	pixel = in[0] + (in[1] << 8);
+	out[B] = (pixel & 31) * 255 / 31;
+	out[G] = ((pixel>>5) & 31) * 255 / 31;
+	out[R] = ((pixel>>10) & 31) * 255 / 31;
+	out[A] = 255;
+	out += 4; in += 2;
     }
 }
 
@@ -293,6 +346,7 @@ ImagingUnpackBGRX(UINT8* out, const UINT8* in, int pixels)
 	out[R] = in[2];
 	out[G] = in[1];
 	out[B] = in[0];
+	out[A] = 255;
 	out += 4; in += 4;
     }
 }
@@ -443,7 +497,9 @@ static struct {
     /* palette */
     {"P;1",   	1,	unpackP1},
     {"P;2",   	2,	unpackP2},
+    {"P;2L",   	2,	unpackP2L},
     {"P;4",   	4,	unpackP4},
+    {"P;4L",   	4,	unpackP4L},
     {"P",	8,	(ImagingShuffler) memcpy},
 
     /* true colour */
@@ -453,6 +509,7 @@ static struct {
     {"RGB;L",	24,	unpackRGBL},
     {"BGR",	24,	ImagingUnpackBGR},
     {"BGRX",	32,	ImagingUnpackBGRX},
+    {"BGR;5",	16,	ImagingUnpackBGR5},
     {"R",   	8,	band0},
     {"G",   	8,	band1},
     {"B",   	8,	band2},

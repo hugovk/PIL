@@ -48,9 +48,10 @@ OBJS=		Storage.o Except.o \
 		GetBBox.o Histo.o Matrix.o Negative.o Offset.o \
 		Pack.o Palette.o Paste.o Point.o \
 		Quantize.o String.o Unpack.o \
-		EpsEncode.o GifDecode.o HexDecode.o JpegDecode.o JpegEncode.o \
-		LzwDecode.o PackDecode.o PcdDecode.o PcxDecode.o \
-		RawDecode.o RawEncode.o XbmDecode.o XbmEncode.o ZipDecode.o
+		EpsEncode.o FliDecode.o GifDecode.o GifEncode.o HexDecode.o \
+		JpegDecode.o JpegEncode.o LzwDecode.o MspDecode.o PackDecode.o\
+		PcdDecode.o PcxDecode.o RawDecode.o RawEncode.o SunRleDecode.o\
+		TgaRleDecode.o XbmDecode.o XbmEncode.o ZipDecode.o ZipEncode.o
 
 SRCS=		Storage.c Except.c \
 		Bands.c Blend.c Chops.c Convert.c Copy.c Crop.c \
@@ -58,9 +59,10 @@ SRCS=		Storage.c Except.c \
 		GetBBox.c Histo.c Matrix.c Negative.c Offset.c \
 		Pack.c Palette.c Paste.c Point.c \
 		Quantize.c String.c Unpack.c \
-		EpsEncode.c GifDecode.c HexDecode.c JpegDecode.c JpegEncode.c \
-		LzwDecode.c PackDecode.c PcdDecode.c PcxDecode.c \
-		RawDecode.c RawEncode.c XbmDecode.c XbmEncode.c ZipDecode.c
+		EpsEncode.c FliDecode.c GifDecode.c GifEncode.c HexDecode.c \
+		JpegDecode.c JpegEncode.c LzwDecode.c MspDecode.c PackDecode.c\
+		PcdDecode.c PcxDecode.c RawDecode.c RawEncode.c SunRleDecode.c\
+		TgaRleDecode.c XbmDecode.c XbmEncode.c ZipDecode.c ZipEncode.o
 
 LIB=		libImaging.a
 

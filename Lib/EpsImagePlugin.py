@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: EpsImagePlugin.py,v 1.7 1996/11/10 17:52:14 fredrik Exp $
+# $Id: EpsImagePlugin.py,v 1.8 1997/01/14 16:38:36 fl Exp $
 #
 # EPS file handling
 #
@@ -25,6 +25,9 @@ import Image, ImageFile
 
 def i32(c):
     return ord(c[0]) + (ord(c[1])<<8) + (ord(c[2])<<16) + (ord(c[3])<<24)
+
+def o32(i):
+    return chr(i&255) + chr(i>>8&255) + chr(i>>16&255) + chr(i>>24&255)
 
 split = regex.compile("^%%\([^:]*\):[ \t]*\(.*\)[ \t]*$")
 field = regex.compile("^%[%!]\([^:]*\)[ \t]*$")
@@ -88,6 +91,10 @@ class PSFile:
 	    s = s + c
 	    c = self.fp.read(1)
 	return s + "\n"
+
+
+def _accept(prefix):
+    return prefix[:4] == "%!PS" or i32(prefix) == 0xC6D3D0C5
 
 
 class EpsImageFile(ImageFile.ImageFile):
@@ -292,7 +299,8 @@ def _save(im, fp, filename, eps=1):
 #
 # --------------------------------------------------------------------
 
-Image.register_open(EpsImageFile.format, EpsImageFile)
+Image.register_open(EpsImageFile.format, EpsImageFile, _accept)
+
 Image.register_save(EpsImageFile.format, _save)
 
 Image.register_extension(EpsImageFile.format, ".ps")

@@ -1,4 +1,4 @@
-/* $Id: _imagingmodule.c,v 1.9 1996/12/16 18:50:08 fl Exp fl $
+/* $Id: _imagingmodule.c,v 1.10 1997/01/14 16:40:31 fl Exp $
  *
  * The Python Imaging Library.
  *
@@ -24,10 +24,14 @@
  *	96-09-06 fl	Added putdata methods, use abstract interface
  *	96-11-01 fl	Added xbm encoder
  *	96-11-04 fl	Added experimental path stuff, draw_lines, etc
- *	96-12-10 fl	Added crc32 interface
+ *	96-12-10 fl	Added zip decoder, crc32 interface
  *	96-12-14 fl	Added modulo arithmetics
+ *	96-12-29 fl	Added zip encoder
+ *	96-01-03 fl	Added fli and msp decoders
+ *	96-01-04 fl	Added experimental sun_rle and tga_rle decoders
+ *	96-01-05 fl	Added gif encoder, getpalette hack
  *
- * Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1995-97.  All rights reserved.
  */
 
 
@@ -38,9 +42,12 @@
 
 #define WITH_CHOPS
 #define	WITH_GRAPHICS
+#define	WITH_LZW
 #define	WITH_PATH
 #define	WITH_STRING
 #define	WITH_DEBUG
+
+#undef	VERBOSE
 
 
 /* -------------------------------------------------------------------- */
@@ -68,6 +75,10 @@ PyImagingNew(Imaging imOut)
 	return NULL;
     }
 
+#ifdef VERBOSE
+    printf("imaging %p allocated\n", imagep);
+#endif
+
     imagep->image = imOut;
 
     return (PyObject*) imagep;
@@ -76,6 +87,11 @@ PyImagingNew(Imaging imOut)
 static void
 _dealloc(ImagingObject* imagep)
 {
+
+#ifdef VERBOSE
+    printf("imaging %p deleted\n", imagep);
+#endif
+
     ImagingDelete(imagep->image);
     PyMem_DEL(imagep);
 }
@@ -88,6 +104,7 @@ Imaging PyImaging_AsImaging(PyObject *op)
 	PyErr_BadInternalCall();
 	return NULL;
     }
+
     return ((ImagingObject *)op)->image;
 }
 
@@ -137,6 +154,7 @@ _fill(PyObject* self, PyObject* args)
     char* mode;
     int xsize, ysize;
     int colour;
+    char buffer[4];
 
     xsize = ysize = 256;
     colour = 0;
@@ -144,7 +162,13 @@ _fill(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "s|(ii)i", &mode, &xsize, &ysize, &colour))
 	return NULL;
 
-    return PyImagingNew(ImagingFill(mode, xsize, ysize, &colour));
+    /* Unpack integer value (note the order for multilayer images: ABGR)*/
+    buffer[0] = (UINT8) colour;
+    buffer[1] = (UINT8) (colour >> 8);
+    buffer[2] = (UINT8) (colour >> 16);
+    buffer[3] = (UINT8) (colour >> 24);
+
+    return PyImagingNew(ImagingFill(mode, xsize, ysize, buffer));
 }
 
 static PyObject* 
@@ -335,6 +359,39 @@ _filter(ImagingObject* self, PyObject* args)
     }
 
     return PyImagingNew(im);
+}
+
+static PyObject* 
+_getpalette(ImagingObject* self, PyObject* args)
+{
+    char* rawmode = "RGB";
+    PyObject* palette;
+    int palettesize = 256;
+    int bits;
+    ImagingShuffler pack;
+
+    if (!PyArg_ParseTuple(args, "|s", &rawmode))
+	return NULL;
+
+    if (!self->image->palette) {
+	PyErr_SetString(PyExc_ValueError, "");
+	return NULL;
+    }
+
+    pack = ImagingFindPacker(rawmode, &bits);
+    if (!pack) {
+	PyErr_SetString(PyExc_ValueError, "unknown raw mode");
+	return NULL;
+    }
+
+    palette = PyString_FromStringAndSize(NULL, palettesize * bits / 8);
+    if (!palette)
+	return NULL;
+
+    pack((UINT8*) PyString_AsString(palette),
+	 self->image->palette->palette, palettesize);
+
+    return palette;
 }
 
 static PyObject*
@@ -667,6 +724,34 @@ _getbbox(ImagingObject* self, PyObject* args)
     }
 
     return Py_BuildValue("iiii", bbox[0], bbox[1], bbox[2], bbox[3]);
+}
+
+static PyObject* 
+_getprojection(ImagingObject* self, PyObject* args)
+{
+    char* xprofile;
+    char* yprofile;
+    PyObject* result;
+
+    xprofile = malloc(self->image->xsize);
+    yprofile = malloc(self->image->ysize);
+
+    if (xprofile == NULL || yprofile == NULL) {
+	free(xprofile);
+	free(yprofile);
+	PyErr_NoMemory();
+	return NULL;
+    }
+
+    ImagingGetProjection(self->image, xprofile, yprofile);
+
+    result = Py_BuildValue("s#s#", xprofile, self->image->xsize,
+			   yprofile, self->image->ysize);
+
+    free(xprofile);
+    free(yprofile);
+
+    return result;
 }
 
 /* -------------------------------------------------------------------- */
@@ -1131,10 +1216,12 @@ static struct PyMethodDef methods[] = {
     {"transpose", (PyCFunction)_transpose, 1},
 
     {"getbbox", (PyCFunction)_getbbox, 1},
+    {"getprojection", (PyCFunction)_getprojection, 1},
 
     {"getband", (PyCFunction)_getband, 1},
     {"putband", (PyCFunction)_putband, 1},
 
+    {"getpalette", (PyCFunction)_getpalette, 1},
     {"putpalette", (PyCFunction)_putpalette, 1},
 
 #ifdef WITH_CHOPS
@@ -1205,79 +1292,83 @@ _getattr(ImagingObject* self, char* name)
 static int
 image_length(ImagingObject *self)
 {
-	Imaging im = self->image;
+    Imaging im = self->image;
 
-	return im->xsize * im->ysize;
+    return im->xsize * im->ysize;
 }
 
 static PyObject *
 image_item(ImagingObject *self, int i)
 {
-	unsigned x, y;
-	UINT8 *p;
-	Imaging im = self->image;
+    unsigned x, y;
+    UINT8 *p;
+    Imaging im = self->image;
 
-	x = i % im->xsize;
-	y = i / im->ysize;
+    x = i % im->xsize;
+    y = i / im->xsize;
 
-	if (x >= im->xsize || y >= im->ysize) {
-	    PyErr_SetString(PyExc_IndexError, "image index out of range");
-	    return NULL;
-	}
+    if (x >= im->xsize || y >= im->ysize) {
+	PyErr_SetString(PyExc_IndexError, "image index out of range");
+	return NULL;
+    }
 
-	/* single layer */
-	if (im->image8)
-	    return Py_BuildValue("i", im->image8[y][x]);
+    /* single layer */
+    if (im->image8)
+	return Py_BuildValue("i", im->image8[y][x]);
 
-	/* multilayer */
-	p = (UINT8*) &im->image32[y][x];
-	if (im->bands == 3)
-	    return Py_BuildValue("iii", p[0], p[1], p[2]);
-	return Py_BuildValue("iiii", p[0], p[1], p[2], p[3]);
+    /* multilayer */
+    p = (UINT8*) &im->image32[y][x];
+    if (im->bands == 3)
+	return Py_BuildValue("iii", p[0], p[1], p[2]);
+    return Py_BuildValue("iiii", p[0], p[1], p[2], p[3]);
 }
 
 
 static PySequenceMethods image_as_sequence = {
-	(inquiry)image_length, /*sq_length*/
-	(binaryfunc)0, /*sq_concat*/
-	(intargfunc)0, /*sq_repeat*/
-	(intargfunc)image_item, /*sq_item*/
-	(intintargfunc)0, /*sq_slice*/
-	(intobjargproc)0, /*sq_ass_item*/
-	(intintobjargproc)0, /*sq_ass_slice*/
+    (inquiry)image_length, /*sq_length*/
+    (binaryfunc)0, /*sq_concat*/
+    (intargfunc)0, /*sq_repeat*/
+    (intargfunc)image_item, /*sq_item*/
+    (intintargfunc)0, /*sq_slice*/
+    (intobjargproc)0, /*sq_ass_item*/
+    (intintobjargproc)0, /*sq_ass_slice*/
 };
 
 
 /* type description */
 
 statichere PyTypeObject Imaging_Type = {
-	PyObject_HEAD_INIT(NULL)
-	0,				/*ob_size*/
-	"ImagingCore",			/*tp_name*/
-	sizeof(ImagingObject),		/*tp_size*/
-	0,				/*tp_itemsize*/
-	/* methods */
-	(destructor)_dealloc,		/*tp_dealloc*/
-	0,				/*tp_print*/
-	(getattrfunc)_getattr,		/*tp_getattr*/
-	0,				/*tp_setattr*/
-	0,				/*tp_compare*/
-	0,				/*tp_repr*/
-	0,                              /*tp_as_number */
-	&image_as_sequence,             /*tp_as_sequence */
-	0,                              /*tp_as_mapping */
-	0                               /*tp_hash */
+    PyObject_HEAD_INIT(NULL)
+    0,				/*ob_size*/
+    "ImagingCore",		/*tp_name*/
+    sizeof(ImagingObject),	/*tp_size*/
+    0,				/*tp_itemsize*/
+    /* methods */
+    (destructor)_dealloc,	/*tp_dealloc*/
+    0,				/*tp_print*/
+    (getattrfunc)_getattr,	/*tp_getattr*/
+    0,				/*tp_setattr*/
+    0,				/*tp_compare*/
+    0,				/*tp_repr*/
+    0,                          /*tp_as_number */
+    &image_as_sequence,         /*tp_as_sequence */
+    0,                          /*tp_as_mapping */
+    0                           /*tp_hash*/
 };
 
 /* Decoders (in decode.c) */
+extern PyObject* PyImaging_FliDecoderNew(PyObject* self, PyObject* args);
 extern PyObject* PyImaging_GifDecoderNew(PyObject* self, PyObject* args);
 extern PyObject* PyImaging_HexDecoderNew(PyObject* self, PyObject* args);
 extern PyObject* PyImaging_JpegDecoderNew(PyObject* self, PyObject* args);
-extern PyObject* PyImaging_LzwDecoderNew(PyObject* self, PyObject* args);
+extern PyObject* PyImaging_TiffLzwDecoderNew(PyObject* self, PyObject* args);
+extern PyObject* PyImaging_MspDecoderNew(PyObject* self, PyObject* args);
 extern PyObject* PyImaging_PackbitsDecoderNew(PyObject* self, PyObject* args);
 extern PyObject* PyImaging_PcdDecoderNew(PyObject* self, PyObject* args);
 extern PyObject* PyImaging_PcxDecoderNew(PyObject* self, PyObject* args);
 extern PyObject* PyImaging_RawDecoderNew(PyObject* self, PyObject* args);
+extern PyObject* PyImaging_SunRleDecoderNew(PyObject* self, PyObject* args);
+extern PyObject* PyImaging_TgaRleDecoderNew(PyObject* self, PyObject* args);
 extern PyObject* PyImaging_XbmDecoderNew(PyObject* self, PyObject* args);
 extern PyObject* PyImaging_ZipDecoderNew(PyObject* self, PyObject* args);
 
@@ -1287,6 +1378,7 @@ extern PyObject* PyImaging_GifEncoderNew(PyObject* self, PyObject* args);
 extern PyObject* PyImaging_JpegEncoderNew(PyObject* self, PyObject* args);
 extern PyObject* PyImaging_RawEncoderNew(PyObject* self, PyObject* args);
 extern PyObject* PyImaging_XbmEncoderNew(PyObject* self, PyObject* args);
+extern PyObject* PyImaging_ZipEncoderNew(PyObject* self, PyObject* args);
 
 /* Display support (in display.c) */
 extern PyObject* PyImaging_DisplayWin32(PyObject* self, PyObject* args);
@@ -1306,22 +1398,32 @@ static PyMethodDef functions[] = {
 
     /* Codecs */
     {"eps_encoder", (PyCFunction)PyImaging_EpsEncoderNew, 1},
+    {"fli_decoder", (PyCFunction)PyImaging_FliDecoderNew, 1},
+#ifdef WITH_LZW
     {"gif_decoder", (PyCFunction)PyImaging_GifDecoderNew, 1},
+#endif
+    {"gif_encoder", (PyCFunction)PyImaging_GifEncoderNew, 1},
     {"hex_decoder", (PyCFunction)PyImaging_HexDecoderNew, 1},
 #ifdef HAVE_LIBJPEG
     {"jpeg_decoder", (PyCFunction)PyImaging_JpegDecoderNew, 1},
     {"jpeg_encoder", (PyCFunction)PyImaging_JpegEncoderNew, 1},
 #endif
-    {"lzw_decoder", (PyCFunction)PyImaging_LzwDecoderNew, 1},
+#ifdef WITH_LZW
+    {"tiff_lzw_decoder", (PyCFunction)PyImaging_TiffLzwDecoderNew, 1},
+#endif
+    {"msp_decoder", (PyCFunction)PyImaging_MspDecoderNew, 1},
     {"packbits_decoder", (PyCFunction)PyImaging_PackbitsDecoderNew, 1},
     {"pcd_decoder", (PyCFunction)PyImaging_PcdDecoderNew, 1},
     {"pcx_decoder", (PyCFunction)PyImaging_PcxDecoderNew, 1},
     {"raw_decoder", (PyCFunction)PyImaging_RawDecoderNew, 1},
     {"raw_encoder", (PyCFunction)PyImaging_RawEncoderNew, 1},
+    {"sun_rle_decoder", (PyCFunction)PyImaging_SunRleDecoderNew, 1},
+    {"tga_rle_decoder", (PyCFunction)PyImaging_TgaRleDecoderNew, 1},
     {"xbm_decoder", (PyCFunction)PyImaging_XbmDecoderNew, 1},
     {"xbm_encoder", (PyCFunction)PyImaging_XbmEncoderNew, 1},
 #ifdef HAVE_LIBZ
     {"zip_decoder", (PyCFunction)PyImaging_ZipDecoderNew, 1},
+    {"zip_encoder", (PyCFunction)PyImaging_ZipEncoderNew, 1},
 #endif
 
     /* Display support */
@@ -1353,5 +1455,8 @@ static PyMethodDef functions[] = {
 void
 init_imaging()
 {
+    /* Patch object type */
+    Imaging_Type.ob_type = &PyType_Type;
+
     Py_InitModule("_imaging", functions);
 }
