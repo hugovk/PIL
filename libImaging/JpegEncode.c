@@ -1,0 +1,169 @@
+/*
+ * The Python Imaging Library.
+ * $Id: JpegEncode.c,v 1.4 1996/12/16 18:51:03 fl Exp fl $
+ *
+ * coder for JPEG data
+ *
+ * history:
+ *	96-05-06 fl	created
+ *	96-07-16 fl	don't drop last block of encoded data
+ *
+ * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ */
+
+
+#include "Imaging.h"
+
+#ifdef	HAVE_LIBJPEG
+
+#undef HAVE_PROTOTYPES 
+#undef HAVE_STDLIB_H 
+#undef UINT8
+#undef UINT16
+#undef UINT32
+#undef INT16
+#undef INT32
+
+#include "Jpeg.h"
+
+/* -------------------------------------------------------------------- */
+/* Suspending output handler						*/
+/* -------------------------------------------------------------------- */
+
+METHODDEF void
+stub(j_compress_ptr cinfo)
+{
+    /* empty */
+}
+
+METHODDEF boolean
+empty_output_buffer (j_compress_ptr cinfo)
+{
+    /* Suspension */
+    return FALSE;
+}
+
+GLOBAL void
+jpeg_buffer_dest(j_compress_ptr cinfo, JPEGDESTINATION* destination)
+{
+    cinfo->dest = (void*) destination;
+
+    destination->pub.init_destination = stub;
+    destination->pub.empty_output_buffer = empty_output_buffer;
+    destination->pub.term_destination = stub;
+}
+
+
+/* -------------------------------------------------------------------- */
+/* Error handler							*/
+/* -------------------------------------------------------------------- */
+
+METHODDEF void
+error(j_common_ptr cinfo)
+{
+  JPEGERROR* error;
+  error = (JPEGERROR*) cinfo->err;
+  (*cinfo->err->output_message) (cinfo);
+  longjmp(error->setjmp_buffer, 1);
+}
+
+
+/* -------------------------------------------------------------------- */
+/* Encoder								*/
+/* -------------------------------------------------------------------- */
+
+int
+ImagingJpegEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
+{
+    JPEGENCODERSTATE* context = (JPEGENCODERSTATE*) state->context;
+    int ok;
+
+    if (setjmp(context->error.setjmp_buffer)) {
+	/* JPEG error handler */
+	jpeg_destroy_compress(&context->cinfo);
+	state->errcode = IMAGING_CODEC_BROKEN;
+	return -1;
+    }
+
+    if (!state->state) {
+
+	/* Setup compression context (very similar to the decoder) */
+	context->cinfo.err = jpeg_std_error(&context->error.pub);
+	context->error.pub.error_exit = error;
+	jpeg_create_compress(&context->cinfo);
+	jpeg_buffer_dest(&context->cinfo, &context->destination);
+
+	/* Ready to encode */
+	state->state = 1;
+
+    }
+
+    /* Load the destination buffer */
+    context->destination.pub.next_output_byte = buf;
+    context->destination.pub.free_in_buffer = bytes;
+
+    switch (state->state) {
+
+      case 1:
+
+	context->cinfo.image_width = state->xsize;
+	context->cinfo.image_height = state->ysize;
+	switch (state->bits) {
+	  case 8:
+	    context->cinfo.input_components = 1;
+	    context->cinfo.in_color_space = JCS_GRAYSCALE;
+	    break;
+	  case 24:
+	    context->cinfo.input_components = 3;
+	    context->cinfo.in_color_space = JCS_RGB;
+	    break;
+	  case 32:
+	    context->cinfo.input_components = 4;
+	    context->cinfo.in_color_space = JCS_CMYK;
+	    break;
+	  default:
+	    state->errcode = IMAGING_CODEC_CONFIG;
+	    return -1;
+	}
+	jpeg_set_defaults(&context->cinfo);
+	jpeg_start_compress(&context->cinfo, TRUE);
+	state->state++;
+	/* fall through */
+
+      case 2:
+	ok = 1;
+	while (state->y < state->ysize) {
+	    state->shuffle(state->buffer,
+			   (UINT8*) im->image[state->y + state->yoff] +
+			   state->xoff * im->pixelsize, state->xsize);
+	    ok = jpeg_write_scanlines(&context->cinfo, &state->buffer, 1);
+	    if (ok != 1)
+		break;
+	    state->y++;
+	}
+
+	if (ok != 1)
+	    break;
+	state->state++;
+	/* fall through */
+
+      case 3:
+	/* Finish compression */
+	if (context->destination.pub.free_in_buffer < 100)
+	    break;
+	jpeg_finish_compress(&context->cinfo);
+
+	/* Clean up */
+	jpeg_destroy_compress(&context->cinfo);
+	/* if (jerr.pub.num_warnings) return BROKEN; */
+	state->errcode = IMAGING_CODEC_END;
+	break;
+
+    }
+
+    /* Return number of bytes in output buffer */
+    return context->destination.pub.next_output_byte - buf;
+
+}
+
+#endif

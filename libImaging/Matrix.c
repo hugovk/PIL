@@ -1,0 +1,71 @@
+/*
+ * The Python Imaging Library
+ * $Id: Matrix.c,v 1.3 1996/12/16 18:51:03 fl Exp fl $
+ *
+ * colour and luminance matrix transforms
+ *
+ * history:
+ *	96-05-18 fl:	created (brute force implementation)
+ *
+ * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ */
+
+
+#include "Imaging.h"
+
+
+#define	CLIP(v)	    ((v <= 0) ? 0 : (v >= 255) ? 255 : v)
+
+
+Imaging
+ImagingConvertMatrix(Imaging im, const char *mode, float m[])
+{
+    Imaging imOut;
+    unsigned x, y;
+
+    /* Assume there's enough data in the buffer */
+    if (!im)
+	return (Imaging) ImagingError_Argument(NULL);
+
+    if (strcmp(mode, "L") == 0 && im->bands == 3) {
+
+	imOut = ImagingNew("L", im->xsize, im->ysize);
+	if (!imOut)
+	    return NULL;
+
+	for (y = 0; y < im->ysize; y++) {
+	    UINT8* in = (UINT8*) im->image[y];
+	    UINT8* out = (UINT8*) imOut->image[y];
+
+	    for (x = 0; x < im->xsize; x++) {
+		int v = m[0]*in[0] + m[1]*in[1] + m[2]*in[2] + m[3];
+		out[x] = CLIP(v);
+		in += 4;
+	    }
+	}
+
+    } else if (strlen(mode) == 3 && im->bands == 3) {
+
+	imOut = ImagingNew(mode, im->xsize, im->ysize);
+	if (!imOut)
+	    return NULL;
+
+	for (y = 0; y < im->ysize; y++) {
+	    UINT8* in = (UINT8*) im->image[y];
+	    UINT8* out = (UINT8*) imOut->image[y];
+
+	    for (x = 0; x < im->xsize; x++) {
+		int v0 = m[0]*in[0] + m[1]*in[1] +  m[2]*in[2] +  m[3];
+		int v1 = m[4]*in[0] + m[5]*in[1] +  m[6]*in[2] +  m[7];
+		int v2 = m[8]*in[0] + m[9]*in[1] + m[10]*in[2] + m[11];
+		out[0] = CLIP(v0);
+		out[1] = CLIP(v1);
+		out[2] = CLIP(v2);
+		in += 4; out += 4;
+	    }
+	}
+    } else
+	return (Imaging) ImagingError_Argument("bad mode");
+
+    return imOut;
+}

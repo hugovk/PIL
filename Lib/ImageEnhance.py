@@ -1,0 +1,46 @@
+#
+# The Python Imaging Library.
+# $Id: ImageEnhance.py,v 1.4 1996/11/10 17:52:14 fredrik Exp $
+#
+# image enhancement classes
+#
+# For a background, see "Image Processing By Interpolation and
+# Extrapolation", Paul Haeberli and Douglas Voorhies.  Available
+# at http://www.sgi.com/grafica/interp/index.html
+#
+# History:
+#	96-03-23 fl	Created
+#
+# Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+#
+
+import Image, ImageFilter
+
+class _Enhance:
+    def enhance(self, alpha):
+	return Image.blend(self.degenerate, self.image, alpha)
+
+class Color(_Enhance):
+    "Adjust image colour balance"
+    def __init__(self, image):
+	self.image = image
+	self.degenerate = image.convert("L").convert(image.mode)
+
+class Contrast(_Enhance):
+    "Adjust image contrast"
+    def __init__(self, image):
+	self.image = image
+	mean = reduce(lambda a,b: a+b, image.convert("L").histogram())/256.0
+	self.degenerate = Image.new("L", image.size, mean).convert(image.mode)
+
+class Brightness(_Enhance):
+    "Adjust image brightness"
+    def __init__(self, image):
+	self.image = image
+	self.degenerate = Image.new(image.mode, image.size, 0)
+
+class Sharpness(_Enhance):
+    "Adjust image sharpness"
+    def __init__(self, image):
+	self.image = image
+	self.degenerate = image.filter(ImageFilter.SMOOTH)

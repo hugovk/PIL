@@ -1,0 +1,205 @@
+/*
+ * The Python Imaging Library.
+ * $Id: JpegDecode.c,v 1.5 1996/12/16 18:51:03 fl Exp fl $
+ *
+ * decoder for JPEG image data.
+ *
+ * history:
+ *	96-05-02 fl	Created
+ *	96-05-05 fl	Handle small JPEG files correctly
+ *	96-05-28 fl	Added draft support
+ *
+ * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ */
+
+
+#include "Imaging.h"
+
+#ifdef	HAVE_LIBJPEG
+
+#undef HAVE_PROTOTYPES 
+#undef HAVE_STDLIB_H 
+#undef UINT8
+#undef UINT16
+#undef UINT32
+#undef INT16
+#undef INT32
+
+#include "Jpeg.h"
+
+
+/* -------------------------------------------------------------------- */
+/* Suspending input handler						*/
+/* -------------------------------------------------------------------- */
+
+METHODDEF void
+stub(j_decompress_ptr cinfo)
+{
+    /* empty */
+}
+
+METHODDEF boolean
+fill_input_buffer(j_decompress_ptr cinfo)
+{
+    /* Suspension */
+    return FALSE;
+}
+
+METHODDEF void
+skip_input_data(j_decompress_ptr cinfo, long num_bytes)
+{
+    JPEGSOURCE* source = (JPEGSOURCE*) cinfo->src;
+
+    if (num_bytes > source->pub.bytes_in_buffer) {
+	/* We need to skip more data than we have in the buffer.
+	   This will force the JPEG library to suspend decoding. */
+	source->skip = num_bytes - source->pub.bytes_in_buffer;
+	source->pub.next_input_byte += source->pub.bytes_in_buffer;
+	source->pub.bytes_in_buffer = 0;
+    } else {
+	/* Skip portion of the buffer */
+	source->pub.bytes_in_buffer -= num_bytes;
+	source->pub.next_input_byte += num_bytes;
+	source->skip = 0;
+    }
+}
+
+
+GLOBAL void
+jpeg_buffer_src(j_decompress_ptr cinfo, JPEGSOURCE* source)
+{
+  cinfo->src = (void*) source;
+
+  /* Prepare for suspending reader */
+  source->pub.init_source = stub;
+  source->pub.fill_input_buffer = fill_input_buffer;
+  source->pub.skip_input_data = skip_input_data;
+  source->pub.resync_to_restart = jpeg_resync_to_restart;
+  source->pub.term_source = stub;
+  source->pub.bytes_in_buffer = 0; /* forces fill_input_buffer on first read */
+
+  source->skip = 0;
+}
+
+
+/* -------------------------------------------------------------------- */
+/* Error handler							*/
+/* -------------------------------------------------------------------- */
+
+METHODDEF void
+error(j_common_ptr cinfo)
+{
+  JPEGERROR* error;
+  error = (JPEGERROR*) cinfo->err;
+  /*(*cinfo->err->output_message) (cinfo);*/
+  longjmp(error->setjmp_buffer, 1);
+}
+
+
+/* -------------------------------------------------------------------- */
+/* Decoder								*/
+/* -------------------------------------------------------------------- */
+
+int
+ImagingJpegDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
+{
+    JPEGSTATE* context = (JPEGSTATE*) state->context;
+    int ok;
+
+    if (setjmp(context->error.setjmp_buffer)) {
+	/* JPEG error handler */
+	jpeg_destroy_decompress(&context->cinfo);
+	state->errcode = IMAGING_CODEC_BROKEN;
+	return -1;
+    }
+
+    if (!state->state) {
+
+	/* Setup decompression context */
+	context->cinfo.err = jpeg_std_error(&context->error.pub);
+	context->error.pub.error_exit = error;
+	jpeg_create_decompress(&context->cinfo);
+	jpeg_buffer_src(&context->cinfo, &context->source);
+
+	/* Ready to decode */
+	state->state = 1;
+
+    }
+
+    /* Load the source buffer */
+    context->source.pub.next_input_byte = buf;
+    context->source.pub.bytes_in_buffer = bytes;
+
+    if (context->source.skip > 0) {
+	/* There's more data to skip */
+	skip_input_data(&context->cinfo, context->source.skip);
+	if (context->source.skip > 0)
+	    return context->source.pub.next_input_byte - buf; 
+    }
+
+    switch (state->state) {
+
+      case 1:
+	/* Read JPEG header, until we find an image body. */
+	ok = jpeg_read_header(&context->cinfo, FALSE);
+	if (ok == JPEG_SUSPENDED || ok == JPEG_HEADER_TABLES_ONLY)
+	    break;
+	/* Decoder settings */
+	if (strcmp(context->rawmode, "L") == 0)
+	    context->cinfo.out_color_space = JCS_GRAYSCALE;
+	else if (strcmp(context->rawmode, "RGB") == 0)
+	    context->cinfo.out_color_space = JCS_RGB;
+	else if (strcmp(context->rawmode, "YCC") == 0)
+	    context->cinfo.out_color_space = JCS_YCbCr;
+	else if (strcmp(context->rawmode, "CMYK") == 0)
+	    context->cinfo.out_color_space = JCS_CMYK;
+	else if (strcmp(context->rawmode, "YCCK") == 0)
+	    context->cinfo.out_color_space = JCS_YCCK;
+	if (context->scale > 1) {
+	    context->cinfo.scale_num = 1;
+	    context->cinfo.scale_denom = context->scale;
+	}
+	if (context->draft) {
+	    context->cinfo.do_fancy_upsampling = FALSE;
+	    context->cinfo.dct_method = JDCT_FASTEST;
+	}
+	jpeg_start_decompress(&context->cinfo);
+	state->state++;
+	/* fall through */
+
+      case 2:
+	/* Decompress a single line of data */
+	ok = 1;
+	while (state->y < state->ysize) {
+	    ok = jpeg_read_scanlines(&context->cinfo, &state->buffer, 1);
+	    if (ok != 1)
+		break;
+	    state->shuffle((UINT8*) im->image[state->y + state->yoff] +
+			   state->xoff * im->pixelsize, state->buffer,
+			   state->xsize);
+	    state->y++;
+	}
+	if (ok != 1)
+	    break;
+	state->state++;
+	/* fall through */
+
+      case 3:
+	/* Finish decompression */
+	if (!jpeg_finish_decompress(&context->cinfo))
+	    break;
+
+	/* Clean up */
+	jpeg_destroy_decompress(&context->cinfo);
+	/* if (jerr.pub.num_warnings) return BROKEN; */
+	return -1;
+
+    }
+
+    /* Return number of bytes consumed */
+    return context->source.pub.next_input_byte - buf; 
+
+}
+
+#endif
+

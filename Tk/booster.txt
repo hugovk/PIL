@@ -1,0 +1,88 @@
+
+(taken from a mail posted to the image-sig and wintcl mailing lists)
+
+  The Tk 4.2 PhotoImage code is seriously broken for 16-bit
+"HighColor" Windows displays (at least for Windows 95).
+
+  The first of the attached patches fixes the bug in a rather crude
+fashion (tested on win95 only), while the second is a Windows-
+specific patch that boosts performance for 16/24-bit displays.
+
+  Here's the result from a sample program which loads two 512x512
+greyscale PGM's, and two 512x512 colour PPM's, and displays each of
+them in a separate toplevel windows.  Tcl/Tk was compiled with Visual
+C 4.0, and run on a P100 under Win95.  Image load times are not
+included in the timings:
+
+			8-bit		16-bit		24-bit
+--------------------------------------------------------------------
+1. original 4.2 code	5.52 s		8.57 s		3.79 s
+2. booster patch	5.49 s		1.87 s		1.82 s
+
+   speedup		None		4.6x		2.1x
+
+====================================================================
+
+1. For portability and speed, the best thing under Windows is to treat
+   16-bit displays as if they were 24-bit. The Windows device drivers
+   take care of the rest. In tkWinImage.c, change:
+
+    imagePtr->bits_per_pixel = depth;
+
+to
+
+    if (visual->class == TrueColor)
+	/* true colour is stored as 3 bytes: (blue, green, red) */
+	imagePtr->bits_per_pixel = 24;
+    else
+	imagePtr->bits_per_pixel = depth;
+
+NOTE: This turned out to be quite similar to how this was done in
+4.1, which worked fine (albeit much too slow) on 16-bit displays.
+There's probably some reason for the change; it is mentioned in the
+CHANGES file as a fix to make sure *image* depths other than 8 and 24
+bits works, but I have still to find a machine where 4.2 works for
+*display* depths other than 8 and 24 bits...
+
+
+2. The DitherInstance implementation is not good.  It's especially
+bad on highend truecolour displays; it crawls under Windows, it
+crawls on my fast 64-bit workstation.  IMO, it should be rewritten
+from scratch (stay tuned ;-)...
+
+  Anyway, the following band-aid makes the situation a little bit
+better under Windows.  This hack trades some marginal quality (no
+dithering on 16-bit displays) for a dramatic performance boost.
+Requires patch 1 to be in place.
+
+
+    for (; height > 0; height -= nLines) {
+	if (nLines > height) {
+	    nLines = height;
+	}
+	dstLinePtr = (unsigned char *) imagePtr->data;
+	yEnd = yStart + nLines;
+#ifdef __WIN32__
+	if (colorPtr->visualInfo.class == TrueColor
+		&& instancePtr->gamma == 1.0) {
+	    /* Windows hicolor/truecolor booster */
+	    for (y = yStart; y < yEnd; ++y) {
+		destBytePtr = dstLinePtr;
+		srcPtr = srcLinePtr;
+		for (x = xStart; x < xEnd; ++x) {
+		    destBytePtr[0] = srcPtr[2];
+		    destBytePtr[1] = srcPtr[1];
+		    destBytePtr[2] = srcPtr[0];
+		    destBytePtr += 3; srcPtr += 3;
+		}
+		srcLinePtr += lineLength;
+		dstLinePtr += bytesPerLine;
+	    }
+	} else
+#endif
+	for (y = yStart; y < yEnd; ++y) {
+	    srcPtr = srcLinePtr;
+	    errPtr = errLinePtr;
+	    destBytePtr = dstLinePtr;
+
+====================================================================

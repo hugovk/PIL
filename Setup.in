@@ -1,0 +1,51 @@
+# Setup file for the Imaging module
+# =================================
+#
+# INSTRUCTIONS:
+#
+# 1) Edit the configuration settings as described below.
+#
+# 2) Run "make -f Makefile.pre.in Makefile installdir=<prefix>"
+#    where <prefix> is the same as the prefix variable used to build
+#    (or at least install) Python.
+#
+# This file has the same format as <pythonroot>/Modules/Setup.in.
+#
+
+# --------------------------------------------------------------------
+# Edit IMAGINGPATH to match where you will install the Lib files (or
+# where they are in the source tree if you don't plan on removing it.)
+# *** Note the leading colon!
+
+IMAGINGPATH=:/usr/local/lib/python/Imaging:/usr/local/lib/python/Imaging/Lib
+
+# The Python path is derived from the core path plus the path defined
+# above. 
+
+PYTHONPATH=$(COREPYTHONPATH)$(IMAGINGPATH)
+
+# --------------------------------------------------------------------
+# Remove (or comment) the following line if you wish to build a
+# statically linked python interpreter.
+
+*noconfig*
+
+# --------------------------------------------------------------------
+# If you have installed the IJG JPEG or ZLIB libraries in a non-
+# standard place, edit the JPEGINCLUDE and JPEGLIB definitions.
+# If you don't have the library, you don't need to bother.
+
+IMAGINGINCLUDE = libImaging
+IMAGINGLIB = libImaging/libImaging.a
+
+JPEGINCLUDE = /usr/local/include
+JPEGLIB = /usr/local/lib/libjpeg.a
+
+ZINCLUDE = /usr/local/include
+ZLIB = /usr/local/lib/libz.a
+
+# --------------------------------------------------------------------
+# If you don't have the IJG JPEG or ZLIB libraries, remove the corre-
+# sponding variables in the following line
+
+_imaging _imagingmodule.c decode.c encode.c display.c path.c -I$(IMAGINGINCLUDE) $(IMAGINGLIB)  -I$(JPEGINCLUDE) $(JPEGLIB)  -I$(ZINCLUDE) $(ZLIB)
