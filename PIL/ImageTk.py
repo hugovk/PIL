@@ -17,8 +17,9 @@
 # 98-07-02 fl	Explicitly destroy Tkinter image objects
 # 99-07-24 fl	Support multiple Tk interpreters (from Greg Couch)
 # 99-07-26 fl	Automatically hook into Tkinter (if possible)
+# 99-08-15 fl	Hook uses _imagingtk instead of _imaging
 #
-# Copyright (c) Secret Labs AB 1997-98.
+# Copyright (c) Secret Labs AB 1997-99.
 # Copyright (c) Fredrik Lundh 1996-97.
 #
 # See the README file for information on usage and redistribution.
@@ -119,12 +120,13 @@ class PhotoImage:
 	except Tkinter.TclError, v:
 	    # activate Tkinter hook
 	    try:
+		import _imagingtk
 		try:
-		    Image.core.tkinit(tk.interpaddr(), 1)
+		    _imagingtk.tkinit(tk.interpaddr(), 1)
 		except AttributeError:
-		    Image.core.tkinit(id(tk), 0)
+		    _imagingtk.tkinit(id(tk), 0)
 		tk.call("PyImagingPhoto", self.__photo, block.id)
-	    except (AttributeError, Tkinter.TclError):
+	    except (ImportError, AttributeError, Tkinter.TclError):
 		raise # configuration problem; cannot attach to Tkinter
 
 # --------------------------------------------------------------------

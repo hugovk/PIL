@@ -97,6 +97,8 @@ Imaging/map.c
 Imaging/outline.c
 Imaging/path.c
 
+Imaging/_imagingtk.c
+
 Imaging/PIL.pth
 Imaging/PIL/__init__.py
 Imaging/PIL/ArgImagePlugin.py

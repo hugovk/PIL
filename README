@@ -2,10 +2,10 @@
 The Python Imaging Library
 $Id: README$
 
-Release 1.0 (Jul 31, 1999)
+Release 1.0.1 (Aug 15, 1999)
 
 ====================================================================
-The Python Imaging Library 1.0
+The Python Imaging Library 1.0.1
 ====================================================================
 
 Contents
@@ -177,18 +177,18 @@ support.
    steps 3 to 6 as described below.  Step 7 will probably fail,
    though.
 
-3. Unpack the PIL distribution (the file Imaging-1.0.tar.gz)
+3. Unpack the PIL distribution (the file Imaging-1.0.1.tar.gz)
    in your Python extensions directory (or any other suitable
    directory).
 
 	$ cd Python-1.5/Extensions # example
-	$ gunzip Imaging-1.0.tar.gz
-	$ tar xvf Imaging-1.0.tar
+	$ gunzip Imaging-1.0.1.tar.gz
+	$ tar xvf Imaging-1.0.1.tar
 
 
 4. Now build the Imaging core library (libImaging.a):
 
-	$ cd Imaging-1.0/libImaging
+	$ cd Imaging-1.0.1/libImaging
 	$ ./configure
 	$ make
 
@@ -226,7 +226,9 @@ support.
 
 	$ make
 
-   This will create a file called "_imaging.so".
+   This will create two files; "_imaging.so", and "_imagingtk.so"
+   (the latter isn't created if you commented out the Tcl/Tk inter-
+   face section in Setup.in)
 
    Then type (assuming a standard shell):
 
@@ -243,8 +245,9 @@ support.
    you can use to further test the library.
 
 
-9. Copy the "_imaging.so" module and the contents of the "Imaging/PIL"
-   directory to a suitable place along the Python path.
+9. Copy the "_imaging.so" module, the "_imagingtk.so" module, and the
+   contents of the "Imaging/PIL" directory to a suitable place along
+   the Python path.
 
    If you're using Python 1.5 or later, the preferred way is to create
    a "PIL" subdirectory under "site-packages", copy the "PIL.pth" file
@@ -254,8 +257,15 @@ support.
 
 	$ cp PIL.pth /usr/local/lib/Python1.5/site-packages
 	$ mkdir /usr/local/lib/Python1.5/site-packages/PIL
-	$ cp _imaging.so PIL/* /usr/local/lib/Python1.5/site-packages/PIL
+	$ cp *.so PIL/* /usr/local/lib/Python1.5/site-packages/PIL
 
+   You can also place "PIL" subdirectory anywhere along the Python
+   path, and use PIL as a package.
+
+   Example:
+
+	$ mkdir /usr/local/lib/Python1.5/PIL
+	$ cp *.so PIL/* /usr/local/lib/Python1.5/PIL
 
 --------------------------------------------------------------------
 Build instructions for Windows

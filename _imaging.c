@@ -44,7 +44,6 @@
  * 98-12-29 fl	Added support for arcs, chords, and pieslices
  * 99-01-10 fl	Added some experimental arrow graphics stuff
  * 99-02-06 fl	Added draw_bitmap, font acceleration stuff
- * 99-07-26 fl	Added tkinit helper
  *
  * Copyright (c) Secret Labs AB 1997-99.
  * Copyright (c) Fredrik Lundh 1995-97.
@@ -59,9 +58,6 @@
 
 
 /* Configuration stuff. Feel free to undef things you don't need. */
-#ifdef WIN32
-#define WITH_TKINTER /* Tkinter support */
-#endif
 #define WITH_IMAGECHOPS /* ImageChops support */
 #define	WITH_IMAGEDRAW /* ImageDraw support */
 #define	WITH_MAPPING /* use memory mapping to read some file formats */
@@ -2296,53 +2292,6 @@ statichere PyTypeObject ImagingFont_Type = {
 
 /* -------------------------------------------------------------------- */
 
-/* Tkinter interface stuff (based on stuff from uiToolkit/Tk) */
-
-#ifdef WITH_TKINTER
-
-#include "tk.h"
-
-/* must link with Tk/tkImaging.c */
-extern void TkImaging_Init(Tcl_Interp* interp);
-
-/* copied from _tkinter.c */
-
-typedef struct {
-    PyObject_HEAD
-    Tcl_Interp* interp;
-} TkappObject;
-
-static PyObject* 
-_tkinit(PyObject* self, PyObject* args)
-{
-    Tcl_Interp* interp;
-
-    long arg;
-    int is_interp;
-    if (!PyArg_ParseTuple(args, "li", &arg, &is_interp))
-        return NULL;
-
-    if (is_interp)
-        interp = (Tcl_Interp*) arg;
-    else {
-        TkappObject* app;
-	/* Do it the hard way.  This will break if the TkappObject
-	   layout changes */
-        app = (TkappObject*) arg;
-        interp = app->interp;
-    }
-
-    /* This will bomb if interp is invalid... */
-    TkImaging_Init(interp);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-#endif
-
-/* -------------------------------------------------------------------- */
-
 /* FIXME: this is something of a mess.  Should replace this with
    pluggable codecs, but not before PIL 1.1 */
 
@@ -2466,11 +2415,6 @@ static PyMethodDef functions[] = {
     /* Experimental arrow graphics stuff */
 #ifdef WITH_ARROW
     {"outline", (PyCFunction)PyOutline_Create, 1},
-#endif
-
-    /* Tkinter interface stuff */
-#ifdef WITH_TKINTER
-    {"tkinit", (PyCFunction)_tkinit, 1},
 #endif
 
     {NULL, NULL} /* sentinel */

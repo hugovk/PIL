@@ -7,10 +7,16 @@ among others: David Ascher, Phil Austin, Anthony Baxter, Jan Blom,
 Roger Burnham, Gene Cash, Greg Coats, Greg Couch, Bill Crutchfield,
 Fred Drake, Tim Docker, Robin Friedrich, Mark Hammond, Bernhard
 Herzog, Rob Hooft, Jack Jansen, Edward Jones, Richard Jones, Skip
-Montanaro, Fredrik Nehr, Mr. Nitpicker, Håkan Karlsson, Magnus
-Källström, Eric Raymond, Bertil Reinhammar, Toby Sargeant, The Mad
-Scientist, Barry Scott, Les Schaffer, Joel Shprentz, Perry Stoll, Paul
-Svensson, Ivan Tkatchev, and Charles Waldman.
+Montanaro, Fredrik Nehr, Mr. Nitpicker, Håkan Karlsson, Matthias
+Klose, Magnus Källström, Eric Raymond, Bertil Reinhammar, Toby
+Sargeant, The Mad Scientist, Barry Scott, Les Schaffer, Joel Shprentz,
+Perry Stoll, Paul Svensson, Ivan Tkatchev, and Charles Waldman.
+
+*** Changes from release 1.0 to 1.0.1 ***
+
++ To make it easier to distribute prebuilt versions of PIL,
+  the tkinit binding stuff has been moved to a separate
+  extension module, named "_imagingtk".
 
 *** Changes from release 0.3b2 to 1.0 final ***
 

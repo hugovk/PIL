@@ -25,6 +25,7 @@
 # 99-07-09 fl	PIL release 1.0c1 (release candidate 1)
 # 99-07-26 fl	PIL release 1.0c2 (release candidate 2)
 # 99-07-28 fl	PIL release 1.0 final
+# 99-08-15 fl	PIL release 1.0.1
 #
 # Copyright (c) 1997-99 by Secret Labs AB.
 # Copyright (c) 1995-97 by Fredrik Lundh.
@@ -32,7 +33,7 @@
 # See the README file for information on usage and redistribution.
 #
 
-VERSION = "1.0"
+VERSION = "1.0.1"
 
 class _imaging_not_installed:
     # module placeholder
