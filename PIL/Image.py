@@ -25,15 +25,17 @@
 # 99-07-09 fl	PIL release 1.0c1 (release candidate 1)
 # 99-07-26 fl	PIL release 1.0c2 (release candidate 2)
 # 99-07-28 fl	PIL release 1.0 final
-# 99-08-15 fl	PIL release 1.0.1
+# 99-08-15 fl	PIL release 1.0.1 (internal maintenance release)
+# 00-06-07 fl	PIL release 1.1 final
+# 00-10-20 fl	PIL release 1.1.1
 #
-# Copyright (c) 1997-99 by Secret Labs AB.
-# Copyright (c) 1995-97 by Fredrik Lundh.
+# Copyright (c) 1997-2000 by Secret Labs AB
+# Copyright (c) 1995-2000 by Fredrik Lundh
 #
 # See the README file for information on usage and redistribution.
 #
 
-VERSION = "1.0.1"
+VERSION = "1.1.1"
 
 class _imaging_not_installed:
     # module placeholder
@@ -189,8 +191,13 @@ def init():
 
     import os, sys
 
+    try:
+        directories = __path__
+    except NameError:
+        directories = sys.path
+
     # only check directories (including current, if present in the path)
-    for path in filter(os.path.isdir, sys.path):
+    for path in filter(os.path.isdir, directories):
 	for file in os.listdir(path):
 	    if file[-14:] == "ImagePlugin.py":
 		p, f = os.path.split(file)
@@ -301,12 +308,12 @@ class Image:
 	new.info = self.info
 	return new
 
-    def _dump(self, file=None, format="PPM"):
+    def _dump(self, file=None, format=None):
         import tempfile
 	if not file:
 	    file = tempfile.mktemp()
 	self.load()
-	if format == "PPM":
+	if not format or format == "PPM":
 	    self.im.save_ppm(file)
 	else:
 	    file = file + "." + format

@@ -22,9 +22,10 @@
 # 98-01-10 fl	Fixed seek/tell (from Jan Blom)
 # 98-07-15 fl	Use private names for internal variables
 # 99-06-13 fl	Rewritten for PIL 1.0
+# 00-10-11 fl	Additional fixes for Python 2.0
 #
-# Copyright (c) Secret Labs AB 1997-99.
-# Copyright (c) Fredrik Lundh 1995-97.
+# Copyright (c) Secret Labs AB 1997-2000
+# Copyright (c) Fredrik Lundh 1995-2000
 #
 # See the README file for information on usage and redistribution.
 #
@@ -324,11 +325,11 @@ class ImageFileDirectory:
 
 	    # figure out if data fits into the directory
 	    if len(data) == 4:
-		append(tag, typ, len(value), data, "")
+		append((tag, typ, len(value), data, ""))
 	    elif len(data) < 4:
-		append(tag, typ, len(value), data + (4-len(data))*"\0", "")
+		append((tag, typ, len(value), data + (4-len(data))*"\0", ""))
 	    else:
-		append(tag, typ, len(value), o32(offset), data)
+		append((tag, typ, len(value), o32(offset), data))
 		offset = offset + len(data)
 		if offset & 1:
 		    offset = offset + 1 # word padding

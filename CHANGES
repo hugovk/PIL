@@ -12,6 +12,15 @@ Kern, Matthias Klose, Magnus Källström, Eric Raymond, Bertil
 Reinhammar, Toby Sargeant, Barry Scott, Les Schaffer, Joel Shprentz,
 Perry Stoll, Paul Svensson, Ivan Tkatchev, and Charles Waldman.
 
+*** Changes from release 1.0 to 1.1.1 ***
+
++ Additional fixes for Python 1.6/2.0, including TIFF "save" bug. 
+
++ Changed "init" to properly load plugins when PIL is used as a
+  package.
+
++ Fixed broken "show" method (on Unix)
+
 *** Changes from release 1.0 to 1.1 ***
 
 + Adapted to Python 1.6 ("append" and other method changes)
