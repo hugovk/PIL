@@ -1,16 +1,19 @@
-The Python Imaging Library
-$Id: README,v$
 
-Release 0.3b1 (March 9, 1998)
+The Python Imaging Library
+$Id: README$
+
+Release 1.0 (Jul 31, 1999)
 
 ====================================================================
-The Python Imaging Library 0.3b1
+The Python Imaging Library 1.0
 ====================================================================
 
 Contents
 --------
 
 + Introduction
++ Support Options
++ News Highlights
 + Software License
 + Build instructions for UNIX
 + Build instructions for Windows
@@ -19,46 +22,97 @@ Contents
 Introduction
 --------------------------------------------------------------------
 
-This is an intermediate release, initially shipped as a binary
-distribution for Windows 95 and NT.  A source release will be made
-available before the end of this month.
+The Python Imaging Library (PIL) adds image processing capabilities to
+your Python environment.  This library provides extensive file format
+support, an efficient internal representation, and fairly powerful
+image processing capabilities.
 
-The PIL handbook is available via http://www.pythonware.com
-(currently as HTML only).
+This source kit has been built and tested on Windows 95, 98 and NT,
+and a number of Unix platforms (including Alpha, Solaris, and Intel
+systems).  We believe that it should work on most modern platforms
+(people are using it on Cray's, after all ;-)
 
-News highlights in 0.3b1 (as compared to 0.2b4):
+The main distribution site for this software is:
 
-+ Uses memory mapping to read some uncompressed formats
-  (currently on Win32 only).
+	http://www.pythonware.com/products/pil/
 
-+ The "save" method now automatically converts images on the fly
-  in some cases.  This includes converting "1" to "L" (JPEG) and
-  "RGBA" to "RGB" (JPEG, PPM, BMP).
+That site also contains information about free and commercial support
+options, PIL add-ons, answers to frequently asked questions, and more.
 
-+ Support 32-bit integer and floating point images.
+The PIL handbook is not included in this distribution; to get the
+latest version, check:
 
-+ The Tk interface now supports transparent images.
-  *** NOTE: the Tk interface has been changed; you need to update
-  *** your Tkinter build to properly handle the new interface.
-
-+ Added read support for McIdas, Pixar Raster, FlashPix (FPX),
-  IPTC/NAA and Microsoft Image Composer (MIC).
-
-+ Fixed the FLI/FLC reader to properly read FLC files.
-
-+ Fixed the PDF writer.  It now properly writes "L" and "RGB"
-  images.
-
-+ Lots of bug fixes.
-
-For more information on these and other changes, see the CHANGES
-document.
+	http://www.pythonware.com/library.htm
 
 For installation and licensing details, see below.
 
-For questions, comments and bug reports, send mail to
-'image-sig@python.org'.
+--------------------------------------------------------------------
+Support Options
+--------------------------------------------------------------------
 
++ Free Support
+
+For support and general questions on the Python Imaging Library, send
+e-mail to the Image SIG mailing list:
+
+	image-sig@python.org
+
+You can join the Image SIG by sending a mail to:
+
+	image-sig-request@python.org
+
+Put "subscribe" in the message body to automatically subscribe to the
+list, or "help" to get additional information.  Alternatively, you can
+send your questions to the Python mailing list, python-list@cwi.nl, or
+post them to the newsgroup comp.lang.python.
+
++ Commercial Support
+
+Secret Labs (PythonWare) offers support contracts for companies using
+the Python Imaging Library in commercial applications, or in mission-
+critical environments.  This includes technical support, bug fixes,
+extensions to the PIL library, sample applications, and more.
+
+For the full story, check:
+
+	http://www.pythonware.com/products/pil/support.htm
+
+Or send a mail to:
+
+	sales@pythonware.com
+
+--------------------------------------------------------------------
+News Highlights in 1.0 (as compared to 0.2):
+--------------------------------------------------------------------
+
++ Improved font support.  The pilfont package is now included
+  in the core distribution.
+
++ Support for incremental parsing of image files.
+
++ Improved graphics support, including arc, chord, and pieslice
+  primitives.
+
++ Conversion to "P" and "1" uses Floyd-Steinberg dithering.
+  Conversion to "P" can use "web" colours or adaptive palette.
+
++ Added support for "YCbCr" image memories.
+
++ Added support for 32-bit integer and floating point images
+  (modes "I" and "F"), including new decoders to deal with many
+  kinds of input data.
+
++ The Tk interface now supports transparent images.
+  *** NOTE: if you're updating from 0.2, you need to update
+  *** your Tkinter build to properly handle the new interface.
+
++ Added read support for IPTC/NAA Newsphoto, McIdas, PIXAR raster,
+  FlashPix, Microsoft Image Composer, and XV thumbnails.
+
++ Lots and lots of bug fixes.
+
+For more information on these and other changes, see the CHANGES
+document.
 
 --------------------------------------------------------------------
 Software License
@@ -66,8 +120,8 @@ Software License
 
 The Python Imaging Library is
 
-Copyright (c) 1997-1998 by Secret Labs AB
-Copyright (c) 1995-1997 by Fredrik Lundh
+Copyright (c) 1997-1999 by Secret Labs AB
+Copyright (c) 1995-1999 by Fredrik Lundh
 
 By obtaining, using, and/or copying this software and/or its
 associated documentation, you agree that you have read, understood,
@@ -78,7 +132,7 @@ associated documentation for any purpose and without fee is hereby
 granted, provided that the above copyright notice appears in all
 copies, and that both that copyright notice and this permission notice
 appear in supporting documentation, and that the name of Secret Labs
-AB or the author is not used in advertising or publicity pertaining to
+AB or the author not be used in advertising or publicity pertaining to
 distribution of the software without specific, written prior
 permission.
 
@@ -110,21 +164,31 @@ support.
      PIL was tested with version 1.0.4, but is likely to work with
      versions from 0.95 and onwards.
 
-     If you have RedHat 4.2 or newer, you can use the libraries pro-
-     vided with the operating system.
+     If you have RedHat 4.2 or newer, the libraries provided with
+     the operating system should work just fine.
 
 
-2. Unpack the PIL distribution (the file Imaging-0.3b1.tar.gz) in your
-   Python/Extensions directory.
+2. If you didn't build Python from sources, make sure you have
+   Python's build support files on your machine.  If you've down-
+   loaded a prebuilt package (e.g. a Linux RPM), you probably
+   need additional developer packages.
+
+   If this doesn't mean anything to you, you can still carry out
+   steps 3 to 6 as described below.  Step 7 will probably fail,
+   though.
+
+3. Unpack the PIL distribution (the file Imaging-1.0.tar.gz)
+   in your Python extensions directory (or any other suitable
+   directory).
 
 	$ cd Python-1.5/Extensions # example
-	$ gunzip Imaging-0.3b1.tar.gz
-	$ tar xvf Imaging-0.3b1.tar
+	$ gunzip Imaging-1.0.tar.gz
+	$ tar xvf Imaging-1.0.tar
 
 
-3. Now build the Imaging core library (libImaging.a):
+4. Now build the Imaging core library (libImaging.a):
 
-	$ cd Imaging-0.3b1/libImaging
+	$ cd Imaging-1.0/libImaging
 	$ ./configure
 	$ make
 
@@ -134,114 +198,94 @@ support.
 	$ CC="cc -ansi" ./configure
 
 
-4. To check that this library works as it should, type:
+5. To check that this library works as it should, type:
 
 	$ make check
 
-   It isn't much of a test, but it shouldn't crash :-)
+   (It isn't much of a test, but at least it shouldn't crash :-)
 
 
-5. Go back to the Imaging directory.
+6. Go back to the Imaging directory.
 
    If you don't have the IJG JPEG or ZLIB libraries (or you have them,
    but not in a standard place), copy the "Setup.in" file to "Setup"
    and edit it according to the instructions in the file.
 
 
-6. Edit Makefile.pre.in and build a Makefile following the instructions
+7. Edit Makefile.pre.in and build a Makefile following the instructions
    there.  In most cases, you can simply give the following command:
 
 	$ make -f Makefile.pre.in boot
 
+   If this doesn't generate a Makefile, you probably don't have the
+   necessary build files on your machine.  See step 2 above for more
+   information.
 
-7. To build a dynamically loaded module, just type "make":
+
+8. To build a dynamically loaded module, just type "make":
 
 	$ make
 
-   This will create a file called "_imagingmodule.so".
+   This will create a file called "_imaging.so".
 
    Then type (assuming a standard shell):
 
-	$ cd test
-	$ PYTHONPATH=..:../Lib ; export PYTHONPATH
+	$ PYTHONPATH=.:./PIL ; export PYTHONPATH
 	$ python
 
 	>>> import _imaging
 	>>> import Image
 
    If both imports works, you've successfully added PIL to your Python
-   environment.  There are a few demo scripts in the Imaging/Scripts
-   directory that you can use to further test the library.
+   environment.
+
+   There are a few demo scripts in the Imaging/Scripts directory that
+   you can use to further test the library.
 
 
-8. Copy the "_imagingmodule.so" module and the contents of the
-   "Imaging/Lib" directory to a suitable place along the Python path.
+9. Copy the "_imaging.so" module and the contents of the "Imaging/PIL"
+   directory to a suitable place along the Python path.
 
+   If you're using Python 1.5 or later, the preferred way is to create
+   a "PIL" subdirectory under "site-packages", copy the "PIL.pth" file
+   to "site-packages", and the rest of the files to the new subdirectory.
 
-* Adding Tkinter support
+   Example:
 
-1. Add the following lines to tkappinit.c (part of the standard
-   Python distribution), after the MOREBUTTONS stuff:
-
-	{
-	    extern void TkImaging_Init(Tcl_Interp* interp);
-	    TkImaging_Init(interp);
-	}
-
-   This registers a Tcl command called "PyImagingPhoto", which is
-   use to communicate between PIL and Tk's PhotoImage handler.
-
-2. Compile Python's _tkinter.c with the WITH_APPINIT flag set,
-   and link it with tkImaging.c and tkappinit.c.  The easiest
-   way to do this is to copy the former to the Modules directory,
-   and edit the _tkinter line in Setup to something like (on
-   one line):
-
-   _tkinter _tkinter.c tkImaging.c tkappinit.c -DWITH_APPINIT
-	-I/usr/local/include -L/usr/local/lib -ltk4.2 -ltcl7.6 -lX11
+	$ cp PIL.pth /usr/local/lib/Python1.5/site-packages
+	$ mkdir /usr/local/lib/Python1.5/site-packages/PIL
+	$ cp _imaging.so PIL/* /usr/local/lib/Python1.5/site-packages/PIL
 
 
 --------------------------------------------------------------------
 Build instructions for Windows
 --------------------------------------------------------------------
 
-PIL is shipped with a Visual C++ 4.2 project makefile.  It contains
-subprojects for the IJG JPEG and ZLIB libraries as well.  Unless
-you're really lucky, you'll probably have to tweak the makefile
-somewhat to fit your configuration.
+The current release does not include Windows makefiles.  You can
+get a prebuilt version from:
 
+	http://www.pythonware.com/downloads.htm
 
-1. Unpack the PIL distribution (the file Imaging-0.3b1.tar.gz) in
-   a suitable directory.  The provided makefile assumes PIL to
-   be located in a sibling to Python's own 'PC' directory.
+That version is compatible with Python interpreters built using
+Microsoft Visual C++ 5.0.
 
-   Also unpack the IJG JPEG and ZLIB libraries, and place their
-   directories in the Imaging subdirectory (as jpeg-6 and zlib,
-   respectively).
+Building your own copy under Visual Studio should be straightforward;
+create a new project based on the sample extensions provided with
+Python (the target should be "_imaging.dll"), add all C files except
+"Except.c" and "coretest.c" to that project, check the contents of the
+"ImConfig.h" file (modify it if necessary), and build the DLL.
 
-   Note that the distribution is a gzipped archive.  You can use
-   WinZip to unpack the distribution.
+NOTE: Make sure to build PIL with the same linking options as
+      was used on the Python interpreter (usually /MD).  If you
+      mix linking options, anything can happen...  (the most
+      common problem is that "save" doesn't work!)
 
-
-2. Build the module from within the developer's studio, or by giving
-   the following command:
-
-	$ nmake -f _imaging.mak
-
-
-3. Copy the "_imaging.dll" file and the contents of the Lib directory
-   to a suitable place along your Python path.
-
-
-* Adding Tkinter support
-
-See the Unix section.  Instead of modifying the Setup file, just add
-tkImaging.c and tkappinit.c to the project file, and -DWITH_APPINIT
-to the _tkinter.c compile options.
+(If I'd used Visual Studio myself, I would have provided a project
+file.  But I don't.  Contributions are welcome, though...)
 
 --------------------------------------------------------------------
 NOTE: If you use Tk on Windows, you may wish to install the booster
-patch which provides dramatic performance improvements for 16- and
+patches which provides dramatic performance improvements for 16- and
 24-bit displays.  See the description in the Tk subdirectory for
 details.
 --------------------------------------------------------------------

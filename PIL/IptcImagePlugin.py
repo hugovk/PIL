@@ -1,14 +1,14 @@
 #
 # The Python Imaging Library.
-# $Id: IptcImagePlugin.py,v 1.1 1996/10/04 19:40:50 fredrik Exp $
+# $Id$
 #
-# IPTC/NAA file handling (experimental)
+# IPTC/NAA file handling
 #
-# History:
+# history:
 # 95-10-01 fl	Created
 # 98-03-09 fl	Cleaned up and added to PIL
 #
-# Copyright (c) Secret Labs AB 1997.
+# Copyright (c) Secret Labs AB 1997-98.
 # Copyright (c) Fredrik Lundh 1995.
 #
 # See the README file for information on usage and redistribution.

@@ -30,7 +30,7 @@ ImagingBitDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	/* Initialize context variables */
 
         /* this decoder only works for float32 image buffers */
-        if (im->type != 2) {
+        if (im->type != IMAGING_TYPE_FLOAT32) {
 	    state->errcode = IMAGING_CODEC_CONFIG;
 	    return -1;
         }

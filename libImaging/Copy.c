@@ -1,6 +1,6 @@
 /* 
  * The Python Imaging Library
- * $Id: Copy.c,v 1.2 1996/05/09 21:20:18 fredrik Exp $
+ * $Id$
  *
  * copy image
  *
@@ -25,7 +25,7 @@ _copy(Imaging imOut, Imaging imIn)
     int y;
 
     if (!imIn)
-	return (Imaging) ImagingError_Argument(NULL);
+	return (Imaging) ImagingError_ValueError(NULL);
 
     imOut = ImagingNew2(imIn->mode, imOut, imIn);
     if (!imOut)

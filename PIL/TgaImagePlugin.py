@@ -1,21 +1,23 @@
 #
 # The Python Imaging Library.
-# $Id: TgaImagePlugin.py,v 1.4 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # TGA file handling
 #
 # History:
-#	95-09-01 fl	Created (reads 24-bit files only)
-#	97-01-04 fl	Support more TGA versions, including compressed images
+# 95-09-01 fl	created (reads 24-bit files only)
+# 97-01-04 fl	support more TGA versions, including compressed images
+# 98-07-04 fl	fixed orientation and alpha layer bugs
+# 98-09-11 fl	fixed orientation for runlength decoder
 #
-# Copyright (c) Secret Labs AB 1997.
+# Copyright (c) Secret Labs AB 1997-98.
 # Copyright (c) Fredrik Lundh 1995-97.
 #
 # See the README file for information on usage and redistribution.
 #
 
 
-__version__ = "0.2"
+__version__ = "0.3"
 
 import Image, ImageFile, ImagePalette
 
@@ -28,13 +30,13 @@ def i32(c):
 
 
 MODES = {
-    # map imagetype/bits to rawmode
+    # map imagetype/depth to rawmode
     (1, 8):  "P",
     (3, 1):  "1",
     (3, 8):  "L",
     (2, 16): "BGR;5",
     (2, 24): "BGR",
-    (2, 32): "BGRX",
+    (2, 32): "BGRA",
 }
 
 
@@ -49,6 +51,8 @@ class TgaImageFile(ImageFile.ImageFile):
 
     def _open(self):
 
+
+
 	# process header
 	s = self.fp.read(18)
 
@@ -57,55 +61,67 @@ class TgaImageFile(ImageFile.ImageFile):
 	colormaptype = ord(s[1])
 	imagetype = ord(s[2])
 
-	bits = ord(s[16])
+	depth = ord(s[16])
+
+	flags = ord(s[17])
 
 	self.size = i16(s[12:]), i16(s[14:])
 
 	# validate header fields
-	if id != 0 or\
-	   colormaptype not in [0, 1] or\
+	if id != 0 or colormaptype not in (0, 1) or\
 	   self.size[0] <= 0 or self.size[1] <= 0 or\
-	   bits not in [8, 16, 24, 32]:
+	   depth not in (8, 16, 24, 32):
 	    raise SyntaxError, "not a TGA file"
 
 	# image mode
-	if imagetype in [3, 11]:
+	if imagetype in (3, 11):
 	    self.mode = "L"
-	    if bits == 1:
-		self.mode = "1"
-	elif imagetype in [1, 9]:
+	    if depth == 1:
+		self.mode = "1" # ???
+	elif imagetype in (1, 9):
 	    self.mode = "P"
-	elif imagetype in [2, 10]:
+	elif imagetype in (2, 10):
 	    self.mode = "RGB"
+	    if depth == 32:
+		self.mode = "RGBA"
         else:
 	    raise SyntaxError, "unknown TGA mode"
+
+	# orientation
+	orientation = flags & 0x30
+	if orientation == 0x20:
+	    orientation = 1
+	elif not orientation:
+	    orientation = -1
+	else:
+	    raise SyntaxError, "unknown TGA orientation"
 
 	if imagetype & 8:
 	    self.info["compression"] = "tga_rle"
 
 	if colormaptype:
 	    # read palette
-	    start, size, mapbits = i16(s[3:]), i16(s[5:]), i16(s[7:])
-	    if mapbits == 16:
+	    start, size, mapdepth = i16(s[3:]), i16(s[5:]), i16(s[7:])
+	    if mapdepth == 16:
 		self.palette = ImagePalette.raw("BGR;16",
 		    "\0"*2*start + self.fp.read(2*size))
-	    elif mapbits == 24:
+	    elif mapdepth == 24:
 		self.palette = ImagePalette.raw("BGR",
 		    "\0"*3*start + self.fp.read(3*size))
-	    elif mapbits == 32:
-		self.palette = ImagePalette.raw("BGRX",
+	    elif mapdepth == 32:
+		self.palette = ImagePalette.raw("BGRA",
 		    "\0"*4*start + self.fp.read(4*size))
 
 	# setup tile descriptor
 	try:
-	    rawmode = MODES[(imagetype&7, bits)]
+	    rawmode = MODES[(imagetype&7, depth)]
 	    if imagetype & 8:
 		# compressed
 		self.tile = [("tga_rle", (0, 0)+self.size,
-			      self.fp.tell(), rawmode)]
+			      self.fp.tell(), (rawmode, orientation, depth))]
 	    else:
 		self.tile = [("raw", (0, 0)+self.size,
-			      self.fp.tell(), (rawmode, 0, 1))]
+			      self.fp.tell(), (rawmode, 0, orientation))]
 	except KeyError:
 	    pass # cannot decode
 

@@ -1,28 +1,24 @@
 /*
  * The Python Imaging Library.
- * $Id: RawEncode.c,v 1.2 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * coder for raw data
  *
- * notes:
- *	FIXME: This encoder will fail if the buffer is not large
- *	enough to hold one full line of data.  There's a workaround
- *	for this problem in ImageFile.py, but it should be solved
- *	here instead.
+ * FIXME: This encoder will fail if the buffer is not large enough to
+ * hold one full line of data.  There's a workaround for this problem
+ * in ImageFile.py, but it should be solved here instead.
  *
  * history:
- *	96-04-30 fl	created
- *	97-01-03 fl	fixed padding
+ * 96-04-30 fl	created
+ * 97-01-03 fl	fixed padding
  *
  * Copyright (c) Fredrik Lundh 1996-97.
  * Copyright (c) Secret Labs AB 1997.
  *
- * See the README file for information on usage and redistribution.
- */
+ * See the README file for information on usage and redistribution.  */
 
 
 #include "Imaging.h"
-
 
 int
 ImagingRawEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)

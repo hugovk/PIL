@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library
- * $Id: Offset.c,v 1.1 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * calculate ISO 3307 checksum
  *

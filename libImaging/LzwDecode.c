@@ -1,8 +1,8 @@
 /*
  * The Python Imaging Library.
- * $Id: LzwDecode.c,v 1.3 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
- * a fast, suspendable LZW decoder
+ * a fast, suspendable TIFF LZW decoder
  *
  * description:
  *	This code is based on the GIF decoder.  There are some

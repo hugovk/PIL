@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library
- * $Id: Matrix.c,v 1.1 1996/06/19 11:28:39 fredrik Exp $
+ * $Id$
  *
  * colour and luminance matrix transforms
  *
@@ -28,7 +28,7 @@ ImagingConvertMatrix(Imaging im, const char *mode, float m[])
 
     /* Assume there's enough data in the buffer */
     if (!im)
-	return (Imaging) ImagingError_Argument(NULL);
+	return (Imaging) ImagingError_ModeError();
 
     if (strcmp(mode, "L") == 0 && im->bands == 3) {
 
@@ -68,7 +68,7 @@ ImagingConvertMatrix(Imaging im, const char *mode, float m[])
 	    }
 	}
     } else
-	return (Imaging) ImagingError_Argument("bad mode");
+	return (Imaging) ImagingError_ModeError();
 
     return imOut;
 }

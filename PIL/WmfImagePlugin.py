@@ -2,7 +2,7 @@
 # THIS IS WORK IN PROGRESS.
 #
 # The Python Imaging Library.
-# $Id: PpmImagePlugin.py,v 1.4 1996/05/09 21:21:53 fredrik Exp fredrik $
+# $Id$
 #
 # WMF support for PIL
 #

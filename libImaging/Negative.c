@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library
- * $Id: Negative.c,v 1.1 1996/03/25 08:46:34 fredrik Exp $
+ * $Id$
  *
  * negate image
  *
@@ -27,7 +27,7 @@ ImagingNegative(Imaging im)
     int x, y;
 
     if (!im)
-	return (Imaging) ImagingError_Argument(NULL);
+	return (Imaging) ImagingError_ModeError();
 
     imOut = ImagingNew(im->mode, im->xsize, im->ysize);
     if (!imOut)

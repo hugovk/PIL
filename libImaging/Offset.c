@@ -1,11 +1,12 @@
 /*
  * The Python Imaging Library
- * $Id: Offset.c,v 1.1 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * offset an image in x and y directions
  *
  * history:
- *	96-07-22 fl:	Created
+ * 96-07-22 fl:	Created
+ * 98-11-01 cgw@pgt.com: Fixed negative-array index bug
  *
  * Copyright (c) Fredrik Lundh 1996.
  * Copyright (c) Secret Labs AB 1997.
@@ -24,7 +25,7 @@ ImagingOffset(Imaging im, int xoffset, int yoffset)
     Imaging imOut;
 
     if (!im)
-	return (Imaging) ImagingError_Argument(NULL);
+	return (Imaging) ImagingError_ModeError();
 
     imOut = ImagingNew(im->mode, im->xsize, im->ysize);
     if (!imOut)
@@ -32,11 +33,22 @@ ImagingOffset(Imaging im, int xoffset, int yoffset)
 
     ImagingCopyInfo(imOut, im);
 
+    /* make offsets positive to avoid negative coordinates */
+    xoffset %= im->xsize;
+    xoffset = im->xsize - xoffset;
+    if (xoffset < 0)
+	xoffset += im->xsize;
+
+    yoffset %= im->ysize;
+    yoffset = im->ysize - yoffset;
+    if (yoffset < 0)
+	yoffset += im->ysize;
+
 #define	OFFSET(image)\
     for (y = 0; y < im->ysize; y++)\
 	for (x = 0; x < im->xsize; x++) {\
-	    int yi = (y - yoffset) % im->ysize;\
-	    int xi = (x - xoffset) % im->xsize;\
+	    int yi = (y + yoffset) % im->ysize;\
+	    int xi = (x + xoffset) % im->xsize;\
 	    imOut->image[y][x] = im->image[yi][xi];\
 	}
 

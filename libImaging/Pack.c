@@ -1,18 +1,21 @@
 /*
  * The Python Imaging Library.
- * $Id: Pack.c,v 1.3 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * code to pack raw data
  *
  * history:
- *	96-04-30 fl	Created
- *	96-05-12 fl	Published a few RGB packers
- *	96-11-01 fl	More RGB packers (Tk booster stuff)
- *	96-12-30 fl	Added P;1, P;2 and P;4 packers
- *	97-06-02 fl	Added F (F;32NF) packer
- *	97-08-28 fl	Added 1 as L packer
- *	98-02-08 fl	Added I packer
- *	98-03-09 fl	Added mode field, RGBA/RGBX as RGB packers
+ * 96-04-30 fl	Created
+ * 96-05-12 fl	Published a few RGB packers
+ * 96-11-01 fl	More RGB packers (Tk booster stuff)
+ * 96-12-30 fl	Added P;1, P;2 and P;4 packers
+ * 97-06-02 fl	Added F (F;32NF) packer
+ * 97-08-28 fl	Added 1 as L packer
+ * 98-02-08 fl	Added I packer
+ * 98-03-09 fl	Added mode field, RGBA/RGBX as RGB packers
+ * 98-07-01 fl	Added YCbCr support
+ * 98-07-12 fl	Added I 16 packer
+ * 99-02-03 fl	Added BGR packers
  *
  * Copyright (c) Secret Labs AB 1997-98.
  * Copyright (c) Fredrik Lundh 1996-97.
@@ -29,6 +32,39 @@
 #define	B 2
 #define	X 3
 
+
+/* byte swapping macros */
+
+#define C16N\
+        (out[0]=tmp[0], out[1]=tmp[1]);
+#define C16S\
+        (out[1]=tmp[0], out[0]=tmp[1]);
+#define C32N\
+        (out[0]=tmp[0], out[1]=tmp[1], out[2]=tmp[2], out[3]=tmp[3]);
+#define C32S\
+        (out[3]=tmp[0], out[2]=tmp[1], out[1]=tmp[2], out[0]=tmp[3]);
+#define C64N\
+        (out[0]=tmp[0], out[1]=tmp[1], out[2]=tmp[2], out[3]=tmp[3],\
+         out[4]=tmp[4], out[5]=tmp[5], out[6]=tmp[6], out[7]=tmp[7]);
+#define C64S\
+        (out[7]=tmp[0], out[6]=tmp[1], out[5]=tmp[2], out[4]=tmp[3],\
+         out[3]=tmp[4], out[2]=tmp[5], out[1]=tmp[6], out[0]=tmp[7]);
+
+#ifdef WORDS_BIGENDIAN
+#define C16B C16N
+#define C16L C16S
+#define C32B C32N
+#define C32L C32S
+#define C64B C64N
+#define C64L C64S
+#else
+#define C16B C16S
+#define C16L C16N
+#define C32B C32S
+#define C32L C32N
+#define C64B C64S
+#define C64L C64N
+#endif
 
 static void
 pack1(UINT8* out, const UINT8* in, int pixels)
@@ -234,7 +270,6 @@ packRGBL(UINT8* out, const UINT8* in, int pixels)
     }
 }
 
-
 static void
 packRGBXL(UINT8* out, const UINT8* in, int pixels)
 {
@@ -250,6 +285,36 @@ packRGBXL(UINT8* out, const UINT8* in, int pixels)
 }
 
 static void
+packI16B(UINT8* out, const UINT8* in_, int pixels)
+{
+    int i;
+    INT32* in = (INT32*) in_;
+    UINT16 tmp_;
+    UINT8* tmp = (UINT8*) &tmp_;
+    for (i = 0; i < pixels; i++) {
+        if (in[0] <= 0)
+            tmp_ = 0;
+        else if (in[0] > 65535)
+            tmp_ = 65535;
+        else
+            tmp_ = in[0];
+        C16B;
+	out += 2; in++;
+    }
+}
+
+static void
+packI32S(UINT8* out, const UINT8* in, int pixels)
+{
+    int i;
+    UINT8* tmp = (UINT8*) in;
+    for (i = 0; i < pixels; i++) {
+        C32L;
+	out += 4; tmp += 4;
+    }
+}
+
+static void
 copy1(UINT8* out, const UINT8* in, int pixels)
 {
     /* L, P */
@@ -257,10 +322,56 @@ copy1(UINT8* out, const UINT8* in, int pixels)
 }
 
 static void
+copy2(UINT8* out, const UINT8* in, int pixels)
+{
+    /* I;16, etc */
+    memcpy(out, in, pixels*2);
+}
+
+static void
+copy3(UINT8* out, const UINT8* in, int pixels)
+{
+    /* BGR;24, etc */
+    memcpy(out, in, pixels*3);
+}
+
+static void
 copy4(UINT8* out, const UINT8* in, int pixels)
 {
     /* RGBA, CMYK quadruples */
-    memcpy(out, in, 4 * pixels);
+    memcpy(out, in, 4*pixels);
+}
+
+static void
+band0(UINT8* out, const UINT8* in, int pixels)
+{
+    int i;
+    for (i = 0; i < pixels; i++, in += 4)
+	out[i] = in[0];
+}
+
+static void
+band1(UINT8* out, const UINT8* in, int pixels)
+{
+    int i;
+    for (i = 0; i < pixels; i++, in += 4)
+	out[i] = in[1];
+}
+
+static void
+band2(UINT8* out, const UINT8* in, int pixels)
+{
+    int i;
+    for (i = 0; i < pixels; i++, in += 4)
+	out[i] = in[2];
+}
+
+static void
+band3(UINT8* out, const UINT8* in, int pixels)
+{
+    int i;
+    for (i = 0; i < pixels; i++, in += 4)
+	out[i] = in[3];
 }
 
 static struct {
@@ -294,33 +405,62 @@ static struct {
     {"RGB",	"BGRX",		32,	ImagingPackBGRX},
     {"RGB",	"XBGR",		32,	ImagingPackXBGR},
     {"RGB",	"RGB;L",	24,	packRGBL},
+    {"RGB",   	"R",            8,      band0},
+    {"RGB",   	"G",            8,      band1},
+    {"RGB",   	"B",            8,      band2},
 
     /* true colour w. transparency */
     {"RGBA",	"RGBA",		32,	copy4},
     {"RGBA",	"RGBA;L",	32,	packRGBXL},
     {"RGBA",	"RGB",		24,	ImagingPackRGB},
+    {"RGBA",   	"R",            8,      band0},
+    {"RGBA",   	"G",            8,      band1},
+    {"RGBA",   	"B",            8,      band2},
+    {"RGBA",   	"A",            8,      band3},
 
     /* true colour w. padding */
     {"RGBX",	"RGBX",		32,	copy4},
     {"RGBX",	"RGBX;L",	32,	packRGBXL},
     {"RGBX",	"RGB",		32,	ImagingPackRGB},
+    {"RGBX",   	"R",            8,      band0},
+    {"RGBX",   	"G",            8,      band1},
+    {"RGBX",   	"B",            8,      band2},
+    {"RGBX",   	"X",            8,      band3},
 
     /* colour separation */
     {"CMYK",	"CMYK",		32,	copy4},
     {"CMYK",	"CMYK;L",	32,	packRGBXL},
+    {"CMYK",   	"C",            8,      band0},
+    {"CMYK",   	"M",            8,      band1},
+    {"CMYK",   	"Y",            8,      band2},
+    {"CMYK",   	"K",            8,      band3},
 
-    /* video (YCrCb) */
-    {"YCC",	"YCC",		24,	ImagingPackRGB},
-    {"YCCX",	"YCCX",		32,	copy4},
-    {"YCCK",	"YCCK",		32,	copy4},
+    /* video (YCbCr) */
+    {"YCbCr",	"YCbCr",	24,	ImagingPackRGB},
+    {"YCbCr",	"YCbCr;L",	24,	packRGBL},
+    {"YCbCr",	"YCbCrX",	32,	copy4},
+    {"YCbCr",	"YCbCrK",	32,	copy4},
+    {"YCbCr",  	"Y",            8,      band0},
+    {"YCbCr",  	"Cb",           8,      band1},
+    {"YCbCr",  	"Cr",           8,      band2},
 
     /* integer */
     {"I", 	"I",		32,	copy4},
-    {"I", 	"I;32NF",	32,	copy4},
+    {"I", 	"I;16B",	16,	packI16B},
+    {"I", 	"I;32S",	32,	packI32S},
+    {"I", 	"I;32NS",	32,	copy4},
 
     /* floating point */
     {"F",	"F",		32,	copy4},
+    {"F", 	"F;32F",	32,	packI32S},
     {"F",	"F;32NF",	32,	copy4},
+
+    /* storage modes */
+    {"I;16", 	"I;16",		16,	copy2},
+    {"I;16B", 	"I;16B",	16,	copy2},
+    {"BGR;15", 	"BGR;15",	16,	copy2},
+    {"BGR;16", 	"BGR;16",	16,	copy2},
+    {"BGR;24", 	"BGR;24",	24,	copy3},
 
     {NULL} /* sentinel */
 };

@@ -1,11 +1,11 @@
 /*
  * The Python Imaging Library.
- * $Id: Unpack.c,v 1.6 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * code to convert and unpack PhotoYCC data
  *
  * history:
- *	97-01-25 fl	Moved from PcdDecode.c
+ * 97-01-25 fl	Moved from PcdDecode.c
  *
  * Copyright (c) Fredrik Lundh 1996-97.
  * Copyright (c) Secret Labs AB 1997.
@@ -154,7 +154,7 @@ ImagingUnpackYCCA(UINT8* out, const UINT8* in, int pixels)
 	rgb[0] = (in[3] == 0) ? 0 : (((int) in[0] * 255) / in[3]);
 	rgb[1] = (in[3] == 0) ? 0 : (((int) in[1] * 255) / in[3]);
 	rgb[2] = (in[3] == 0) ? 0 : (((int) in[2] * 255) / in[3]);
-	/* Convert non-multipled data to RGB */
+	/* Convert non-multiplied data to RGB */
 	YCC2RGB(out, rgb[0], rgb[1], rgb[2]);
 	out[A] = in[3];
 	out += 4; in += 4;

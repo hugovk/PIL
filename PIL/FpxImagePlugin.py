@@ -2,12 +2,12 @@
 # THIS IS WORK IN PROGRESS
 #
 # The Python Imaging Library.
-# $Id: IcoImagePlugin.py,v 1.2 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # FlashPix support for PIL
 #
 # History:
-#	97-01-25 fl	Created (reads uncompressed RGB images only)
+# 97-01-25 fl	Created (reads uncompressed RGB images only)
 #
 # Copyright (c) Secret Labs AB 1997.
 # Copyright (c) Fredrik Lundh 1997.
@@ -175,12 +175,12 @@ class FpxImageFile(ImageFile.ImageFile):
 		rawmode = self.rawmode
 
 		if internal_color_conversion:
-		    # The image is stored as usual (usually YCrCb).
+		    # The image is stored as usual (usually YCbCr).
 		    if rawmode == "RGBA":
-			# For "RGBA", data is stored as YCrCbA based on
+			# For "RGBA", data is stored as YCbCrA based on
 			# negative RGB. The following trick works around
 			# this problem :
-			jpegmode, rawmode = "YCCK", "CMYK"
+			jpegmode, rawmode = "YCbCrK", "CMYK"
 		    else:
 			jpegmode = None # let the decoder decide
 

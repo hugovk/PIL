@@ -1,25 +1,27 @@
 #
 # The Python Imaging Library.
-# $Id: GifImagePlugin.py,v 1.6 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # GIF file handling
 #
 # History:
-#	95-09-01 fl	Created
-#	96-12-14 fl	Added interlace support
-#	96-12-30 fl	Added animation support
-#	97-01-05 fl	Added write support, fixed local colour map bug
-#	97-02-23 fl	Make sure to load raster data in getdata()
-#	97-07-05 fl	Support external decoder
+# 95-09-01 fl	Created
+# 96-12-14 fl	Added interlace support
+# 96-12-30 fl	Added animation support
+# 97-01-05 fl	Added write support, fixed local colour map bug
+# 97-02-23 fl	Make sure to load raster data in getdata()
+# 97-07-05 fl	Support external decoder
+# 98-07-09 fl	Handle all modes when saving
+# 98-07-15 fl	Renamed offset attribute to avoid name clash
 #
-# Copyright (c) Secret Labs AB 1997.
+# Copyright (c) Secret Labs AB 1997-98.
 # Copyright (c) Fredrik Lundh 1995-97.
 #
 # See the README file for information on usage and redistribution.
 #
 
 
-__version__ = "0.4"
+__version__ = "0.5"
 
 
 import array
@@ -76,8 +78,8 @@ class GifImageFile(ImageFile.ImageFile):
 	    self.global_palette = self.palette =\
 		ImagePalette.raw("RGB", self.fp.read(3<<bits))
 
-	self.fp2 = self.fp # FIXME: hack
-	self.offset = 0
+	self.__fp = self.fp # FIXME: hack
+	self.__offset = 0
 	self.dispose = None
 
 	self.frame = -1
@@ -92,13 +94,13 @@ class GifImageFile(ImageFile.ImageFile):
 
 	self.tile = []
 
-	self.fp = self.fp2 # FIXME: hack
-	if self.offset:
+	self.fp = self.__fp
+	if self.__offset:
 	    # backup to last frame
-	    self.fp.seek(self.offset)
+	    self.fp.seek(self.__offset)
 	    while self.data():
 		pass
-	    self.offset = 0
+	    self.__offset = 0
 
 	if self.dispose:
 	    self.im = self.dispose
@@ -167,10 +169,10 @@ class GifImageFile(ImageFile.ImageFile):
 
 		# image data
 		bits = ord(self.fp.read(1))
-		self.offset = self.fp.tell()
+		self.__offset = self.fp.tell()
 		self.tile = [("gif",
 			     (x0, y0, x1, y1),
-			     self.offset,
+			     self.__offset,
 			     (bits, interlace))]
 		break
 
@@ -179,7 +181,7 @@ class GifImageFile(ImageFile.ImageFile):
 		# raise IOError, "illegal GIF tag `%x`" % ord(s)
 
 	if not self.tile:
-	    self.fp2 = None
+	    self.__fp = None
 	    raise EOFError, "no more images in GIF file"
 
 	self.mode = "L"
@@ -214,19 +216,43 @@ def _save(im, fp, filename):
         except IOError:
             pass # write uncompressed file
 
+    try:
+	rawmode = RAWMODE[im.mode]
+	imOut = im
+    except KeyError:
+	# convert on the fly (EXPERIMENTAL -- I'm not sure PIL
+	# should automatically convert images on save...)
+	if Image.getmodebase(im.mode) == "RGB":
+	    imOut = im.convert("P")
+	    rawmode = "P"
+	else:
+	    imOut = im.convert("L")
+	    rawmode = "L"
+
     # header
-    for s in getheader(im):
+    for s in getheader(imOut):
 	fp.write(s)
+
+    flags = 0
+
+    try:
+	interlace = im.encoderinfo["interlace"]
+    except:
+	# default is on (since we're writing uncompressed images)
+	interlace = 1
+	flags = flags | 64
 
     # local image header
     fp.write("," +
 	     o16(0) + o16(0) +		# bounding box
 	     o16(im.size[0]) +		# size
 	     o16(im.size[1]) +
-	     chr(0) +			# flags
+	     chr(flags) +		# flags
 	     chr(8))			# bits
 
-    ImageFile._save(im, fp, [("gif", (0,0)+im.size, 0, RAWMODE[im.mode])])
+    imOut.encoderconfig = (8, interlace)
+
+    ImageFile._save(imOut, fp, [("gif", (0,0)+im.size, 0, rawmode)])
 
     fp.write("\0") # end of image data
 
@@ -258,11 +284,6 @@ def _save_netpbm(im, fp, filename):
 
 def getheader(im):
     """Return a list of strings representing a GIF header"""
-
-    try:
-        rawmode = RAWMODE[im.mode]
-    except KeyError:
-	raise IOError, "cannot save mode %s as GIF" % im.mode
 
     s = [
 	"GIF87a" +		# magic

@@ -1,24 +1,25 @@
 /*
  * The Python Imaging Library
- * $Id: Filter.c,v 1.2 1996/03/29 00:23:23 fredrik Exp $
+ * $Id$
  *
  * apply convolution kernel to image
  *
- * to do:
- *	FIXME: Support RGB and RGBA/CMYK modes as well
- *	FIXME: Expand image border (current version leaves border as is)
- *	FIXME: Implement image processing gradient filters
- *
  * history:
- *	95-11-26 fl:	Created, supports 3x3 kernels
- *	95-11-27 fl:	Added 5x5 kernels, copy border
+ * 95-11-26 fl	Created, supports 3x3 kernels
+ * 95-11-27 fl	Added 5x5 kernels, copy border
+ * 99-07-26 fl	Eliminated a few compiler warnings
  *
+ * Copyright (c) Secret Labs AB 1997-99.  All rights reserved.
  * Copyright (c) Fredrik Lundh 1995.
- * Copyright (c) Secret Labs AB 1997.
  *
  * See the README file for information on usage and redistribution.
  */
 
+/*
+ * FIXME: Support RGB and RGBA/CMYK modes as well
+ * FIXME: Expand image border (current version leaves border as is)
+ * FIXME: Implement image processing gradient filters
+ */
 
 #include "Imaging.h"
 
@@ -161,13 +162,13 @@ ImagingFilter(Imaging im, const int* kernel)
     int sum, divisor, offset;
 
     if (!im || strcmp(im->mode, "L") != 0)
-	return (Imaging) ImagingError_Argument(NULL);
+	return (Imaging) ImagingError_ModeError();
 
     xkernel = kernel[0];
     ykernel = kernel[1];
 
     if ((xkernel != 3 && xkernel != 5) || xkernel != ykernel)
-	return (Imaging) ImagingError_Argument(NULL);
+	return (Imaging) ImagingError_ValueError("bad kernel size");
 
     divisor = kernel[2];
     offset  = kernel[3];
@@ -178,6 +179,7 @@ ImagingFilter(Imaging im, const int* kernel)
     if (!imOut)
 	return NULL;
 
+    /* brute force kernel implementations */
 #define	KERNEL3x3(image, kernel, d) ( \
     (int) image[y+1][x-d] * kernel[0] + \
     (int) image[y+1][x]   * kernel[1] + \
@@ -225,39 +227,39 @@ ImagingFilter(Imaging im, const int* kernel)
 	    for (x = 1; x < im->xsize-1; x++) {
 		sum = KERNEL3x3(im->image8, kernel, 1) / divisor + offset;
 		if (sum <= 0)
-		    imOut->image[y][x] = 0;
+		    imOut->image8[y][x] = 0;
 		else if (sum >= 255)
-		    imOut->image[y][x] = 255;
+		    imOut->image8[y][x] = 255;
 		else
-		    imOut->image[y][x] = sum;
+		    imOut->image8[y][x] = sum;
 	     }
-	    imOut->image[y][x] = im->image8[y][x];
+	    imOut->image8[y][x] = im->image8[y][x];
 	}
 	for (x = 0; x < im->xsize; x++)
-	    imOut->image[y][x] = im->image8[y][x];
+	    imOut->image8[y][x] = im->image8[y][x];
     } else {
 	/* 5x5 kernel. */
 	for (y = 0; y < 2; y++)
 	    for (x = 0; x < im->xsize; x++)
-		imOut->image[y][x] = im->image8[y][x];
+		imOut->image8[y][x] = im->image8[y][x];
 	for (; y < im->ysize-2; y++) {
 	    for (x = 0; x < 2; x++)
-		imOut->image[y][x] = im->image8[y][x];
+		imOut->image8[y][x] = im->image8[y][x];
 	    for (; x < im->xsize-2; x++) {
 		sum = KERNEL5x5(im->image8, kernel, 1) / divisor + offset;
 		if (sum <= 0)
-		    imOut->image[y][x] = 0;
+		    imOut->image8[y][x] = 0;
 		else if (sum >= 255)
-		    imOut->image[y][x] = 255;
+		    imOut->image8[y][x] = 255;
 		else
-		    imOut->image[y][x] = sum;
+		    imOut->image8[y][x] = sum;
 	    }
 	    for (; x < im->xsize; x++)
-		imOut->image[y][x] = im->image8[y][x];
+		imOut->image8[y][x] = im->image8[y][x];
 	}
 	for (; y < im->ysize; y++)
 	    for (x = 0; x < im->xsize; x++)
-		imOut->image[y][x] = im->image8[y][x];
+		imOut->image8[y][x] = im->image8[y][x];
     }
     return imOut;
 }

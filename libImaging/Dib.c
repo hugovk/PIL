@@ -1,19 +1,20 @@
 /*
  * The Python Imaging Library
- * $Id: Dib.c,v 1.3 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * imaging display object for Windows
  *
  * history:
- *	96-05-12 fl:	Created
- *	96-05-17 fl:	Up and running
- *	96-05-21 fl:	Added palette stuff
- *	96-05-26 fl:	Added query palette and mode inquery
- *	97-09-21 fl:	Added draw primitive
- *	98-01-20 fl:	Use StretchDIBits instead of StretchBlt
+ * 96-05-12 fl	Created
+ * 96-05-17 fl	Up and running
+ * 96-05-21 fl	Added palette stuff
+ * 96-05-26 fl	Added query palette and mode inquery
+ * 97-09-21 fl	Added draw primitive
+ * 98-01-20 fl	Use StretchDIBits instead of StretchBlt
+ * 98-12-30 fl	Plugged a resource leak in DeleteDIB (from Roger Burnham)
  *
+ * Copyright (c) Secret Labs AB 1997-98.
  * Copyright (c) Fredrik Lundh 1996.
- * Copyright (c) Secret Labs AB 1997, 98.
  *
  * See the README file for information on usage and redistribution.
  */
@@ -66,17 +67,17 @@ ImagingNewDIB(const char *mode, int xsize, int ysize)
     /* Check mode */
     if (strcmp(mode, "1") != 0 && strcmp(mode, "L") != 0 &&
 	strcmp(mode, "RGB") != 0)
-	return (ImagingDIB) ImagingError_Argument("bad mode");
+	return (ImagingDIB) ImagingError_ModeError();
 
     /* Create DIB context and info header */
     dib = (ImagingDIB) malloc(sizeof(*dib));
     if (!dib)
-	return (ImagingDIB) ImagingError_NoMemory();
+	return (ImagingDIB) ImagingError_MemoryError();
     dib->info = (BITMAPINFO*) malloc(sizeof(BITMAPINFOHEADER) +
                                      256 * sizeof(RGBQUAD));
     if (!dib->info) {
         free(dib);
-	return (ImagingDIB) ImagingError_NoMemory();
+	return (ImagingDIB) ImagingError_MemoryError();
     }
 
     memset(dib->info, 0, sizeof(BITMAPINFOHEADER));
@@ -92,7 +93,7 @@ ImagingNewDIB(const char *mode, int xsize, int ysize)
     if (!dib->dc) {
 	free(dib->info);
 	free(dib);
-	return (ImagingDIB) ImagingError_NoMemory();
+	return (ImagingDIB) ImagingError_MemoryError();
     }
 
     dib->bitmap = CreateDIBSection(dib->dc, dib->info, DIB_RGB_COLORS,
@@ -100,7 +101,7 @@ ImagingNewDIB(const char *mode, int xsize, int ysize)
     if (!dib->bitmap) {
         free(dib->info);
 	free(dib);
-	return (ImagingDIB) ImagingError_NoMemory();
+	return (ImagingDIB) ImagingError_MemoryError();
     }
 
     strcpy(dib->mode, mode);
@@ -118,7 +119,7 @@ ImagingNewDIB(const char *mode, int xsize, int ysize)
     }
 
     /* Bind the DIB to the device context */
-    SelectObject(dib->dc, dib->bitmap);
+    dib->old_bitmap = SelectObject(dib->dc, dib->bitmap);
 
     palette = dib->info->bmiColors;
 
@@ -203,7 +204,7 @@ ImagingNewDIB(const char *mode, int xsize, int ysize)
 
 #endif
 
-#if 1
+#if 0
 	    {
 		/* DEBUG: dump palette to file */
 		FILE *err = fopen("dib.pal", "w");
@@ -298,8 +299,10 @@ ImagingDeleteDIB(ImagingDIB dib)
 
     if (dib->palette)
 	DeleteObject(dib->palette);
-    if (dib->bitmap)
+    if (dib->bitmap) {
+        SelectObject(dib->dc, dib->old_bitmap);
 	DeleteObject(dib->bitmap);
+    }
     if (dib->dc)
 	DeleteDC(dib->dc);
     free(dib->info);

@@ -1,18 +1,22 @@
 /*
  * The Python Imaging Library.
- * $Id: JpegDecode.c,v 1.7 1997/06/01 18:13:07 fl Exp $
+ * $Id$
  *
  * decoder for JPEG image data.
  *
  * history:
- *	96-05-02 fl	Created
- *	96-05-05 fl	Handle small JPEG files correctly
- *	96-05-28 fl	Added "draft mode" support
- *	97-01-25 fl	Added colour conversion override
- *	98-01-31 fl	Adapted to libjpeg 6a
+ * 96-05-02 fl	Created
+ * 96-05-05 fl	Handle small JPEG files correctly
+ * 96-05-28 fl	Added "draft mode" support
+ * 97-01-25 fl	Added colour conversion override
+ * 98-01-31 fl	Adapted to libjpeg 6a
+ * 98-07-12 fl	Extended YCbCr support
+ * 98-12-29 fl	Added new state to handle suspension in multipass modes
  *
- * Copyright (c) Fredrik Lundh 1996-97.
  * Copyright (c) Secret Labs AB 1998.
+ * Copyright (c) Fredrik Lundh 1996-97.
+ *
+ * See the README file for details on usage and redistribution.
  */
 
 
@@ -94,7 +98,10 @@ error(j_common_ptr cinfo)
 {
   JPEGERROR* error;
   error = (JPEGERROR*) cinfo->err;
-  /* (*cinfo->err->output_message) (cinfo); DEBUG */
+#if 0
+  /* DEBUG */
+  cinfo->err->output_message(cinfo);
+#endif
   longjmp(error->setjmp_buffer, 1);
 }
 
@@ -143,6 +150,7 @@ ImagingJpegDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
     switch (state->state) {
 
     case 1:
+
 	/* Read JPEG header, until we find an image body. */
 	do {
 	    
@@ -163,11 +171,11 @@ ImagingJpegDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	    context->cinfo.jpeg_color_space = JCS_GRAYSCALE;
 	else if (strcmp(context->jpegmode, "RGB") == 0)
 	    context->cinfo.jpeg_color_space = JCS_RGB;
-	else if (strcmp(context->jpegmode, "YCC") == 0)
+	else if (strcmp(context->jpegmode, "YCbCr") == 0)
 	    context->cinfo.jpeg_color_space = JCS_YCbCr;
 	else if (strcmp(context->jpegmode, "CMYK") == 0)
 	    context->cinfo.jpeg_color_space = JCS_CMYK;
-	else if (strcmp(context->jpegmode, "YCCK") == 0) {
+	else if (strcmp(context->jpegmode, "YCbCrK") == 0) {
 	    context->cinfo.jpeg_color_space = JCS_YCCK;
 	}
 
@@ -179,6 +187,10 @@ ImagingJpegDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	    context->cinfo.out_color_space = JCS_RGB;
 	else if (strcmp(context->rawmode, "CMYK") == 0)
 	    context->cinfo.out_color_space = JCS_CMYK;
+	else if (strcmp(context->rawmode, "YCbCr") == 0)
+	    context->cinfo.out_color_space = JCS_YCbCr;
+	else if (strcmp(context->rawmode, "YCbCrK") == 0)
+	    context->cinfo.out_color_space = JCS_YCCK;
 	else {
 	    /* Disable decoder conversions */
 	    context->cinfo.jpeg_color_space = JCS_UNKNOWN;
@@ -193,11 +205,22 @@ ImagingJpegDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	    context->cinfo.do_fancy_upsampling = FALSE;
 	    context->cinfo.dct_method = JDCT_FASTEST;
 	}
-	jpeg_start_decompress(&context->cinfo);
-	state->state++;
+
+        state->state++;
 	/* fall through */
 
     case 2:
+
+        /* Set things up for decompression (this processes the entire
+           file if necessary to return data line by line) */
+	if (!jpeg_start_decompress(&context->cinfo))
+            break;
+        
+	state->state++;
+	/* fall through */
+
+    case 3:
+
 	/* Decompress a single line of data */
 	ok = 1;
 	while (state->y < state->ysize) {
@@ -214,7 +237,8 @@ ImagingJpegDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	state->state++;
 	/* fall through */
 
-    case 3:
+    case 4:
+
 	/* Finish decompression */
 	if (!jpeg_finish_decompress(&context->cinfo))
 	    break;

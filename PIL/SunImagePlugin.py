@@ -1,25 +1,26 @@
 #
 # The Python Imaging Library.
-# $Id: SunImagePlugin.py,v 1.3 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # Sun image file handling
 #
 # History:
-#	95-09-10 fl	Created
-#	96-05-28 fl	Fixed 32-bit alignment
+# 95-09-10 fl	Created
+# 96-05-28 fl	Fixed 32-bit alignment
+# 98-12-29 fl	Import ImagePalette module
 #
-# Copyright (c) Secret Labs AB 1997.
+# Copyright (c) Secret Labs AB 1997-98.
 # Copyright (c) Fredrik Lundh 1995-96.
 #
 # See the README file for information on usage and redistribution.
 #
 
 
-__version__ = "0.1"
+__version__ = "0.2"
 
 
 import regex, string
-import Image, ImageFile
+import Image, ImageFile, ImagePalette
 
 
 def i16(c):
@@ -68,7 +69,7 @@ class SunImageFile(ImageFile.ImageFile):
 	    if self.mode == "L":
 		self.mode = "P"
 
-	stride = (((self.size[0] * depth + 7) / 8) + 3) & -4
+	stride = (((self.size[0] * depth + 7) / 8) + 3) & (~3)
 
 	if compression == 1:
 	    self.tile = [("raw", (0,0)+self.size, offset, (rawmode, stride))]

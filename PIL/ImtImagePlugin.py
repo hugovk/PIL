@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: PpmImagePlugin.py,v 1.4 1996/05/09 21:21:53 fredrik Exp fredrik $
+# $Id$
 #
 # IM Tools support for PIL
 #

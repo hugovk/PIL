@@ -1,13 +1,13 @@
 /*
  * The Python Imaging Library
- * $Id: Palette.c,v 1.2 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * imaging palette object
  *
  * history:
- *	96-05-05 fl:	Added to library
- *	96-05-27 fl:	Added colour mapping stuff
- *	97-05-12 fl:	Support RGBA palettes
+ * 96-05-05 fl:	Added to library
+ * 96-05-27 fl:	Added colour mapping stuff
+ * 97-05-12 fl:	Support RGBA palettes
  *
  * Copyright (c) Fredrik Lundh 1995-97.
  * Copyright (c) Secret Labs AB 1997.
@@ -21,8 +21,6 @@
 #include "Imaging.h"
 
 
-/* The palette buffer contains Lxxx, RGBx, or CMYK values */
-
 ImagingPalette
 ImagingPaletteNew(const char* mode)
 {
@@ -33,10 +31,10 @@ ImagingPaletteNew(const char* mode)
 
     palette = calloc(1, sizeof(struct ImagingPaletteInstance));
     if (!palette)
-	return (ImagingPalette) ImagingError_NoMemory();
+	return (ImagingPalette) ImagingError_MemoryError();
 
     if (strcmp(mode, "RGB") && strcmp(mode, "RGBA"))
-	return (ImagingPalette) ImagingError_Argument("Illegal mode");
+	return (ImagingPalette) ImagingError_ModeError();
 
     strcpy(palette->mode, mode);
 
@@ -90,7 +88,7 @@ ImagingPaletteDuplicate(ImagingPalette palette)
 
     new_palette = malloc(sizeof(struct ImagingPaletteInstance));
     if (!new_palette)
-	return (ImagingPalette) ImagingError_NoMemory();
+	return (ImagingPalette) ImagingError_MemoryError();
 
     memcpy(new_palette, palette, sizeof(struct ImagingPaletteInstance));
 
@@ -121,12 +119,11 @@ ImagingPaletteDelete(ImagingPalette palette)
    a palette index cache. */
 
 /*
- * This implementation is modelled after the one in the IJG JPEG library
- * by Thomas G. Lane.  Original algorithms by Paul Heckbert and Spencer
- * W. Thomas.
+ * This implementation is loosely based on the corresponding code in
+ * the IJG JPEG library by Thomas G. Lane.  Original algorithms by
+ * Paul Heckbert and Spencer W. Thomas.
  *
- * The IJG JPEG library is copyright (C) 1991-1995, Thomas G. Lane.
- */
+ * The IJG JPEG library is copyright (C) 1991-1995, Thomas G. Lane.  */
 
 #define	DIST(a, b, s) (a - b) * (a - b) * s
 
@@ -275,7 +272,7 @@ ImagingPaletteCachePrepare(ImagingPalette palette)
 
 	palette->cache = (INT16*) malloc(entries * sizeof(INT16));
 	if (!palette->cache) {
-	    ImagingError_NoMemory();
+	    ImagingError_MemoryError();
 	    return -1;
 	}
 

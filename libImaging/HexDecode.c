@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: HexDecode.c,v 1.2 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * decoder for hex encoded image data
  *

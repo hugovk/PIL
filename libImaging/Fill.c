@@ -1,14 +1,18 @@
 /*
  * The Python Imaging Library
- * $Id: Fill.c,v 1.4 1997/06/01 18:06:54 fl Exp $
+ * $Id$
  *
  * fill image with constant pixel value
  *
  * history:
- *	95-11-26 fl:	Moved from Imaging.c
- *	96-05-17 fl:	Added radial fill, renamed wedge to linear
+ * 95-11-26 fl	moved from Imaging.c
+ * 96-05-17 fl	added radial fill, renamed wedge to linear
+ * 98-06-23 fl	changed ImageFill signature
  *
+ * Copyright (c) Secret Labs AB 1997-98.  All rights reserved.
  * Copyright (c) Fredrik Lundh 1995-96.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -18,28 +22,23 @@
 
 
 Imaging
-ImagingFill(const char *mode, int xsize, int ysize, void *colour)
+ImagingFill(Imaging im, const void* colour)
 {
-    Imaging imOut;
     INT32 c;
     int x, y;
 
-    imOut = ImagingNew(mode, xsize, ysize);
-    if (!imOut)
-	return NULL;
-
     c = 0L;
-    memcpy(&c, colour, imOut->bands);
+    memcpy(&c, colour, im->pixelsize);
 
-    if (imOut->image32 && c != 0L)
-	for (y = 0; y < ysize; y++)
-	    for (x = 0; x < xsize; x++)
-		imOut->image32[y][x] = c;
+    if (im->image32 && c != 0L)
+	for (y = 0; y < im->ysize; y++)
+	    for (x = 0; x < im->xsize; x++)
+		im->image32[y][x] = c;
     else
-	for (y = 0; y < ysize; y++)
-	    memset(imOut->image[y], (unsigned char) c, imOut->linesize);
+	for (y = 0; y < im->ysize; y++)
+	    memset(im->image[y], (unsigned char) c, im->linesize);
 
-    return imOut;
+    return im;
 }
 
 Imaging
@@ -49,7 +48,7 @@ ImagingFillLinearGradient(const char *mode)
     int y;
 
     if (strlen(mode) != 1)
-	return (Imaging) ImagingError_Argument("Bad mode for linear fill");
+	return (Imaging) ImagingError_ModeError();
 
     im = ImagingNew(mode, 256, 256);
     if (!im)
@@ -69,7 +68,7 @@ ImagingFillRadialGradient(const char *mode)
     int d;
 
     if (strlen(mode) != 1)
-	return (Imaging) ImagingError_Argument("Bad mode for radial fill");
+	return (Imaging) ImagingError_ModeError();
 
     im = ImagingNew(mode, 256, 256);
     if (!im)

@@ -2,11 +2,11 @@
 The Python Imaging Library
 $Id: FORMATS,v 1.5 1996/10/04 19:41:25 fredrik Exp $
 
-*** File formats supported by release 0.3a1 ***
+*** File formats supported by release 1.0rc1 ***
 
 format	summary
 --------------------------------------------------------------------
-ARG	Reads the highly experimental ARG animation format. [1, 2]
+ARG	Reads the (highly experimental) ARG animation format. [1, 2]
 
 BMP	Reads and writes 1, 4, 8 and 24-bit uncompressed images. RLE
         compressed files are not supported.
@@ -38,20 +38,22 @@ GD	Reads GD images through the "GdImageFile" module.  Note that
 GIF	Reads GIF87 and GIF89 images, and writes uncompressed GIF87
 	images.  Animation files can be handled via the "seek/tell"
 	methods.  To generate animation files, see the "gifmaker.py"
-	script.
+	sample script.
 
 ICO	Reads 4 and 8-bit Windows icon files.  If a file contains
 	multiple icons, the largest size is loaded.
 
-IM	Reads and writes most versions of the IFUNC/LabEye IM format.
+IM	Reads and writes basic versions of the IFUNC/LabEye IM format.
 
 IMT	Reads single-layer, 8-bit images of the Image Tools format.
 
-IPTC	Reads some versions of the IPTC/NAA newsphoto format.
+IPTC	Reads some versions of the IPTC/ANPA Newsphoto format.  Tags
+        are stored in the "info" attribute.  This driver is experimental.
 
-JPEG	Reads and writes "L", "RGB" and "CMYK" images.  "1" images are
-	written as "L", and "RGBA" images as "RGB".  This driver also
-	supports progressive JPEG files. [1]
+JPEG	Reads and writes "L", "RGB", "CMYK" and "YCrCb" images.  Note
+        that YCrCb files are automatically converted to RGB, unless you
+	use the "draft" method.  This driver also supports progressive
+        JPEG files. [1]
 
 MCIDAS	Reads 8-bit McIdas area files.
 
@@ -61,13 +63,13 @@ MIC	Reads Microsoft Image Composer images.  You can use the seek
 MPEG	Identifies MPEG video streams.
 
 MSP	Reads and writes MSP images.  Reads both version 1 and version
-	2 files, but only writes version 1 files (uncompressed).
+	2 files, but writes version 1 files only (uncompressed).
 
 PCD	Reads PhotoCD (PCD) images.  PIL reads the base resolution
 	only (768x512).
 
-PCX	Reads 1, 4, 8, and 24-bit compressed images.  Uncompressed PCX
-        files are not supported.
+PCX	Reads and writes 1, 2, 4, 8, and 24-bit compressed images.
+	Uncompressed PCX files are not supported.
 
 PDF	Identifies and writes PDF images. [1]
 
@@ -75,22 +77,21 @@ PIXAR	Reads PIXAR raster files.  Only "RGB" images are supported in
 	this version.  This driver is experimental.
 
 PNG	Reads W3O PNG files of all possible flavours (except interlaced
-	files in this version).  Writes "1", "P", "L", "RGB", and "RGBA"
-	images. [2]
+	files in this version).  Writes "1", "P", "L", "I", "RGB", and
+	"RGBA" images. [2]
 
 PPM	Reads and writes "1" (PBM), "L" (PGM), and "RGB" (PPM) images.
-	"RGBA" images are written as "RGB".
 
 PSD	Reads Adobe PSD files.  Both uncompressed and compressed
-	versions are supported.  Note that overlays and auxiliary
-	layers are not read.
+	(packbits) versions are supported.  Note that overlays and
+	auxiliary layers are not read.
 
 SGI	Reads uncompressed "L" and "RGB" images.
 
 SUN	Reads uncompressed "1", "L" and "RGB" images.
 
-TGA	Reads uncompressed 8, 16, 24 and 32-bit "P", "L", and "RGB"
-	images.
+TGA	Reads uncompressed 8, 16, 24 and 32-bit "P", "L", "RGB", and
+	"RGBA" images.
 
 TIFF	Reads and writes "1", "L", "RGB", "RGBA", and "CMYK" images.
 	PIL reads the following TIFF flavours:

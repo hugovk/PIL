@@ -1,12 +1,11 @@
-/* $Id: ImDib.h,v 1.3 1996/08/15 13:12:44 fredrik Exp $
- *
+/*
  * The Python Imaging Library
+ * $Id$
  *
- * File:
- *	ImDib.h -- Windows DIB specifics
+ * Windows DIB specifics
  *
+ * Copyright (c) Secret Labs AB 1997-98.
  * Copyright (c) Fredrik Lundh 1996.
- * Copyright (c) Secret Labs AB 1997, 98.
  *
  * See the README file for information on usage and redistribution.
  */
@@ -23,6 +22,7 @@ struct ImagingDIBInstance {
     /* Windows interface */
     HDC dc;
     HBITMAP bitmap;
+    HGDIOBJ old_bitmap;
     BITMAPINFO *info;
     UINT8 *bits;
     HPALETTE palette;

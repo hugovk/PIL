@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: Jpeg.h,v 1.2 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * declarations for the IJG JPEG codec interface.
  *

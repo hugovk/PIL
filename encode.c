@@ -1,25 +1,27 @@
-/* $Id: encode.c,v 1.3 1996/10/04 19:40:33 fredrik Exp $
- *
+/*
  * The Python Imaging Library.
+ * $Id$
  *
- * File:
- *	encode.c -- experimental encoder interfaces for the Imaging library
+ * standard encoder interfaces for the Imaging library
  *
  * History:
- *	96-04-19 fl	Based on decoders.c
- *	96-05-12 fl	Compile cleanly as C++
- *	96-12-30 fl	Plugged potential memory leak for tiled images
- *	97-01-03 fl	Added GIF encoder
- *	97-01-05 fl	Plugged encoder buffer leaks
- *	97-01-11 fl	Added encode_to_file method
- *	98-03-09 fl	Added mode argument to encoders
+ * 96-04-19 fl	Based on decoders.c
+ * 96-05-12 fl	Compile cleanly as C++
+ * 96-12-30 fl	Plugged potential memory leak for tiled images
+ * 97-01-03 fl	Added GIF encoder
+ * 97-01-05 fl	Plugged encoder buffer leaks
+ * 97-01-11 fl	Added encode_to_file method
+ * 98-03-09 fl	Added mode/rawmode argument to encoders
+ * 98-07-09 fl	Added interlace argument to GIF encoder
+ * 99-02-07 fl	Added PCX encoder
  *
- * Copyright (c) Secret Labs AB 1997-98.
+ * Copyright (c) Secret Labs AB 1997-99.
  * Copyright (c) Fredrik Lundh 1996-97.
  *
  * See the README file for information on usage and redistribution.
  */
 
+/* FIXME: make these pluggable! */
 
 #include "Python.h"
 
@@ -199,7 +201,7 @@ _setimage(ImagingEncoderObject* encoder, PyObject* args)
 	state->xsize + state->xoff > im->xsize ||
 	state->ysize <= 0 ||
 	state->ysize + state->yoff > im->ysize) {
-	PyErr_SetString(PyExc_SystemError, "illegal tile extent");
+	PyErr_SetString(PyExc_SystemError, "tile cannot extend outside image");
 	return NULL;
     }
 
@@ -274,6 +276,7 @@ get_packer(ImagingEncoderObject* encoder, const char* mode,
     return 0;
 }
 
+
 /* -------------------------------------------------------------------- */
 /* EPS									*/
 /* -------------------------------------------------------------------- */
@@ -294,7 +297,7 @@ PyImaging_EpsEncoderNew(PyObject* self, PyObject* args)
 
 
 /* -------------------------------------------------------------------- */
-/* RAW									*/
+/* GIF									*/
 /* -------------------------------------------------------------------- */
 
 PyObject*
@@ -305,7 +308,8 @@ PyImaging_GifEncoderNew(PyObject* self, PyObject* args)
     char *mode;
     char *rawmode;
     int bits = 8;
-    if (!PyArg_ParseTuple(args, "ss|i", &mode, &rawmode, &bits))
+    int interlace = 0;
+    if (!PyArg_ParseTuple(args, "ss|ii", &mode, &rawmode, &bits, &interlace))
 	return NULL;
 
     encoder = PyImaging_EncoderNew(sizeof(GIFENCODERSTATE));
@@ -318,6 +322,35 @@ PyImaging_GifEncoderNew(PyObject* self, PyObject* args)
     encoder->encode = ImagingGifEncode;
 
     ((GIFENCODERSTATE*)encoder->state.context)->bits = bits;
+    ((GIFENCODERSTATE*)encoder->state.context)->interlace = interlace;
+
+    return (PyObject*) encoder;
+}
+
+
+/* -------------------------------------------------------------------- */
+/* PCX									*/
+/* -------------------------------------------------------------------- */
+
+PyObject*
+PyImaging_PcxEncoderNew(PyObject* self, PyObject* args)
+{
+    ImagingEncoderObject* encoder;
+
+    char *mode;
+    char *rawmode;
+    int bits = 8;
+    if (!PyArg_ParseTuple(args, "ss|ii", &mode, &rawmode, &bits))
+	return NULL;
+
+    encoder = PyImaging_EncoderNew(0);
+    if (encoder == NULL)
+	return NULL;
+
+    if (get_packer(encoder, mode, rawmode) < 0)
+	return NULL;
+
+    encoder->encode = ImagingPcxEncode;
 
     return (PyObject*) encoder;
 }
@@ -336,6 +369,7 @@ PyImaging_RawEncoderNew(PyObject* self, PyObject* args)
     char *rawmode;
     int stride = 0;
     int ystep = 1;
+
     if (!PyArg_ParseTuple(args, "ss|ii", &mode, &rawmode, &stride, &ystep))
 	return NULL;
 
@@ -353,6 +387,7 @@ PyImaging_RawEncoderNew(PyObject* self, PyObject* args)
 
     return (PyObject*) encoder;
 }
+
 
 /* -------------------------------------------------------------------- */
 /* XBM									*/
@@ -374,6 +409,7 @@ PyImaging_XbmEncoderNew(PyObject* self, PyObject* args)
 
     return (PyObject*) encoder;
 }
+
 
 /* -------------------------------------------------------------------- */
 /* ZIP									*/

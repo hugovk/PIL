@@ -1,13 +1,13 @@
 /* 
  * The Python Imaging Library
- * $Id: Blend.c,v 1.5 1996/10/04 19:45:07 fredrik Exp fredrik $
+ * $Id$
  *
  * interpolate between two existing images
  *
  * history:
- *	96-03-20 fl:	Created
- *	96-05-18 fl:	Simplified blend expression
- *	96-10-05 fl:	Fixed expression bug, special case for interpolation
+ * 96-03-20 fl	Created
+ * 96-05-18 fl	Simplified blend expression
+ * 96-10-05 fl	Fixed expression bug, special case for interpolation
  *
  * Copyright (c) Fredrik Lundh 1996.
  * Copyright (c) Secret Labs AB 1997.
@@ -18,6 +18,7 @@
 
 #include "Imaging.h"
 
+
 Imaging
 ImagingBlend(Imaging imIn1, Imaging imIn2, float alpha)
 {
@@ -25,10 +26,9 @@ ImagingBlend(Imaging imIn1, Imaging imIn2, float alpha)
     int x, y;
 
     /* Check arguments */
-    if (!imIn1 || !imIn2)
-	return ImagingError_Argument(NULL);
-    if (imIn1->type  != 0 || imIn1->type  != imIn2->type  ||
-	imIn1->depth != 8 || imIn1->depth != imIn2->depth ||
+    if (!imIn1 || !imIn2 || imIn1->type != IMAGING_TYPE_UINT8)
+	return ImagingError_ModeError();
+    if (imIn1->type  != imIn2->type  ||
 	imIn1->bands != imIn2->bands ||
 	imIn1->xsize != imIn2->xsize ||
 	imIn1->ysize != imIn2->ysize)

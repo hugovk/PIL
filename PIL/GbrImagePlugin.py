@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library
-# $Id: GbrImagePlugin.py,v 1.3 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # load a GIMP brush file
 #
@@ -50,13 +50,14 @@ class GbrImageFile(ImageFile.ImageFile):
 	self.data = self.fp.read(width * height)
 
     def load(self):
+
 	if not self.data:
 	    return
+
 	# create an image out of the brush data block
 	self.im = Image.core.new(self.mode, self.size)
 	self.im.fromstring(self.data)
 	self.data = ""
-
 
 #
 # registry

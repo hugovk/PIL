@@ -1,13 +1,14 @@
 #
 # The Python Imaging Library
-# $Id: PSDraw.py,v 1.6 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # simple postscript graphics interface
 #
 # History:
-#	96-04-20 fl	Created
+# 96-04-20 fl	Created
+# 99-01-10 fl	Added gsave/grestore to image method
 #
-# Copyright (c) Secret Labs AB 1997.
+# Copyright (c) Secret Labs AB 1997-99.
 # Copyright (c) Fredrik Lundh 1996.
 #
 # See the README file for information on usage and redistribution.
@@ -90,14 +91,14 @@ class PSDraw:
 	    x = x * ymax / y; y = ymax
 	dx = (xmax - x) / 2 + box[0]
 	dy = (ymax - y) / 2 + box[1]
-	self.fp.write("%f %f translate\n" % (dx, dy))
+	self.fp.write("gsize\n%f %f translate\n" % (dx, dy))
 	if (x, y) != im.size:
 	    # EpsImagePlugin._save prints the image at (0,0,xsize,ysize)
 	    sx = x / im.size[0]
 	    sy = y / im.size[1]
 	    self.fp.write("%f %f scale\n" % (sx, sy))
 	EpsImagePlugin._save(im, self.fp, None, 0)
-	self.fp.write("\n")
+	self.fp.write("\ngrestore\n")
 
 # --------------------------------------------------------------------
 # Postscript driver

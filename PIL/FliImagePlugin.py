@@ -1,14 +1,15 @@
 #
 # The Python Imaging Library.
-# $Id: FliImagePlugin.py,v 1.2 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # FLI/FLC file handling.
 #
 # History:
 #	95-09-01 fl	Created
 #	97-01-03 fl	Fixed parser, setup decoder tile
+#	98-07-15 fl	Renamed offset attribute to avoid name clash
 #
-# Copyright (c) Secret Labs AB 1997.
+# Copyright (c) Secret Labs AB 1997-98.
 # Copyright (c) Fredrik Lundh 1995-97.
 #
 # See the README file for information on usage and redistribution.
@@ -61,11 +62,11 @@ class FliImageFile(ImageFile.ImageFile):
 
 	s = self.fp.read(16)
 
-	self.offset = 128
+	self.__offset = 128
 
 	if i16(s[4:6]) == 0xF100:
 	    # prefix chunk; ignore it
-	    self.offset = self.offset + i32(s)
+	    self.__offset = self.__offset + i32(s)
 	    s = self.fp.read(16)
 
 	if i16(s[4:6]) == 0xF1FA:
@@ -81,7 +82,7 @@ class FliImageFile(ImageFile.ImageFile):
 
 	# set things up to decode first frame
 	self.frame = -1
-	self.fp2 = self.fp
+	self.__fp = self.fp
 
 	self.seek(0)
 
@@ -110,8 +111,8 @@ class FliImageFile(ImageFile.ImageFile):
 	self.frame = frame
 
 	# move to next frame
-	self.fp = self.fp2
-	self.fp.seek(self.offset)
+	self.fp = self.__fp
+	self.fp.seek(self.__offset)
 
 	s = self.fp.read(4)
 	if not s:
@@ -120,9 +121,9 @@ class FliImageFile(ImageFile.ImageFile):
 	framesize = i32(s)
 
 	self.decodermaxblock = framesize
-	self.tile = [("fli", (0,0)+self.size, self.offset, None)]
+	self.tile = [("fli", (0,0)+self.size, self.__offset, None)]
 
-	self.offset = self.offset + framesize
+	self.__offset = self.__offset + framesize
 
     def tell(self):
 

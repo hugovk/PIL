@@ -5,8 +5,6 @@
 
 from Tkinter import *
 import Image, ImageTk
-import sys
-import os
 
 #
 # an image viewer
@@ -28,13 +26,10 @@ class UI(Label):
 #
 # script interface
 
-def main():
+if __name__ == "__main__":
 
-    if os.name == 'mac' and not sys.argv[1:]:
-    	import macfs
-    	fss, ok = macfs.StandardGetFile()
-    	if not ok: sys.exit(0)
-    	sys.argv[1:] = [fss.as_pathname()]
+    import sys
+
     if not sys.argv[1:]:
 	print "Syntax: python viewer.py imagefile"
 	sys.exit(1)
@@ -44,17 +39,8 @@ def main():
     root = Tk()
     root.title(filename)
 
-    try:
-	root.config(bd=2, relief=SUNKEN)
-    except AttributeError:
-    	# workaround for Python 1.4
-	root.tk.call(root, "config", "-bd", 2, "-relief", SUNKEN)
-
     im = Image.open(filename)
 
     UI(root, im).pack()
 
     root.mainloop()
-
-
-main()

@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: JpegEncode.c,v 1.5 1997/01/14 16:40:04 fl Exp $
+ * $Id$
  *
  * coder for JPEG data
  *
@@ -9,8 +9,13 @@
  *	96-07-16 fl	don't drop last block of encoded data
  *	96-12-30 fl	added quality and progressive settings
  *	97-01-08 fl	added streamtype settings
+ *	98-01-31 fl	Adapted to libjpeg 6a
+ *	98-07-12 fl	added YCbCr support
  *
- * Copyright (c) Fredrik Lundh 1996-97.
+ * Copyright (c) Secret Labs AB 1997-98.
+ * Copyright (c) Fredrik Lundh 1995-97.
+ *
+ * See the README file for details on usage and redistribution.
  */
 
 
@@ -106,26 +111,30 @@ ImagingJpegEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 
     switch (state->state) {
 
-      case 1:
+    case 1:
 
 	context->cinfo.image_width = state->xsize;
 	context->cinfo.image_height = state->ysize;
+
 	switch (state->bits) {
-	  case 8:
-	    context->cinfo.input_components = 1;
-	    context->cinfo.in_color_space = JCS_GRAYSCALE;
-	    break;
-	  case 24:
-	    context->cinfo.input_components = 3;
-	    context->cinfo.in_color_space = JCS_RGB;
-	    break;
-	  case 32:
-	    context->cinfo.input_components = 4;
-	    context->cinfo.in_color_space = JCS_CMYK;
-	    break;
-	  default:
-	    state->errcode = IMAGING_CODEC_CONFIG;
-	    return -1;
+        case 8:
+            context->cinfo.input_components = 1;
+            context->cinfo.in_color_space = JCS_GRAYSCALE;
+            break;
+        case 24:
+            context->cinfo.input_components = 3;
+            if (strcmp(im->mode, "YCbCr") == 0)
+                context->cinfo.in_color_space = JCS_YCbCr;
+            else
+                context->cinfo.in_color_space = JCS_RGB;
+            break;
+        case 32:
+            context->cinfo.input_components = 4;
+            context->cinfo.in_color_space = JCS_CMYK;
+            break;
+        default:
+            state->errcode = IMAGING_CODEC_CONFIG;
+            return -1;
 	}
 
 	/* Compressor configuration */
@@ -155,7 +164,8 @@ ImagingJpegEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	state->state++;
 	/* fall through */
 
-      case 2:
+    case 2:
+
 	ok = 1;
 	while (state->y < state->ysize) {
 	    state->shuffle(state->buffer,
@@ -172,7 +182,8 @@ ImagingJpegEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	state->state++;
 	/* fall through */
 
-      case 3:
+    case 3:
+
 	/* Finish compression */
 	if (context->destination.pub.free_in_buffer < 100)
 	    break;

@@ -46,6 +46,12 @@ class Interval:
 # --------------------------------------------------------------------
 # main program
 
+html = 0
+
+if sys.argv[1:2] == ["-h"]:
+    html = 1
+    del sys.argv[1]
+
 if not sys.argv[2:]:
     print
     print "Syntax: python explode.py infile template [range]"
@@ -66,6 +72,7 @@ outfile = sys.argv[2]
 frames = Interval(string.join(sys.argv[3:], ","))
 
 try:
+    # check if outfile contains a placeholder
     outfile % 1
 except TypeError:
     file, ext = os.path.splitext(outfile)
@@ -75,11 +82,19 @@ ix = 1
 
 im = Image.open(infile)
 
+if html:
+    file, ext = os.path.splitext(outfile)
+    html = open(file+".html", "w")
+    html.write("<html>\n<body>\n")
+
 while 1:
 
     if frames[ix]:
         im.save(outfile % ix)
         print outfile % ix
+
+	if html:
+	    html.write("<img src='%s'><br>\n" % outfile % ix)
 
     try:
 	im.seek(ix)
@@ -87,3 +102,6 @@ while 1:
 	break
 
     ix = ix + 1
+
+if html:
+    html.write("</body>\n</html>\n")

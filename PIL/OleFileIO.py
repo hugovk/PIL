@@ -9,20 +9,23 @@
 # be used to read other files of this type.
 #
 # History:
-#	97-01-20 fl	Created
-#	97-01-22 fl	Fixed 64-bit portability quirk
+# 97-01-20 fl	Created
+# 97-01-22 fl	Fixed 64-bit portability quirk
 #
 # Notes:
-#	FIXME: change filename to use "a/b/c" instead of ["a", "b", "c"]
-#	FIXME: provide a glob mechanism function (using fnmatchcase)
+# FIXME: change filename to use "a/b/c" instead of ["a", "b", "c"]
+# FIXME: provide a glob mechanism function (using fnmatchcase)
 #
 # Literature:
-#	"FlashPix Format Specification, Appendix A", Kodak and Microsoft,
-#	 September 1996.
 #
-#	"If this document and functionality of the Software conflict,
-#	 the actual functionality of the Software represents the correct
-#	 functionality"	-- Microsoft, in the OLE format specification
+# "FlashPix Format Specification, Appendix A", Kodak and Microsoft,
+#  September 1996.
+#
+# Quotes:
+# 
+# "If this document and functionality of the Software conflict,
+#  the actual functionality of the Software represents the correct
+#  functionality" -- Microsoft, in the OLE format specification
 #
 # Copyright (c) Secret Labs AB 1997.
 # Copyright (c) Fredrik Lundh 1997.

@@ -1,4 +1,5 @@
 Imaging/README
+
 Imaging/CHANGES
 Imaging/FORMATS
 Imaging/CONTENTS
@@ -6,18 +7,26 @@ Imaging/CONTENTS
 Imaging/Setup.in
 Imaging/Makefile.pre.in
 
-Imaging/_imaging.mak
-Imaging/_imaging.def
+Imaging/libImaging/Makefile.win
+Imaging/libImaging/ImConfig.h.win
 
 Imaging/libImaging/Imaging.h
 Imaging/libImaging/ImConfig.h
 Imaging/libImaging/ImDib.h
 Imaging/libImaging/ImPlatform.h
 
+Imaging/libImaging/Quant.h
+Imaging/libImaging/QuantHash.h
+Imaging/libImaging/QuantHeap.h
+Imaging/libImaging/QuantDefines.h
+Imaging/libImaging/QuantTypes.h
+
+Imaging/libImaging/Access.c
 Imaging/libImaging/Bands.c
 Imaging/libImaging/Blend.c
 Imaging/libImaging/Chops.c
 Imaging/libImaging/Convert.c
+Imaging/libImaging/ConvertYCbCr.c
 Imaging/libImaging/Copy.c
 Imaging/libImaging/Crc32.c
 Imaging/libImaging/Crop.c
@@ -38,7 +47,9 @@ Imaging/libImaging/Pack.c
 Imaging/libImaging/Palette.c
 Imaging/libImaging/Paste.c
 Imaging/libImaging/Point.c
-Imaging/libImaging/Quantize.c
+Imaging/libImaging/Quant.c
+Imaging/libImaging/QuantHash.c
+Imaging/libImaging/QuantHeap.c
 Imaging/libImaging/Storage.c
 Imaging/libImaging/Unpack.c
 Imaging/libImaging/UnpackYCC.c
@@ -61,6 +72,7 @@ Imaging/libImaging/LzwDecode.c
 Imaging/libImaging/MspDecode.c
 Imaging/libImaging/PackDecode.c
 Imaging/libImaging/PcdDecode.c
+Imaging/libImaging/PcxEncode.c
 Imaging/libImaging/PcxDecode.c
 Imaging/libImaging/RawDecode.c
 Imaging/libImaging/RawEncode.c
@@ -74,22 +86,41 @@ Imaging/libImaging/ZipEncode.c
 Imaging/libImaging/coretest.c
 
 Imaging/libImaging/configure
-Imaging/libImaging/configure.in
 Imaging/libImaging/ImConfig.h.in
 Imaging/libImaging/Makefile.in
 
-Imaging/_imagingmodule.c
+Imaging/_imaging.c
 Imaging/decode.c
 Imaging/encode.c
 Imaging/display.c
+Imaging/map.c
+Imaging/outline.c
 Imaging/path.c
 
 Imaging/PIL.pth
+Imaging/PIL/__init__.py
+Imaging/PIL/ArgImagePlugin.py
+Imaging/PIL/BdfFontFile.py
+Imaging/PIL/BmpImagePlugin.py
+Imaging/PIL/ContainerIO.py
+Imaging/PIL/CurImagePlugin.py
+Imaging/PIL/DcxImagePlugin.py
+Imaging/PIL/EpsImagePlugin.py
+Imaging/PIL/FliImagePlugin.py
+Imaging/PIL/FontFile.py
+Imaging/PIL/FpxImagePlugin.py
+Imaging/PIL/GbrImagePlugin.py
+Imaging/PIL/GdImageFile.py
+Imaging/PIL/GifImagePlugin.py
+Imaging/PIL/GimpGradientFile.py
+Imaging/PIL/GimpPaletteFile.py
+Imaging/PIL/IcoImagePlugin.py
 Imaging/PIL/Image.py
 Imaging/PIL/ImageChops.py
 Imaging/PIL/ImageDraw.py
 Imaging/PIL/ImageEnhance.py
 Imaging/PIL/ImageFile.py
+Imaging/PIL/ImageFileIO.py
 Imaging/PIL/ImageFilter.py
 Imaging/PIL/ImageFont.py
 Imaging/PIL/ImagePalette.py
@@ -98,24 +129,6 @@ Imaging/PIL/ImageSequence.py
 Imaging/PIL/ImageStat.py
 Imaging/PIL/ImageTk.py
 Imaging/PIL/ImageWin.py
-
-Imaging/PIL/PSDraw.py
-
-Imaging/PIL/ContainerIO.py
-Imaging/PIL/OleFileIO.py
-Imaging/PIL/TarIO.py
-
-Imaging/PIL/ArgImagePlugin.py
-Imaging/PIL/BmpImagePlugin.py
-Imaging/PIL/CurImagePlugin.py
-Imaging/PIL/DcxImagePlugin.py
-Imaging/PIL/EpsImagePlugin.py
-Imaging/PIL/FliImagePlugin.py
-Imaging/PIL/FpxImagePlugin.py
-Imaging/PIL/GbrImagePlugin.py
-Imaging/PIL/GdImageFile.py
-Imaging/PIL/GifImagePlugin.py
-Imaging/PIL/IcoImagePlugin.py
 Imaging/PIL/ImImagePlugin.py
 Imaging/PIL/ImtImagePlugin.py
 Imaging/PIL/IptcImagePlugin.py
@@ -124,34 +137,40 @@ Imaging/PIL/McIdasImagePlugin.py
 Imaging/PIL/MicImagePlugin.py
 Imaging/PIL/MpegImagePlugin.py
 Imaging/PIL/MspImagePlugin.py
+Imaging/PIL/OleFileIO.py
+Imaging/PIL/PaletteFile.py
 Imaging/PIL/PcdImagePlugin.py
+Imaging/PIL/PcfFontFile.py
 Imaging/PIL/PcxImagePlugin.py
 Imaging/PIL/PdfImagePlugin.py
 Imaging/PIL/PixarImagePlugin.py
 Imaging/PIL/PngImagePlugin.py
 Imaging/PIL/PpmImagePlugin.py
 Imaging/PIL/PsdImagePlugin.py
+Imaging/PIL/PSDraw.py
 Imaging/PIL/SgiImagePlugin.py
 Imaging/PIL/SunImagePlugin.py
+Imaging/PIL/TarIO.py
 Imaging/PIL/TgaImagePlugin.py
 Imaging/PIL/TiffImagePlugin.py
+Imaging/PIL/TiffTags.py
+Imaging/PIL/WmfImagePlugin.py
 Imaging/PIL/XbmImagePlugin.py
 Imaging/PIL/XpmImagePlugin.py
-Imaging/PIL/WmfImagePlugin.py
+Imaging/PIL/XVThumbImagePlugin.py
 
-Imaging/pilconvert.py
-Imaging/pilfile.py
-Imaging/pilprint.py
-
-Imaging/Grail/README
-Imaging/Grail/image_tiff.py
-Imaging/Grail/pil_interface.py
+Imaging/Scripts/pilconvert.py
+Imaging/Scripts/pildriver.py
+Imaging/Scripts/pilfile.py
+Imaging/Scripts/pilfont.py
+Imaging/Scripts/pilprint.py
 
 Imaging/Images/lena.gif
 Imaging/Images/lena.ppm
 Imaging/Images/lena.jpg
 
 Imaging/Sane/README
+Imaging/Sane/sanedoc.txt
 Imaging/Sane/_sanemodule.c
 Imaging/Sane/sane.py
 Imaging/Sane/demo.py
@@ -168,5 +187,6 @@ Imaging/Scripts/viewer.py
 Imaging/Scripts/thresholder.py
 
 Imaging/Tk/tkImaging.c
+Imaging/Tk/install.txt
 Imaging/Tk/booster.txt
 Imaging/Tk/pilbitmap.txt

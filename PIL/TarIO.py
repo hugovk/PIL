@@ -1,12 +1,12 @@
 #
 # The Python Imaging Library.
-# $Id: TarIO.py,v 1.3 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # read files from within a tar file
 #
 # History:
-#	95-06-18 fl	Created
-#	96-05-28 fl	Open files in binary mode
+# 95-06-18 fl	Created
+# 96-05-28 fl	Open files in binary mode
 #
 # Copyright (c) Secret Labs AB 1997.
 # Copyright (c) Fredrik Lundh 1995-96.
@@ -41,7 +41,7 @@ class TarIO(ContainerIO.ContainerIO):
 	    if file == name:
 		break
 
-	    fh.seek((size + 511) & -512, 1)
+	    fh.seek((size + 511) & (~511), 1)
 
 	# Open region
 	ContainerIO.ContainerIO.__init__(self, fh, fh.tell(), size)

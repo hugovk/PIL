@@ -1,9 +1,8 @@
-/* $Id: Gif.h,v 1.1 1996/04/14 18:58:28 fredrik Exp $
- *
+/*
  * The Python Imaging Library.
+ * $Id$
  *
- * File:
- *	Gif.h -- Declarations for a fast, suspendable GIF decoder.
+ * Declarations for a fast, suspendable GIF decoder.
  *
  * Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
  */
@@ -66,6 +65,12 @@ typedef struct {
 
 } GIFDECODERSTATE;
 
+typedef struct GIFENCODERBLOCK_T
+{
+    struct GIFENCODERBLOCK_T *next;
+    int size;
+    UINT8 data[255];
+} GIFENCODERBLOCK;
 
 typedef struct {
 
@@ -78,17 +83,27 @@ typedef struct {
 
     /* NOTE: the expanding encoder ignores this field */
 
+    /* If set, write an interlaced image (see above) */
+    int interlace;
+
     /* PRIVATE CONTEXT (set by encoder) */
 
-    /* End of file processing state */
-    int eof; /* 1=end detected, 2=flush bit buffer, 3=flush block and quit */
+    /* Interlace parameters */
+    int step, repeat;
 
     /* Output bit buffer */
     INT32 bitbuffer;
     int bitcount;
 
-    /* Output byte buffer */
-    UINT8 block[256];
-    int blocksize;
+    /* Output buffer list (linked list) */
+    GIFENCODERBLOCK* block; /* current block */
+    GIFENCODERBLOCK* flush; /* output queue */
+    GIFENCODERBLOCK* free; /* if not null, use this */
+
+    /* Fields used for run-length encoding */
+    int first; /* true if we haven't read the first pixel */
+    int last; /* last byte value seen */
+    int count; /* how many bytes with that value we've seen */
+    int lastcode;
 
 } GIFENCODERSTATE;

@@ -7,7 +7,7 @@
 # history:
 #	97-01-03 fl	created
 #
-# Copyright (c) Secret Labs AB 1997.
+# Copyright (c) Secret Labs AB 1997.  All rights reserved.
 # Copyright (c) Fredrik Lundh 1997.
 #
 # See the README file for information on usage and redistribution.

@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: GdImageFile.py,v 1.4 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # GD file handling
 #

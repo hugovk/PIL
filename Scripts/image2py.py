@@ -14,7 +14,7 @@
 # note that the application using this module must include JPEG
 # and/or ZIP decoders, unless the -u option is used.
 #
-# Copyright (c) Secret Labs AB 1997.
+# Copyright (c) Secret Labs AB 1997.  All rights reserved.
 # Copyright (c) Fredrik Lundh 1997.
 #
 # See the README file for information on usage and redistribution.

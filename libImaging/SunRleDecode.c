@@ -2,7 +2,7 @@
  * THIS IS WORK IN PROGRESS
  *
  * The Python Imaging Library.
- * $Id: PcxDecode.c,v 1.3 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * decoder for SUN RLE data.
  *

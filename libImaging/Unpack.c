@@ -1,23 +1,28 @@
 /*
  * The Python Imaging Library.
- * $Id: Unpack.c,v 1.6 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * code to unpack raw data from various file formats
  *
  * history:
- *	96-03-07 fl	Created (from various decoders)
- *	96-04-19 fl	Added band unpackers
- *	96-05-12 fl	Published RGB unpackers
- *	96-05-27 fl	Added nibble unpacker
- *	96-12-10 fl	Added complete set of PNG unpackers
- *	96-12-29 fl	Set alpha byte in RGB unpackers
- *	97-01-05 fl	Added remaining TGA unpackers
- *	97-01-18 fl	Added inverting band unpackers
- *	97-01-25 fl	Added FlashPix unpackers
- *	97-05-31 fl	Added floating point unpackers
- *	98-02-08 fl	Added I unpacker
+ * 96-03-07 fl	Created (from various decoders)
+ * 96-04-19 fl	Added band unpackers
+ * 96-05-12 fl	Published RGB unpackers
+ * 96-05-27 fl	Added nibble unpacker
+ * 96-12-10 fl	Added complete set of PNG unpackers
+ * 96-12-29 fl	Set alpha byte in RGB unpackers
+ * 97-01-05 fl	Added remaining TGA unpackers
+ * 97-01-18 fl	Added inverting band unpackers
+ * 97-01-25 fl	Added FlashPix unpackers
+ * 97-05-31 fl	Added floating point unpackers
+ * 98-02-08 fl	Added I unpacker
+ * 98-07-01 fl	Added YCbCr unpacker
+ * 98-07-02 fl	Added full set of integer unpackers
+ * 98-12-29 fl	Added mode field, I;16 unpackers
+ * 98-12-30 fl	Added RGBX modes
+ * 99-02-04 fl	Fixed I;16 unpackers
  *
- * Copyright (c) Secret Labs AB 1997-98.
+ * Copyright (c) Secret Labs AB 1997-99.
  * Copyright (c) Fredrik Lundh 1996-97.
  *
  * See the README file for information on usage and redistribution.
@@ -39,6 +44,39 @@
 #define	Y 2
 #define	K 3
 
+
+/* byte-swapping macros */
+
+#define C16N\
+        (tmp[0]=in[0], tmp[1]=in[1]);
+#define C16S\
+        (tmp[1]=in[0], tmp[0]=in[1]);
+#define C32N\
+        (tmp[0]=in[0], tmp[1]=in[1], tmp[2]=in[2], tmp[3]=in[3]);
+#define C32S\
+        (tmp[3]=in[0], tmp[2]=in[1], tmp[1]=in[2], tmp[0]=in[3]);
+#define C64N\
+        (tmp[0]=in[0], tmp[1]=in[1], tmp[2]=in[2], tmp[3]=in[3],\
+         tmp[4]=in[4], tmp[5]=in[5], tmp[6]=in[6], tmp[7]=in[7]);
+#define C64S\
+        (tmp[7]=in[0], tmp[6]=in[1], tmp[5]=in[2], tmp[4]=in[3],\
+         tmp[3]=in[4], tmp[2]=in[5], tmp[1]=in[6], tmp[0]=in[7]);
+
+#ifdef WORDS_BIGENDIAN
+#define C16B C16N
+#define C16L C16S
+#define C32B C32N
+#define C32L C32S
+#define C64B C64N
+#define C64L C64S
+#else
+#define C16B C16S
+#define C16L C16N
+#define C32B C32S
+#define C32L C32N
+#define C64B C64S
+#define C64L C64N
+#endif
 
 /* Unpack to "1" image */
 
@@ -360,6 +398,33 @@ ImagingUnpackBGRX(UINT8* out, const UINT8* in, int pixels)
     }
 }
 
+static void
+ImagingUnpackXRGB(UINT8* out, const UINT8* in, int pixels)
+{
+    int i;
+    /* RGB, leading pad */
+    for (i = 0; i < pixels; i++) {
+	out[R] = in[1];
+	out[G] = in[2];
+	out[B] = in[3];
+	out[A] = 255;
+	out += 4; in += 4;
+    }
+}
+
+static void
+ImagingUnpackXBGR(UINT8* out, const UINT8* in, int pixels)
+{
+    int i;
+    /* RGB, reversed bytes, leading pad */
+    for (i = 0; i < pixels; i++) {
+	out[R] = in[3];
+	out[G] = in[2];
+	out[B] = in[1];
+	out[A] = 255;
+	out += 4; in += 4;
+    }
+}
 
 /* Unpack to "RGBA" image */
 
@@ -402,16 +467,45 @@ unpackRGBAI(UINT8* out, const UINT8* in, int pixels)
 }
 
 static void
+unpackRGBAL(UINT8* out, const UINT8* in, int pixels)
+{
+    int i;
+
+    /* RGBA, line interleaved */
+    for (i = 0; i < pixels; i++) {
+	out[R] = in[i];
+	out[G] = in[i+pixels];
+	out[B] = in[i+pixels+pixels];
+	out[A] = in[i+pixels+pixels+pixels];
+	out += 4;
+    }
+}
+
+void
 unpackRGBA16B(UINT8* out, const UINT8* in, int pixels)
 {
     int i;
-    /* 16-bit truecolour with alpha, big-endian */
+    /* 16-bit RGBA, big-endian order */
     for (i = 0; i < pixels; i++) {
 	out[R] = in[0];
 	out[G] = in[2];
 	out[B] = in[4];
 	out[A] = in[6];
 	out += 4; in += 8;
+    }
+}
+
+static void
+unpackARGB(UINT8* out, const UINT8* in, int pixels)
+{
+    int i;
+    /* RGBA, leading pad */
+    for (i = 0; i < pixels; i++) {
+	out[R] = in[1];
+	out[G] = in[2];
+	out[B] = in[3];
+	out[A] = in[0];
+	out += 4; in += 4;
     }
 }
 
@@ -425,6 +519,20 @@ unpackABGR(UINT8* out, const UINT8* in, int pixels)
 	out[G] = in[2];
 	out[B] = in[1];
 	out[A] = in[0];
+	out += 4; in += 4;
+    }
+}
+
+static void
+unpackBGRA(UINT8* out, const UINT8* in, int pixels)
+{
+    int i;
+    /* RGBA, reversed bytes */
+    for (i = 0; i < pixels; i++) {
+	out[R] = in[2];
+	out[G] = in[1];
+	out[B] = in[0];
+	out[A] = in[3];
 	out += 4; in += 4;
     }
 }
@@ -454,6 +562,13 @@ copy1(UINT8* out, const UINT8* in, int pixels)
 }
 
 static void
+copy2(UINT8* out, const UINT8* in, int pixels)
+{
+    /* I;16 */
+    memcpy(out, in, pixels*2);
+}
+
+static void
 copy4(UINT8* out, const UINT8* in, int pixels)
 {
     /* RGBA, CMYK quadruples */
@@ -461,84 +576,66 @@ copy4(UINT8* out, const UINT8* in, int pixels)
 }
 
 
-/* Unpack to "F" image (now this is pretty ugly!) */
+/* Unpack to "I" and "F" images */
 
-/* bytewise copy */
-
-#define C16N\
-        (tmp[0]=in[0], tmp[1]=in[1]);
-#define C16S\
-        (tmp[1]=in[0], tmp[0]=in[1]);
-#define C32N\
-        (tmp[0]=in[0], tmp[1]=in[1], tmp[2]=in[2], tmp[3]=in[3]);
-#define C32S\
-        (tmp[3]=in[0], tmp[2]=in[1], tmp[1]=in[2], tmp[0]=in[3]);
-#define C64N\
-        (tmp[0]=in[0], tmp[1]=in[1], tmp[2]=in[2], tmp[3]=in[3],\
-         tmp[4]=in[4], tmp[5]=in[5], tmp[6]=in[6], tmp[7]=in[7]);
-#define C64S\
-        (tmp[7]=in[0], tmp[6]=in[1], tmp[5]=in[2], tmp[4]=in[3],\
-         tmp[3]=in[4], tmp[2]=in[5], tmp[1]=in[6], tmp[0]=in[7]);
-
-#ifdef WORDS_BIGENDIAN
-#define C16B C16N
-#define C16L C16S
-#define C32B C32N
-#define C32L C32S
-#define C64B C64N
-#define C64L C64S
-#else
-#define C16B C16S
-#define C16L C16N
-#define C32B C32S
-#define C32L C32N
-#define C64B C64S
-#define C64L C64N
-#endif
-
-#define UNPACK_F(NAME, GET, TYPE)\
+#define UNPACK_RAW(NAME, GET, INTYPE, OUTTYPE)\
 static void NAME(UINT8* out_, const UINT8* in, int pixels)\
 {\
     int i;\
-    FLOAT32* out = (FLOAT32*) out_;\
-    for (i = 0; i < pixels; i++, in += sizeof(TYPE))\
-        out[i] = (FLOAT32) ((TYPE) GET);\
+    OUTTYPE* out = (OUTTYPE*) out_;\
+    for (i = 0; i < pixels; i++, in += sizeof(INTYPE))\
+        out[i] = (OUTTYPE) ((INTYPE) GET);\
 }
 
-#define UNPACK_C(NAME, COPY, TYPE)\
+#define UNPACK(NAME, COPY, INTYPE, OUTTYPE)\
 static void NAME(UINT8* out_, const UINT8* in, int pixels)\
 {\
     int i;\
-    FLOAT32* out = (FLOAT32*) out_;\
-    TYPE tmp_;\
+    OUTTYPE* out = (OUTTYPE*) out_;\
+    INTYPE tmp_;\
     UINT8* tmp = (UINT8*) &tmp_;\
-    for (i = 0; i < pixels; i++, in += sizeof(TYPE)) {\
+    for (i = 0; i < pixels; i++, in += sizeof(INTYPE)) {\
         COPY;\
-        out[i] = (FLOAT32) tmp_;\
+        out[i] = (OUTTYPE) tmp_;\
     }\
 }
 
-UNPACK_F(unpackF8,    in[0], UINT8)
-UNPACK_F(unpackF8S,   in[0], INT8)
-UNPACK_C(unpackF16,   C16L,  UINT16)
-UNPACK_C(unpackF16S,  C16L,  INT16)
-UNPACK_C(unpackF16B,  C16B,  UINT16)
-UNPACK_C(unpackF16BS, C16B,  INT16)
-UNPACK_C(unpackF16N,  C16N,  UINT16)
-UNPACK_C(unpackF16NS, C16N,  INT16)
-UNPACK_C(unpackF32,   C32L,  UINT32)
-UNPACK_C(unpackF32S,  C32L,  INT32)
-UNPACK_C(unpackF32B,  C32B,  UINT32)
-UNPACK_C(unpackF32BS, C32B,  INT32)
-UNPACK_C(unpackF32N,  C32N,  UINT32)
-UNPACK_C(unpackF32NS, C32N,  INT32)
-UNPACK_C(unpackF32F,  C32L,  FLOAT32)
-UNPACK_C(unpackF32BF, C32B,  FLOAT32)
-UNPACK_C(unpackF32NF, C32N,  FLOAT32)
+UNPACK_RAW(unpackI8, in[0], UINT8, INT32)
+UNPACK_RAW(unpackI8S, in[0], INT8, INT32)
+UNPACK(unpackI16, C16L, UINT16, INT32)
+UNPACK(unpackI16S, C16L, INT16, INT32)
+UNPACK(unpackI16B, C16B, UINT16, INT32)
+UNPACK(unpackI16BS, C16B, INT16, INT32)
+UNPACK(unpackI16N, C16N, UINT16, INT32)
+UNPACK(unpackI16NS, C16N, INT16, INT32)
+UNPACK(unpackI32, C32L, UINT32, INT32)
+UNPACK(unpackI32S, C32L, INT32, INT32)
+UNPACK(unpackI32B, C32B, UINT32, INT32)
+UNPACK(unpackI32BS, C32B, INT32, INT32)
+UNPACK(unpackI32N, C32N, UINT32, INT32)
+UNPACK(unpackI32NS, C32N, INT32, INT32)
+
+UNPACK_RAW(unpackF8, in[0], UINT8, FLOAT32)
+UNPACK_RAW(unpackF8S, in[0], INT8, FLOAT32)
+UNPACK(unpackF16, C16L, UINT16, FLOAT32)
+UNPACK(unpackF16S, C16L, INT16, FLOAT32)
+UNPACK(unpackF16B, C16B, UINT16, FLOAT32)
+UNPACK(unpackF16BS, C16B, INT16, FLOAT32)
+UNPACK(unpackF16N, C16N, UINT16, FLOAT32)
+UNPACK(unpackF16NS, C16N, INT16, FLOAT32)
+UNPACK(unpackF32, C32L, UINT32, FLOAT32)
+UNPACK(unpackF32S, C32L, INT32, FLOAT32)
+UNPACK(unpackF32B, C32B, UINT32, FLOAT32)
+UNPACK(unpackF32BS, C32B, INT32, FLOAT32)
+UNPACK(unpackF32N, C32N, UINT32, FLOAT32)
+UNPACK(unpackF32NS, C32N, INT32, FLOAT32)
+UNPACK(unpackF32F, C32L, FLOAT32, FLOAT32)
+UNPACK(unpackF32BF, C32B, FLOAT32, FLOAT32)
+UNPACK(unpackF32NF, C32N, FLOAT32, FLOAT32)
 #ifdef FLOAT64
-UNPACK_C(unpackF64F,  C64L,  FLOAT64)
-UNPACK_C(unpackF64BF, C64B,  FLOAT64)
-UNPACK_C(unpackF64NF, C64N,  FLOAT64)
+UNPACK(unpackF64F, C64L, FLOAT64, FLOAT32)
+UNPACK(unpackF64BF, C64B, FLOAT64, FLOAT32)
+UNPACK(unpackF64NF, C64N, FLOAT64, FLOAT32)
 #endif
 
 
@@ -633,113 +730,161 @@ band3I(UINT8* out, const UINT8* in, int pixels)
 }
 
 static struct {
+    const char* mode;
     const char* rawmode;
     int bits;
     ImagingShuffler unpack;
 } unpackers[] = {
 
     /* bilevel */
-    {"1",	1,	unpack1},
-    {"1;I",	1,	unpack1I},
-    {"1;R",	1,	unpack1R},
-    {"1;IR",	1,	unpack1IR},
+    {"1",	"1",		1,	unpack1},
+    {"1",	"1;I",		1,	unpack1I},
+    {"1",	"1;R",		1,	unpack1R},
+    {"1",	"1;IR",		1,	unpack1IR},
 
     /* greyscale */
-    {"L;2",  	2,	unpackL2},
-    {"L;4",  	4,	unpackL4},
-    {"L",   	8,	copy1},
-    {"L;I",   	8,	unpackLI},
-    {"L;16",  	16,	unpackL16},
-    {"L;16B",  	16,	unpackL16B},
+    {"L",	"L;2",  	2,	unpackL2},
+    {"L",	"L;4",  	4,	unpackL4},
+    {"L",	"L",   		8,	copy1},
+    {"L",	"L;I",   	8,	unpackLI},
+    {"L",	"L;16",  	16,	unpackL16},
+    {"L",	"L;16B",  	16,	unpackL16B},
 
     /* palette */
-    {"P;1",   	1,	unpackP1},
-    {"P;2",   	2,	unpackP2},
-    {"P;2L",   	2,	unpackP2L},
-    {"P;4",   	4,	unpackP4},
-    {"P;4L",   	4,	unpackP4L},
-    {"P",	8,	copy1},
+    {"P",	"P;1",   	1,	unpackP1},
+    {"P",	"P;2",   	2,	unpackP2},
+    {"P",	"P;2L",   	2,	unpackP2L},
+    {"P",	"P;4",   	4,	unpackP4},
+    {"P",	"P;4L",   	4,	unpackP4L},
+    {"P",	"P",		8,	copy1},
 
     /* true colour */
-    {"RGB",	24,	ImagingUnpackRGB},
-    {"RGB;16B",	48,	unpackRGB16B},
-    {"RGBX",	32,	copy4},
-    {"RGB;L",	24,	unpackRGBL},
-    {"BGR",	24,	ImagingUnpackBGR},
-    {"BGRX",	32,	ImagingUnpackBGRX},
-    {"BGR;5",	16,	ImagingUnpackBGR5},
-    {"YCC;P",	24,	ImagingUnpackYCC},
-    {"R",   	8,	band0},
-    {"G",   	8,	band1},
-    {"B",   	8,	band2},
+    {"RGB",	"RGB",		24,	ImagingUnpackRGB},
+    {"RGB",	"RGB;L",	24,	unpackRGBL},
+    {"RGB",	"RGB;16B",	48,	unpackRGB16B},
+    {"RGB",	"BGR",		24,	ImagingUnpackBGR},
+    {"RGB",	"BGR;5",	16,	ImagingUnpackBGR5},
+    {"RGB",	"RGBX",		32,	copy4},
+    {"RGB",	"RGBX;L",	32,	unpackRGBAL},
+    {"RGB",	"BGRX",		32,	ImagingUnpackBGRX},
+    {"RGB",	"XRGB",		24,	ImagingUnpackXRGB},
+    {"RGB",	"XBGR",		32,	ImagingUnpackXBGR},
+    {"RGB",	"YCC;P",	24,	ImagingUnpackYCC},
+    {"RGB",	"R",   		8,	band0},
+    {"RGB",	"G",   		8,	band1},
+    {"RGB",	"B",   		8,	band2},
 
     /* true colour w. transparency */
-    {"LA",	16,	unpackLA},
-    {"LA;16B",	32,	unpackLA16B},
-    {"RGBA",	32,	copy4},
-    {"RGBA;I",	32,	unpackRGBAI},
-    {"RGBA;16B",64,	unpackRGBA16B},
-    {"ABGR",	32,	unpackABGR},
-    {"YCCA;P",	32,	ImagingUnpackYCCA},
-    {"A",   	8,	band3},
+    {"RGBA",	"LA",		16,	unpackLA},
+    {"RGBA",	"LA;16B",	32,	unpackLA16B},
+    {"RGBA",	"RGBA",		32,	copy4},
+    {"RGBA",	"RGBA;I",	32,	unpackRGBAI},
+    {"RGBA",	"RGBA;L",	32,	unpackRGBAL},
+    {"RGBA",	"RGBA;16B",	64,	unpackRGBA16B},
+    {"RGBA",	"BGRA",		32,	unpackBGRA},
+    {"RGBA",	"ARGB",		32,	unpackARGB},
+    {"RGBA",	"ABGR",		32,	unpackABGR},
+    {"RGBA",	"YCCA;P",	32,	ImagingUnpackYCCA},
+    {"RGBA",	"R",   		8,	band0},
+    {"RGBA",	"G",   		8,	band1},
+    {"RGBA",	"B",   		8,	band2},
+    {"RGBA",	"A",   		8,	band3},
+
+    /* true colour w. padding */
+    {"RGBX",	"RGB",		24,	ImagingUnpackRGB},
+    {"RGBX",	"RGB;L",	24,	unpackRGBL},
+    {"RGBX",	"RGB;16B",	48,	unpackRGB16B},
+    {"RGBX",	"BGR",		24,	ImagingUnpackBGR},
+    {"RGBX",	"BGR;5",	16,	ImagingUnpackBGR5},
+    {"RGBX",	"RGBX",		32,	copy4},
+    {"RGBX",	"RGBX;L",	32,	unpackRGBAL},
+    {"RGBX",	"BGRX",		32,	ImagingUnpackBGRX},
+    {"RGBX",	"XRGB",		24,	ImagingUnpackXRGB},
+    {"RGBX",	"XBGR",		32,	ImagingUnpackXBGR},
+    {"RGBX",	"YCC;P",	24,	ImagingUnpackYCC},
+    {"RGBX",	"R",   		8,	band0},
+    {"RGBX",	"G",   		8,	band1},
+    {"RGBX",	"B",   		8,	band2},
+    {"RGBX",	"X",   		8,	band3},
 
     /* colour separation */
-    {"CMYK",	32,	copy4},
-    {"CMYK;I",	32,	unpackCMYKI},
-    {"C",   	8,	band0},
-    {"M",   	8,	band1},
-    {"Y",   	8,	band2},
-    {"K",   	8,	band3},
-    {"C;I",   	8,	band0I},
-    {"M;I",   	8,	band1I},
-    {"Y;I",   	8,	band2I},
-    {"K;I",   	8,	band3I},
+    {"CMYK",	"CMYK",		32,	copy4},
+    {"CMYK",	"CMYK;I",	32,	unpackCMYKI},
+    {"CMYK",	"CMYK;L",	32,	unpackRGBAL},
+    {"CMYK",	"C",   		8,	band0},
+    {"CMYK",	"M",   		8,	band1},
+    {"CMYK",	"Y",   		8,	band2},
+    {"CMYK",	"K",   		8,	band3},
+    {"CMYK",	"C;I",   	8,	band0I},
+    {"CMYK",	"M;I",   	8,	band1I},
+    {"CMYK",	"Y;I",   	8,	band2I},
+    {"CMYK",	"K;I",   	8,	band3I},
 
-    /* video (YCrCb) */
-    {"YCC",	24,	ImagingUnpackRGB},
-    {"YCCX",	32,	copy4},
-    {"YCCK",	32,	copy4},
+    /* video (YCbCr) */
+    {"YCbCr",	"YCbCr",	24,	ImagingUnpackRGB},
+    {"YCbCr",	"YCbCr;L",	24,	unpackRGBL},
+    {"YCbCr",	"YCbCrX",	32,	copy4},
+    {"YCbCr",	"YCbCrK",	32,	copy4},
 
-    /* integer */
-    {"I",	32,	copy4},
+    /* integer variations */
+    {"I",	"I",		32,	copy4},
+    {"I",	"I;8",		8,	unpackI8},
+    {"I",	"I;8S",		8,	unpackI8S},
+    {"I",	"I;16",		16,	unpackI16},
+    {"I",	"I;16S",	16,	unpackI16S},
+    {"I",	"I;16B",	16,	unpackI16B},
+    {"I",	"I;16BS",	16,	unpackI16BS},
+    {"I",	"I;16N",	16,	unpackI16N},
+    {"I",	"I;16NS",	16,	unpackI16NS},
+    {"I",	"I;32",		32,	unpackI32},
+    {"I",	"I;32S",	32,	unpackI32S},
+    {"I",	"I;32B",	32,	unpackI32B},
+    {"I",	"I;32BS",	32,	unpackI32BS},
+    {"I",	"I;32N",	32,	unpackI32N},
+    {"I",	"I;32NS",	32,	unpackI32NS},
 
     /* floating point variations */
-    {"F",	32,	copy4},
-    {"F;8",	8,	unpackF8},
-    {"F;8S",	8,	unpackF8S},
-    {"F;16",	16,	unpackF16},
-    {"F;16S",	16,	unpackF16S},
-    {"F;16B",	16,	unpackF16B},
-    {"F;16BS",	16,	unpackF16BS},
-    {"F;16N",	16,	unpackF16N},
-    {"F;16NS",	16,	unpackF16NS},
-    {"F;32",	32,	unpackF32},
-    {"F;32S",	32,	unpackF32S},
-    {"F;32B",	32,	unpackF32B},
-    {"F;32BS",	32,	unpackF32BS},
-    {"F;32N",	32,	unpackF32N},
-    {"F;32NS",	32,	unpackF32NS},
-    {"F;32F",	32,	unpackF32F},
-    {"F;32BF",	32,	unpackF32BF},
-    {"F;32NF",	32,	unpackF32NF},
+    {"F",	"F",		32,	copy4},
+    {"F",	"F;8",		8,	unpackF8},
+    {"F",	"F;8S",		8,	unpackF8S},
+    {"F",	"F;16",		16,	unpackF16},
+    {"F",	"F;16S",	16,	unpackF16S},
+    {"F",	"F;16B",	16,	unpackF16B},
+    {"F",	"F;16BS",	16,	unpackF16BS},
+    {"F",	"F;16N",	16,	unpackF16N},
+    {"F",	"F;16NS",	16,	unpackF16NS},
+    {"F",	"F;32",		32,	unpackF32},
+    {"F",	"F;32S",	32,	unpackF32S},
+    {"F",	"F;32B",	32,	unpackF32B},
+    {"F",	"F;32BS",	32,	unpackF32BS},
+    {"F",	"F;32N",	32,	unpackF32N},
+    {"F",	"F;32NS",	32,	unpackF32NS},
+    {"F",	"F;32F",	32,	unpackF32F},
+    {"F",	"F;32BF",	32,	unpackF32BF},
+    {"F",	"F;32NF",	32,	unpackF32NF},
 #ifdef FLOAT64
-    {"F;64F",	64,	unpackF64F},
-    {"F;64BF",	64,	unpackF64BF},
-    {"F;64NF",	64,	unpackF64NF},
+    {"F",	"F;64F",	64,	unpackF64F},
+    {"F",	"F;64BF",	64,	unpackF64BF},
+    {"F",	"F;64NF",	64,	unpackF64NF},
 #endif
+
+    /* storage modes */
+    {"I;16",	"I;16",		16,	copy2},
+    {"I;16B",	"I;16B",	16,	copy2},
 
     {NULL} /* sentinel */
 };
 
 
 ImagingShuffler
-ImagingFindUnpacker(const char* rawmode, int* bits_out)
+ImagingFindUnpacker(const char* mode, const char* rawmode, int* bits_out)
 {
     int i;
 
     /* find a suitable pixel unpacker */
     for (i = 0; unpackers[i].rawmode; i++)
-	if (strcmp(unpackers[i].rawmode, rawmode) == 0) {
+	if (strcmp(unpackers[i].mode, mode) == 0 &&
+            strcmp(unpackers[i].rawmode, rawmode) == 0) {
 	    if (bits_out)
 		*bits_out = unpackers[i].bits;
 	    return unpackers[i].unpack;

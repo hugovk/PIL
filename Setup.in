@@ -7,7 +7,7 @@
 #
 # 2) Go to the libImaging directory and build the support library.
 #
-# 3) Run "make -f Makefile.pre.inboot"
+# 3) Run "make -f Makefile.pre.in boot"
 #
 # 4) Run "make"
 #
@@ -18,19 +18,29 @@
 # Remove (or comment) the following line if you wish to build a
 # statically linked python interpreter.
 
-*noconfig*
+*shared*
 
 # --------------------------------------------------------------------
 # Edit or remove the library specifications to match your configura-
 # tion.  As they stand, they assume that you have the IJG JPEG library
 # 6.0a and zlib 1.0.4 (or newer versions of these libraries) in a
-# standard location.
+# standard location.  You can comment out the Tcl/Tk stuff if you
+# don't need ImageTk, or if you're using a custom _tkinter instead
+# (like in earlier versions of PIL).
 
-_imaging _imagingmodule.c decode.c encode.c display.c path.c \
-	-IlibImaging libImaging/libImaging.a\
+_imaging  _imaging.c decode.c encode.c map.c display.c outline.c path.c \
+	-IlibImaging libImaging/libImaging.a \
 #
 # *** IJG JPEG library (libjpeg) location
-	-I/usr/local/include -L/usr/local/lib -ljpeg\
+	-I/usr/local/include -L/usr/local/lib -ljpeg \
 #
 # *** ZLIB (libz) location
-	-I/usr/local/include -L/usr/local/lib -lz
+	-I/usr/local/include -L/usr/local/lib -lz \
+#
+# *** Tcl/Tk support and library location
+        Tk/tkImaging.c -DWITH_TKINTER -I/usr/local/include -L/usr/local/lib -ltcl8.0 -ltk8.0
+
+# --------------------------------------------------------------------
+# uncomment to enable the SANE driver (see Sane/README for more info)
+
+# _sane Sane/_sanemodule.c -IlibImaging -L/usr/local/lib/sane/ -lsane-dll

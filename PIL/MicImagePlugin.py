@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: IcoImagePlugin.py,v 1.2 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # Microsoft Image Composer support for PIL
 #
@@ -61,7 +61,7 @@ class MicImageFile(TiffImagePlugin.TiffImageFile):
 	if not self.images:
 	    raise SyntaxError, "not an MIC file; no image entries"
 
-	self.fp2 = self.fp
+	self.__fp = self.fp
 	self.frame = 0
 
 	if len(self.images) > 1:

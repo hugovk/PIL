@@ -2,7 +2,7 @@
 # THIS IS WORK IN PROGRESS
 #
 # The Python Imaging Library.
-# $Id: PngImagePlugin.py,v 1.3 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # ARG animation support code
 #
@@ -176,7 +176,7 @@ class ArgStream(ChunkStream):
 	if self.count == 0:
 	    raise SyntaxError, "misplaced PAST chunk"
 
-	if self.repair != None:
+	if self.repair is not None:
 	    # we must repair the target image before we
 	    # start pasting
 

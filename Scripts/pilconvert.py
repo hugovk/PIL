@@ -10,6 +10,7 @@
 # 0.2	96-10-04 fl	Use draft mode when converting images
 # 0.3	96-12-30 fl	Optimize output (PNG, JPEG)
 # 0.4	97-01-18 fl	Made optimize an option (PNG, JPEG)
+# 0.5	98-12-30 fl	Fixed -f option (from Anthony Baxter)
 #
 
 import Image
@@ -17,15 +18,15 @@ import Image
 import getopt, string, sys
 
 def usage():
-    print "PIL Convert 0.4/97-01-18 -- convert image files"
+    print "PIL Convert 0.5/98-12-30 -- convert image files"
     print "Usage: pilconvert [option] infile outfile"
     print
     print "Options:"
     print
-    print "  -c <format>  convert to format (default is given by outfile)"
+    print "  -c <format>  convert to format (default is given by extension)"
     print
     print "  -g           convert to greyscale"
-    print "  -p           convert to palette image"
+    print "  -p           convert to palette image (using standard palette)"
     print "  -r           convert to rgb"
     print
     print "  -o           optimize output (trade speed for size)"
@@ -38,7 +39,7 @@ if len(sys.argv) == 1:
     usage()
 
 try:
-    opt, argv = getopt.getopt(sys.argv[1:], "dc:gopq:r")
+    opt, argv = getopt.getopt(sys.argv[1:], "c:dfgopq:r")
 except getopt.error, v:
     print v
     sys.exit(1)
@@ -52,10 +53,14 @@ for o, a in opt:
 
     if o == "-f":
         Image.init()
+	id = Image.ID[:]
 	id.sort()
-	print "Supported formats:"
+	print "Supported formats (* indicates output format):"
 	for i in id:
-	    print i, 
+	    if Image.SAVE.has_key(i):
+		print i+"*",
+	    else:
+		print i, 
 	sys.exit(1)
 
     elif o == "-c":

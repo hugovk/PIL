@@ -1,23 +1,26 @@
-# $Id: ImageFont.py,v 1.1 1996/10/04 19:40:50 fredrik Exp $
-#
-# THIS IS WORK IN PROGRESS.
 #
 # The Python Imaging Library.
+# $Id$
 #
-# File:
-#	ImageFont.py -- PIL raster font management
+# PIL raster font management
 #
 # History:
-#	96-08-07 fl	Created (experimental)
+# 96-08-07 fl	created (experimental)
+# 97-08-25 fl	minor adjustments to handle fonts from pilfont 0.3
+# 99-02-06 fl	rewrote most font management stuff in C
+# 99-03-17 fl	take pth files into account in load_path (from Richard Jones)
 #
-# Copyright (c) Secret Labs AB 1997.
-# Copyright (c) Fredrik Lundh 1996.
+# Todo:
+# Adapt to PILFONT2 format (16-bit fonts, compressed, single file)
+#
+# Copyright (c) Secret Labs AB 1997-99
+# Copyright (c) Fredrik Lundh 1996-97
 #
 # See the README file for information on usage and redistribution.
 #
 
 import Image
-import math, os, string, sys
+import glob, os, string, sys
 
 # --------------------------------------------------------------------
 # Font metrics format:
@@ -32,12 +35,6 @@ import math, os, string, sys
 # position according to dx, dy.
 # --------------------------------------------------------------------
 
-def i16(c):
-    v = (ord(c[0])<<8) + ord(c[1])
-    if v >= 32768:
-	v = v - 65536
-    return v
-
 class ImageFont:
 
     def _load_pilfont(self, filename):
@@ -48,46 +45,32 @@ class ImageFont:
 	if fp.readline() != "PILfont\n":
 	    raise SyntaxError, "Not a PILfont file"
 	d = string.split(fp.readline(), ";")
-	self.ysize = string.atoi(d[6])
-	self.props = [] # FIXME: should be a dictionary
+	self.info = [] # FIXME: should be a dictionary
 	s = fp.readline()
 	while s and s != "DATA\n":
-	    self.props.append(s)
+	    self.info.append(s)
 
 	# read PILfont metrics
-	self.metrics = []
-	for i in range(256):
-	    s = fp.read(20)
-	    if len(s) != 20:
-		raise SyntaxError, "Broken PILfont file"
-	    m = map(lambda a,s=s: i16(s[a:a+2]), range(0,20,2))
-	    self.metrics.append(m)
+	data = fp.read(256*20)
 
-	try:
-	    self.image = Image.open(os.path.splitext(filename)[0] + ".gif")
-	except:
-	    self.image = Image.open(os.path.splitext(filename)[0] + ".pbm")
+	# read PILfont bitmap
+	image = None
+	for ext in (".png", ".gif", ".pbm"):
+	    try:
+		image = Image.open(os.path.splitext(filename)[0] + ext)
+	    except:
+		pass
+	    if image:
+		break
+	if image is None:
+	    raise IOError, "cannot find glyph data file"
 
-	self.image.load()
+	image.load()
+	self.font = Image.core.font(image.im, data)
 
-    def getsize(self, str):
-	w = 0
-	for id in map(ord, str):
-	    w = w + self.metrics[id][0]
-	if w == 0:
-	    return 0, 0
-	return w, self.ysize
-
-    def getmask(self, str):
-	# FIXME: this should be reimplemented in C
-	im = Image.new("1", self.getsize(str), 0)
-	x = 0
-	for m in map(lambda c, m=self.metrics: m[ord(c)], str):
-	    [x0, y0, x1, y1] = m[2:6]
-	    im.im.paste(self.image.im.crop(tuple(m[6:10])),
-			(x0+x, y0, x1+x, y1))
-	    x = x + m[0]
-	return im
+	# delegate critical operations to internal type
+	self.getsize = self.font.getsize
+	self.getmask = self.font.getmask
 
 #
 # --------------------------------------------------------------------
@@ -103,7 +86,12 @@ def load_path(filename):
     for dir in sys.path:
 	try:
 	    return load(os.path.join(dir, filename))
-	except:
+	except IOError:
 	    pass
+	for extra in glob.glob(os.path.join(dir, "*.pth")):
+	    try:
+		dir = os.path.join(dir, string.strip(open(extra).read()))
+		return load(os.path.join(dir, filename))
+	    except IOError:
+		pass
     raise IOError, "cannot find font file"
-

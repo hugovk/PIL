@@ -1,41 +1,49 @@
 #
 # The Python Imaging Library.
-# $Id: Image.py,v 1.13 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # the Image class wrapper
 #
 # history:
-#	95-09-09 fl	Created
-#	96-03-11 fl	PIL release 0.0
-#	96-04-30 fl	PIL release 0.1b1
-#	96-05-27 fl	PIL release 0.1b2
-#	96-10-04 fl	PIL release 0.2a1
-#	96-11-04 fl	PIL release 0.2b1
-#	96-12-08 fl	PIL release 0.2b2
-#	96-12-16 fl	PIL release 0.2b3
-#	97-01-14 fl	PIL release 0.2b4
-#	97-06-02 fl	PIL release 0.3a1
-#	97-08-27 fl	PIL release 0.3a2
-#	98-02-02 fl	PIL release 0.3a3
-#	98-03-09 fl	PIL release 0.3b1
+# 95-09-09 fl	Created
+# 96-03-11 fl	PIL release 0.0 (proof of concept)
+# 96-04-30 fl	PIL release 0.1b1
+# 96-05-27 fl	PIL release 0.1b2
+# 96-10-04 fl	PIL release 0.2a1
+# 96-11-04 fl	PIL release 0.2b1
+# 96-12-08 fl	PIL release 0.2b2
+# 96-12-16 fl	PIL release 0.2b3
+# 97-01-14 fl	PIL release 0.2b4
+# 97-06-02 fl	PIL release 0.3a1
+# 97-08-27 fl	PIL release 0.3a2
+# 98-02-02 fl	PIL release 0.3a3
+# 98-03-16 fl	PIL release 0.3a4
+# 98-07-02 fl	PIL release 0.3b1
+# 98-07-17 fl	PIL release 0.3b2
+# 99-01-01 fl	PIL release 1.0b1
+# 99-02-08 fl	PIL release 1.0b2
+# 99-07-09 fl	PIL release 1.0c1 (release candidate 1)
+# 99-07-26 fl	PIL release 1.0c2 (release candidate 2)
+# 99-07-28 fl	PIL release 1.0 final
 #
-# Copyright (c) Secret Labs AB 1997-98.
-# Copyright (c) Fredrik Lundh 1995-97.
+# Copyright (c) 1997-99 by Secret Labs AB.
+# Copyright (c) 1995-97 by Fredrik Lundh.
 #
 # See the README file for information on usage and redistribution.
 #
 
-VERSION = "0.3a3"
+VERSION = "1.0"
 
 class _imaging_not_installed:
+    # module placeholder
     def __getattr__(self, id):
 	raise ImportError, "The _imaging C module is not installed"
 
 try:
     # If the _imaging C module is not present, you can only use the
-    # "open" function to identify files.  Most other operations will
-    # fail.  Note that other modules should not refer to _imaging
-    # directly; import Image and use the core variable instead.
+    # "open" function to identify files.  Note that other modules
+    # should not refer to _imaging directly; import Image and use the
+    # Image.core variable instead.
     import _imaging
     core = _imaging
     del _imaging
@@ -47,9 +55,16 @@ import os, string
 
 # type stuff
 from types import IntType, StringType, TupleType
-isStringType = lambda t: type(t) == StringType
-isTupleType  = lambda t: type(t) == TupleType
-isImageType  = lambda t: hasattr(t, "im")
+
+def isStringType(t):
+    return type(t) is StringType
+
+def isTupleType(t):
+    return type(t) is TupleType
+
+def isImageType(t):
+    return hasattr(t, "im")
+
 from operator import isNumberType, isSequenceType
 
 #
@@ -58,7 +73,9 @@ from operator import isNumberType, isSequenceType
 DEBUG = 0
 
 #
-# Constants (defined in _imagingmodule.c)
+# Constants (also defined in _imagingmodule.c!)
+
+NONE = 0
 
 # transpose
 FLIP_LEFT_RIGHT = 0
@@ -71,17 +88,33 @@ ROTATE_270 = 4
 AFFINE = 0
 EXTENT = 1
 PERSPECTIVE = 2 # Not yet implemented
+QUAD = 3
+MESH = 4
 
 # resampling
+NONE = 0
 NEAREST = 0
-ANTIALIAS = 1
+ANTIALIAS = 1 # Not yet implemented
+BILINEAR = 2
+BICUBIC = 3
+
+# dithers
+NONE = 0
+NEAREST = 0
+ORDERED = 1 # Not yet implemented
+RASTERIZE = 2 # Not yet implemented
+FLOYDSTEINBERG = 3 # default
+
+# palettes/quantizers
+WEB = 0
+ADAPTIVE = 1
 
 # categories
 NORMAL = 0
 SEQUENCE = 1
 CONTAINER = 2
 
-#
+# --------------------------------------------------------------------
 # Registries
 
 ID = []
@@ -90,7 +123,42 @@ MIME = {}
 SAVE = {}
 EXTENSION = {}
 
-#
+# --------------------------------------------------------------------
+# Modes supported by this version
+
+_MODEINFO = {
+
+    # official modes
+    "1": ("L", "L", ("1",)),
+    "L": ("L", "L", ("L",)),
+    "I": ("L", "I", ("I",)),
+    "F": ("L", "F", ("F",)),
+    "P": ("RGB", "L", ("P",)),
+    "RGB": ("RGB", "L", ("R", "G", "B")),
+    "RGBX": ("RGB", "L", ("R", "G", "B", "X")),
+    "RGBA": ("RGB", "L", ("R", "G", "B", "A")),
+    "CMYK": ("RGB", "L", ("C", "M", "Y", "K")),
+    "YCbCr": ("RGB", "L", ("Y", "Cb", "Cr")),
+
+    # Experimental modes include I;16, I;16B, RGBa, BGR;15,
+    # and BGR;24.  Use these modes only if you know exactly
+    # what you're doing...
+
+}
+
+MODES = _MODEINFO.keys()
+MODES.sort()
+
+def getmodebase(mode):
+    return _MODEINFO[mode][0]
+
+def getmodetype(mode):
+    return _MODEINFO[mode][1]
+
+def getmodebands(mode):
+    return len(_MODEINFO[mode][2])
+
+# --------------------------------------------------------------------
 # Helpers
 
 _initialized = 0
@@ -102,10 +170,10 @@ def preinit():
     if _initialized >= 1:
 	return
 
-    for m in ["BmpImagePlugin", "GifImagePlugin", "JpegImagePlugin",
-              "PpmImagePlugin", "TiffImagePlugin"]:
+    for m in ("BmpImagePlugin", "GifImagePlugin", "JpegImagePlugin",
+              "PpmImagePlugin", "TiffImagePlugin"):
         try:
-            __import__(m)
+            __import__(m, globals(), locals(), [])
         except ImportError:
             pass # ignore missing driver for now
 
@@ -129,7 +197,7 @@ def init():
 		try:
 		    sys.path.insert(0, path)
 		    try:
-			__import__(f)
+			__import__(f, globals(), locals(), [])
 		    finally:
 			del sys.path[0]
 		except ImportError:
@@ -144,25 +212,26 @@ def init():
 # --------------------------------------------------------------------
 # Codec factories (used by tostring/fromstring and ImageFile.load)
 
-def _getdecoder(d, e, a, ac = ()):
+def _getdecoder(mode, decoder_name, args, extra = ()):
 
     # tweak arguments
-    if a == None:
-	a = ()
-    elif type(a) != TupleType:
-	a = (a,)
+    if args is None:
+	args = ()
+    elif type(args) != TupleType:
+	args = (args,)
 
     try:
 	# get decoder
-	decoder = getattr(core, d + "_decoder")
-	return apply(decoder, a + ac)
+	decoder = getattr(core, decoder_name + "_decoder")
+	# print decoder, (mode,) + args + extra
+	return apply(decoder, (mode,) + args + extra)
     except AttributeError:
-	raise IOError, "decoder %s not available" % d
+	raise IOError, "decoder %s not available" % decoder_name
 
 def _getencoder(mode, encoder_name, args, extra = ()):
 
     # tweak arguments
-    if args == None:
+    if args is None:
 	args = ()
     elif type(args) != TupleType:
 	args = (args,)
@@ -170,6 +239,7 @@ def _getencoder(mode, encoder_name, args, extra = ()):
     try:
 	# get encoder
 	encoder = getattr(core, encoder_name + "_encoder")
+	# print encoder, (mode,) + args + extra
 	return apply(encoder, (mode,) + args + extra)
     except AttributeError:
 	raise IOError, "encoder %s not available" % encoder_name
@@ -221,11 +291,6 @@ class Image:
 	self.info = {}
 	self.category = NORMAL
 
-    def __setattr__(self, id, value):
-	if id == "palette":
-	    pass # print "set", id, value
-	self.__dict__[id] = value
-
     def _makeself(self, im):
 	new = Image()
 	new.im = im
@@ -235,12 +300,16 @@ class Image:
 	new.info = self.info
 	return new
 
-    def _dump(self, file = None):
+    def _dump(self, file=None, format="PPM"):
         import tempfile
 	if not file:
 	    file = tempfile.mktemp()
 	self.load()
-	self.im.save_ppm(file)
+	if format == "PPM":
+	    self.im.save_ppm(file)
+	else:
+	    file = file + "." + format
+	    self.save(file, format)
 	return file
 
     def tostring(self, encoder_name = "raw", *args):
@@ -250,19 +319,13 @@ class Image:
         if len(args) == 1 and isTupleType(args[0]):
             args = args[0]
 
-        # compatibility mode
-        if encoder_name == "raw" and args == ():
-            mode = self.mode
-            if mode == "RGB":
-                mode = "RGBX"
-            args = (mode, 0, -1)
-	else:
-            mode = self.mode
+	if encoder_name == "raw" and args == ():
+	    args = self.mode
 
         self.load()
 
         # unpack data
-        e = _getencoder(mode, encoder_name, args)
+        e = _getencoder(self.mode, encoder_name, args)
         e.setimage(self.im)
 
         data = []
@@ -287,26 +350,25 @@ class Image:
 		"#define %s_height %d\n"% (name, self.size[1]),
 		"static char %s_bits[] = {\n" % name, data, "};"], "")
 
-    def fromstring(self, data, decoder = "raw", *args):
+    def fromstring(self, data, decoder_name = "raw", *args):
         "Load data to image from binary string"
 
         # may pass tuple instead of argument list
         if len(args) == 1 and isTupleType(args[0]):
             args = args[0]
 
-        # compatibility mode
-        if decoder == "raw" and args == ():
-            mode = self.mode
-            if mode == "RGB":
-                mode = "RGBX"
-            args = (mode, 0, -1)
+	# default format
+	if decoder_name == "raw" and args == ():
+	    args = self.mode
 
         # unpack data
-        d = _getdecoder(decoder, None, args)
+        d = _getdecoder(self.mode, decoder_name, args)
         d.setimage(self.im)
         s = d.decode(data)
 
-        if s != (-1, 0):
+	if s[0] >= 0:
+            raise ValueError, "not enough image data"
+	if s[1] != 0:
             raise ValueError, "cannot decode image data"
 
     def load(self):
@@ -321,22 +383,57 @@ class Image:
     #
     # function wrappers
 
-    def convert(self, mode = None, data = None):
+    def convert(self, mode=None, data=None, dither=None,
+		palette=WEB, colors=256):
         "Convert to other pixel format"
 
 	if not mode:
+	    # determine default mode
 	    if self.mode == "P":
 		mode = self.palette.mode
 	    else:
 		return self.copy()
+
 	self.load()
+
 	if data:
-	    if mode in ["L", "RGB"]:
-		im = self.im.convert_matrix(mode, data)
-	    elif mode == "P":
-		im = self.im.convert(mode) # FIXME
-	else:
-	    im = self.im.convert(mode)
+	    # matrix conversion
+	    if mode not in ("L", "RGB"):
+		raise ValueError, "illegal conversion"
+	    im = self.im.convert_matrix(mode, data)
+	    return self._makeself(im)
+
+	if mode == "P" and palette == ADAPTIVE:
+	    im = self.im.quantize(colors)
+	    return self._makeself(im)
+
+	# colourspace conversion
+	if dither is None:
+	    dither = FLOYDSTEINBERG
+
+	try:
+	    im = self.im.convert(mode, dither)
+	except ValueError:
+	    try:
+		# normalize source image and try again
+		im = self.im.convert(getmodebase(self.mode))
+		im = im.convert(mode, dither)
+	    except KeyError:
+		raise ValueError, "illegal conversion"
+
+	return self._makeself(im)
+
+    def quantize(self, colours=256, method=0, kmeans=0):
+
+	# methods: 
+	#    0 = median cut
+	#    1 = maximum coverage
+
+        # NOTE: this functionality will be moved to the extended
+	# quantizer interface in a later versions of PIL.
+
+	self.load()
+	im = self.im.quantize(colours, method, kmeans)
 	return self._makeself(im)
 
     def copy(self):
@@ -350,7 +447,7 @@ class Image:
         "Crop region from image"
 
 	self.load()
-	if box == None:
+	if box is None:
 	    return self.copy()
 
         # delayed operation
@@ -364,15 +461,22 @@ class Image:
     def filter(self, kernel):
         "Apply environment filter to image"
 
+	if self.mode == "P":
+	    raise ValueError, "cannot filter palette images"
 	self.load()
 	id = kernel.id
-	if len(self.mode) == 1:
+	if self.im.bands == 1:
 	    return self._makeself(self.im.filter(id))
 	# fix to handle multiband images since _imaging doesn't
 	ims = []
 	for c in range(self.im.bands):
 	    ims.append(self._makeself(self.im.getband(c).filter(id)))
 	return merge(self.mode, ims)
+
+    def getbands(self):
+	"Get band names"
+
+	return _MODEINFO[self.mode][2]
 
     def getbbox(self):
 	"Get bounding box of actual data (non-zero pixels) in image"
@@ -384,17 +488,21 @@ class Image:
 	"Get image data as sequence object."
 
     	self.load()
-	if band != None:
+	if band is not None:
 	    return self.im.getband(band)
-	return self.im # could be misused
+	return self.im # could be abused
 
-    def getpixel(self, (x, y)):
+    def getextrema(self):
+	"Get min/max value"
+
+    	self.load()
+	return self.im.getextrema()
+
+    def getpixel(self, xy):
 	"Get pixel value"
 
     	self.load()
-        if 0 <= x < self.size[0] and 0 <= y <= self.size[1]:
-            return self.im[int(x + y * self.size[0])]
-        raise IndexError
+	return self.im.getpixel(xy)
 
     def getprojection(self):
 	"Get projection to x and y axes"
@@ -403,19 +511,23 @@ class Image:
 	x, y = self.im.getprojection()
 	return map(ord, x), map(ord, y)
 
-    def histogram(self, mask = None):
+    def histogram(self, mask=None, extrema=None):
         "Take histogram of image"
 
 	self.load()
 	if mask:
 	    mask.load()
-	    return self.im.histogram(mask.im)
+	    return self.im.histogram((0, 0), mask.im)
+	if self.mode in ("I", "F"):
+	    if extrema is None:
+		extrema = self.getextrema()
+	    return self.im.histogram(extrema)
 	return self.im.histogram()
 
     def offset(self, xoffset, yoffset = None):
         "Offset image in horizontal and/or vertical direction"
 
-	if yoffset == None:
+	if yoffset is None:
 	    yoffset = xoffset
 	self.load()
 	return self._makeself(self.im.offset(xoffset, yoffset))
@@ -423,46 +535,47 @@ class Image:
     def paste(self, im, box = None, mask = None):
         "Paste other image into region"
 
-	if box == None:
-	    # all of image
+	if box is None:
+	    # cover all of self
 	    box = (0, 0) + self.size
 
-        if not isImageType(im):
-            if len(box) == 2:
-                box = box + self.size
-            im = new(self.mode, (box[2]-box[0], box[3]-box[1]), im)
+	if len(box) == 2:
+	    # lower left corner given; get size from image or mask
+	    if isImageType(im):
+		box = box + (box[0]+im.size[0], box[1]+im.size[1])
+	    else:
+		box = box + (box[0]+mask.size[0], box[1]+mask.size[1])
 
-	elif len(box) == 2:
-	    # lower left corner given
-	    box = box + (box[0]+im.size[0], box[1]+im.size[1])
+        if isImageType(im):
+	    im.load()
+	    if self.mode != im.mode:
+		if self.mode != "RGB" or im.mode not in ("RGBA", "RGBa"):
+		    # should use an adapter for this!
+		    im = im.convert(self.mode)
+	    im = im.im
 
-        im.load()
 	self.load()
-
-	# fix to handle conversion when pasting
-	if self.mode != im.mode:
-	    im = im.convert(self.mode)
 
 	if mask:
 	    mask.load()
-	    self.im.paste(im.im, box, mask.im)
+	    self.im.paste(im, box, mask.im)
 	else:
-	    self.im.paste(im.im, box)
+	    self.im.paste(im, box)
 
     def point(self, lut, mode = None):
         "Map image through lookup table"
 
-        if self.mode == "F":
+        if self.mode in ("I", "F"):
             # floating point; lut must be a valid expression
             scale, offset = _getscaleoffset(lut)
             self.load()
             im = self.im.point_transform(scale, offset);
         else:
             # integer image; use lut and mode
+            self.load()
             if not isSequenceType(lut):
                 # if it isn't a list, it should be a function
-                lut = map(lut, range(256)) * len(self.mode)
-            self.load()
+                lut = map(lut, range(256)) * self.im.bands
             im = self.im.point(lut, mode)
 
 	return self._makeself(im)
@@ -470,7 +583,7 @@ class Image:
     def putalpha(self, im):
         "Set alpha layer"
 
-	if self.mode != "RGBA" or im.mode not in ["1", "L"]:
+	if self.mode != "RGBA" or im.mode not in ("1", "L"):
 	    raise ValueError, "illegal image mode"
 
 	im.load()
@@ -498,27 +611,30 @@ class Image:
         self.palette = ImagePalette.raw(rawmode, data)
         self.palette.mode = "RGB"
 
+    def putpixel(self, xy, value):
+	"Set pixel value"
+
+    	self.load()
+	return self.im.putpixel(xy, value)
+
     def resize(self, size, resample = NEAREST):
         "Resize image"
 
-	if resample not in [NEAREST, ANTIALIAS]:
-	    raise ValueError, "unknown resampling method"
+	if resample not in (NEAREST, BILINEAR, BICUBIC):
+	    raise ValueError, "unknown resampling filter"
 
 	self.load()
-	if resample == NEAREST:
-	    im = self.im.resize(size)
-	else:
-	    im = self.im.resize_antialias(size)
+	im = self.im.resize(size, resample)
 	return self._makeself(im)
 
     def rotate(self, angle, resample = NEAREST):
         "Rotate image.  Angle given as degrees counter-clockwise."
 
-	if resample != NEAREST:
-	    raise ValueError, "unknown resampling method"
+	if resample not in (NEAREST, BILINEAR, BICUBIC):
+	    raise ValueError, "unknown resampling filter"
 
 	self.load()
-	im = self.im.rotate(angle)
+	im = self.im.rotate(angle, resample)
 	return self._makeself(im)
 
     def save(self, fp, format = None, **params):
@@ -567,15 +683,15 @@ class Image:
         if frame != 0:
             raise EOFError
 
-    def show(self, title = None):
+    def show(self, title = None, command = None):
         "Display image (for debug purposes only)"
 
 	try:
 	    import ImageTk
 	    ImageTk._show(self, title)
-	    # note: caller must enter mainloop
+	    # note: caller must enter mainloop!
 	except:
-	    _showxv(self, title)
+	    _showxv(self, title, command)
 
     def split(self):
         "Split image into bands"
@@ -605,28 +721,66 @@ class Image:
 
 	self.draft(None, size)
 
+	self.load()
+
 	im = self.resize(size)
 
 	self.im = im.im
 	self.mode = im.mode
 	self.size = size
 
-    def transform(self, size, method, data, resample = NEAREST):
+    def transform(self, size, method, data, resample=NEAREST, fill=1):
         "Transform image"
 
-	if method == EXTENT:
+	im = new(self.mode, size, None)
+	if method == MESH:
+	    # list of quads
+	    for box, quad in data:
+		im.__transformer(box, self, QUAD, quad, resample, fill)
+	else:
+	    im.__transformer((0, 0)+size, self, method, data, resample, fill)
+
+	return im
+
+    def __transformer(self, box, image, method, data,
+		      resample=NEAREST, fill=1):
+	"Transform into current image"
+
+	# FIXME: this should be turned into a lazy operation (?)
+
+	w = box[2]-box[0]
+	h = box[3]-box[1]
+
+	if method == AFFINE:
+	    # change argument order to match implementation
+	    data = (data[2], data[0], data[1], 
+		    data[5], data[3], data[4])
+	elif method == EXTENT:
+	    # convert extent to an affine transform
 	    x0, y0, x1, y1 = data
-	    xs = float(x1 - x0) / size[0]
-	    ys = float(y1 - y0) / size[1]
-	    data = (xs, 0, x0 + xs/2, 0, ys, y0 + ys/2)
-	elif method != AFFINE:
+	    xs = float(x1 - x0) / w
+	    ys = float(y1 - y0) / h
+	    method = AFFINE
+	    data = (x0 + xs/2, xs, 0, y0 + ys/2, 0, ys)
+	elif method == QUAD:
+	    # quadrilateral warp.  data specifies the four corners
+	    # given as NW, SW, SE, and NE.
+	    nw = data[0:2]; sw = data[2:4]; se = data[4:6]; ne = data[6:8]
+	    x0, y0 = nw; As = 1.0 / w; At = 1.0 / h
+	    data = (x0, (ne[0]-x0)*As, (sw[0]-x0)*At,
+		    (se[0]-sw[0]-ne[0]+x0)*As*At,
+		    y0, (ne[1]-y0)*As, (sw[1]-y0)*At,
+		    (se[1]-sw[1]-ne[1]+y0)*As*At)
+	else:
 	    raise ValueError, "unknown transformation method"
-	if resample != NEAREST:
-	    raise ValueError, "unknown resampling method"
+
+	if resample not in (NEAREST, BILINEAR, BICUBIC):
+	    raise ValueError, "unknown resampling filter"
+
+	image.load()
 
 	self.load()
-	im = self.im.transform(size, data)
-	return self._makeself(im)
+	self.im.transform2(box, image.im, method, data, resample, fill)
 
     def transpose(self, method):
         "Transpose image (flip or rotate in 90 degree steps)"
@@ -653,30 +807,14 @@ class _ImageCrop(Image):
         self.im = im.im
 
     def load(self):
-        
-        # delayed evaluation of crop operation
 
-        if self.__crop is None:
-            return
+        # lazy evaluation!
+        if self.__crop:
+	    self.im = self.im.crop(self.__crop)
+	    self.__crop = None
 
-	# FIXME: the C implementation of crop is broken, so we
-        # implement it by pasting into empty image instead.
-
-	# im = self.im.__crop(self.__crop)
-
-	im = core.new(self.mode, self.size)
-
-	im.paste(self.im, (-self.__crop[0], -self.__crop[1],
-		 self.im.size[0]-self.__crop[0],
-		 self.im.size[1]-self.__crop[1]))
-
-	if self.mode == "P":
-	    im.putpalette("RGB", self.im.getpalette("RGB", "RGB"))
-
-        self.im = im
-
-        self.__crop = None
-
+	# FIXME: future versions should optimize crop/paste
+	# sequences!
 
 # --------------------------------------------------------------------
 # Factories
@@ -695,33 +833,25 @@ def _wedge():
 def new(mode, size, color = 0):
     "Create a new image"
 
-    if color == None:
+    if color is None:
 	# don't initialize
 	return Image()._makeself(core.new(mode, size))
 
-    if isTupleType(color):
-	# convert colour tuple to integer value (0xAABBGGRR)
-	if len(color) == 3:
-	    color = color[0] + (color[1]<<8) + (color[2]<<16)
-	elif len(color) == 4:
-	    color = color[0] + (color[1]<<8) + (color[2]<<16) + (color[3]<<24)
-	else:
-	    color = color[0]
-
     return Image()._makeself(core.fill(mode, size, color))
 
-def fromstring(mode, size, data, decoder = "raw", *args):
+
+def fromstring(mode, size, data, decoder_name = "raw", *args):
     "Load image from string"
 
     # may pass tuple instead of argument list
     if len(args) == 1 and isTupleType(args[0]):
         args = args[0]
 
-    if decoder == "raw" and args == ():
+    if decoder_name == "raw" and args == ():
         args = mode
 
     im = new(mode, size)
-    im.fromstring(data, decoder, args)
+    im.fromstring(data, decoder_name, args)
     return im
 
 def open(fp, mode = "r"):
@@ -747,7 +877,7 @@ def open(fp, mode = "r"):
 	    if not accept or accept(prefix):
 		fp.seek(0)
 		return factory(fp, filename)
-	except SyntaxError:
+	except (SyntaxError, IndexError, TypeError):
 	    pass
 
     init()
@@ -758,7 +888,7 @@ def open(fp, mode = "r"):
 	    if not accept or accept(prefix):
 		fp.seek(0)
 		return factory(fp, filename)
-	except SyntaxError:
+	except (SyntaxError, IndexError, TypeError):
 	    pass
 
     raise IOError, "cannot identify image file"
@@ -773,6 +903,8 @@ def blend(im1, im2, alpha):
 	return im1
     elif alpha == 1.0:
 	return im2
+    im1.load()
+    im2.load()
     return Image()._makeself(core.blend(im1.im, im2.im, alpha))
 
 def composite(image1, image2, mask):
@@ -790,17 +922,16 @@ def eval(image, *args):
 def merge(mode, bands):
     "Merge a set of single band images into a new multiband image."
 
-    if len(mode) != len(bands) or "*" in mode:
+    if getmodebands(mode) != len(bands) or "*" in mode:
         raise ValueError, "wrong number of bands"
     for im in bands[1:]:
-        if len(im.mode) != 1 or im.size != bands[0].size:
+        if im.mode != getmodetype(mode) or im.size != bands[0].size:
             raise ValueError, "wrong number of bands"
     im = core.new(mode, bands[0].size)
-    for i in range(len(mode)):
+    for i in range(getmodebands(mode)):
 	bands[i].load()
 	im.putband(bands[i].im, i)
     return Image()._makeself(im)
-
 
 # --------------------------------------------------------------------
 # Plugin registry
@@ -823,16 +954,27 @@ def register_extension(id, extension):
 # --------------------------------------------------------------------
 # Unix display support
 
-def _showxv(self, title = None):
+def _showxv(self, title=None, command=None):
 
-    if self.mode == "P":
-	file = self.convert("RGB")._dump()
+    if os.name == "nt":
+	format = "BMP"
+	if not command:
+	    command = "start"
     else:
-	file = self._dump()
+	format = None
+	if not command:
+	    command = "xv"
+	    if title:
+		command = command + " -name \"%s\"" % title
 
-    if title:
-	opt = "-name \"%s\"" % title
+    base = getmodebase(self.mode)
+    if base != self.mode and self.mode != "1":
+	file = self.convert(base)._dump(format=format)
     else:
-	opt = ""
+	file = self._dump(format=format)
 
-    os.system("(xv %s %s; rm -f %s)&" % (opt, file, file))
+    if os.name == "nt":
+	os.system("%s %s" % (command, file))
+	# FIXME: leaves temporary files around...
+    else:
+	os.system("(%s %s; rm -f %s)&" % (command, file, file))

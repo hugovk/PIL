@@ -1,15 +1,16 @@
 /* 
  * The Python Imaging Library
- * $Id: GetBBox.c,v 1.1 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * get bounding box for image
  *
  * history:
  *	96-07-22 fl:	Created
  *	96-12-30 fl:	Added projection stuff
+ *	98-07-12 fl:	Added extrema stuff
  *
+ * Copyright (c) Secret Labs AB 1997-98.
  * Copyright (c) Fredrik Lundh 1996.
- * Copyright (c) Secret Labs AB 1997.
  *
  * See the README file for details on usage and redistribution.
  */
@@ -60,9 +61,9 @@ ImagingGetBBox(Imaging im, int bbox[4])
 
     /* Check that we got a box */
     if (bbox[1] < 0)
-	return 0;
+	return 0; /* no data */
 
-    return 1;
+    return 1; /* ok */
 }
 
 
@@ -99,5 +100,72 @@ ImagingGetProjection(Imaging im, UINT8* xproj, UINT8* yproj)
 	GETPROJ(image32, mask);
     }
 
-    return 1;
+    return 1; /* ok */
+}
+
+
+
+int
+ImagingGetExtrema(Imaging im, void *extrema)
+{
+    int x, y;
+    INT32 imin, imax;
+    FLOAT32 fmin, fmax;
+
+    if (im->bands != 1) {
+        ImagingError_ModeError();
+        return -1; /* mismatch */
+    }
+
+    if (!im->xsize || !im->ysize)
+        return 0; /* zero size */
+
+    switch (im->type) {
+    case IMAGING_TYPE_UINT8:
+        imin = imax = im->image8[0][0];
+        for (y = 0; y < im->ysize; y++) {
+            UINT8* in = im->image8[y];
+            for (x = 0; x < im->xsize; x++) {
+                if (imin > in[x])
+                    imin = in[x];
+                else if (imax < in[x])
+                    imax = in[x];
+            }
+        }
+        ((UINT8*) extrema)[0] = (UINT8) imin;
+        ((UINT8*) extrema)[1] = (UINT8) imax;
+        break;
+    case IMAGING_TYPE_INT32:
+        imin = imax = im->image32[0][0];
+        for (y = 0; y < im->ysize; y++) {
+            INT32* in = im->image32[y];
+            for (x = 0; x < im->xsize; x++) {
+                if (imin > in[x])
+                    imin = in[x];
+                else if (imax < in[x])
+                    imax = in[x];
+            }
+        }
+        ((INT32*) extrema)[0] = imin;
+        ((INT32*) extrema)[1] = imax;
+        break;
+    case IMAGING_TYPE_FLOAT32:
+        fmin = fmax = ((FLOAT32*)im->image32[0])[0];
+        for (y = 0; y < im->ysize; y++) {
+            FLOAT32* in = (FLOAT32*) im->image32[y];
+            for (x = 0; x < im->xsize; x++) {
+                if (fmin > in[x])
+                    fmin = in[x];
+                else if (fmax < in[x])
+                    fmax = in[x];
+            }
+        }
+        ((FLOAT32*) extrema)[0] = fmin;
+        ((FLOAT32*) extrema)[1] = fmax;
+        break;
+    default:
+        ImagingError_ModeError();
+        return -1;
+    }
+    return 1; /* ok */
 }

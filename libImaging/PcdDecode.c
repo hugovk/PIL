@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: PcdDecode.c,v 1.2 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * decoder for uncompressed PCD image data.
  *

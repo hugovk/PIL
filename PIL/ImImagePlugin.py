@@ -1,18 +1,21 @@
 #
 # The Python Imaging Library.
-# $Id: ImImagePlugin.py,v 1.2 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
-# Restricted IFUNC IM file handling for PIL
+# IFUNC IM file handling for PIL
 #
 # history:
-#	95-09-01 fl	Created.  
-#	97-01-03 fl	Save palette images
-#	97-01-08 fl	Added sequence support
-#	97-01-23 fl	Added P and RGB save support
-#	97-05-31 fl	Read floating point images
-#	97-06-22 fl	Save floating point images
-#	97-08-27 fl	Read and save 1-bit images
-#	98-03-05 fl	Read and save integer images
+# 95-09-01 fl	Created.  
+# 97-01-03 fl	Save palette images
+# 97-01-08 fl	Added sequence support
+# 97-01-23 fl	Added P and RGB save support
+# 97-05-31 fl	Read floating point images
+# 97-06-22 fl	Save floating point images
+# 97-08-27 fl	Read and save 1-bit images
+# 98-06-25 fl	Added support for RGB+LUT images
+# 98-07-02 fl	Added support for YCC images
+# 98-07-15 fl	Renamed offset attribute to avoid name clash
+# 98-12-29 fl	Added I;16 support
 #
 # Copyright (c) Secret Labs AB 1997-98.
 # Copyright (c) Fredrik Lundh 1995-97.
@@ -43,8 +46,8 @@ MODE = "Image type"
 TAGS = { COMMENT:0, DATE:0, EQUIPMENT:0, FRAMES:0, LUT:0, NAME:0,
 	 SCALE:0, SIZE:0, MODE:0 }
 
-OLDMODES = {
-    # standard IM formats
+OPEN = {
+    # ifunc93/p3cfunc formats
     "0 1 image": ("1", "1"),
     "L 1 image": ("1", "1"),
     "Greyscale image": ("L", "L"),
@@ -56,20 +59,29 @@ OLDMODES = {
     "B2 image": ("P", "P;2"),
     "B4 image": ("P", "P;4"),
     "X 24 image": ("RGB", "RGB"),
-    # P3CFUNC formats
+    # old p3cfunc formats
     "RGB3 image": ("RGB", "RGB;T"),
     "RYB3 image": ("RGB", "RYB;T"),
+    # extensions
+    "RGBA image": ("RGBA", "RGBA;L"),
+    "RGBX image": ("RGBX", "RGBX;L"),
+    "CMYK image": ("CMYK", "CMYK;L"),
+    "YCC image": ("YCbCr", "YCbCr;L"),
 }
 
-# ifunc95 handlers
+# ifunc95 extensions
 for i in ["8", "8S", "16", "16S", "32", "32F"]:
-    OLDMODES["L %s image" % i] = ("F", "F;%s" % i)
-    OLDMODES["L*%s image" % i] = ("F", "F;%s" % i)
+    OPEN["L %s image" % i] = ("F", "F;%s" % i)
+    OPEN["L*%s image" % i] = ("F", "F;%s" % i)
+for i in ["16", "16B"]:
+    OPEN["L %s image" % i] = ("I;%s" % i, "I;%s" % i)
+    OPEN["L*%s image" % i] = ("I;%s" % i, "I;%s" % i)
+for i in ["32S"]:
+    OPEN["L %s image" % i] = ("I", "I;%s" % i)
+    OPEN["L*%s image" % i] = ("I", "I;%s" % i)
 for i in range(2, 33):
-    OLDMODES["L*%s image" % i] = ("F", "F;%s" % i)
+    OPEN["L*%s image" % i] = ("F", "F;%s" % i)
 
-OLDMODES["L 32S image"] = ("I", "I")
-OLDMODES["L*32S image"] = ("I", "I")
 
 # --------------------------------------------------------------------
 # Read IM directory
@@ -83,7 +95,7 @@ class ImImageFile(ImageFile.ImageFile):
 
     def _open(self):
 
-	# Quick rejection: if there's not a LF among the first
+	# Quick rejection: if there's not an LF among the first
 	# 100 bytes, this is (probably) not a text header.
 
 	if not "\n" in self.fp.read(100):
@@ -103,14 +115,14 @@ class ImImageFile(ImageFile.ImageFile):
 
 	    s = self.fp.read(1)
 
-	    # Some drivers erronously uses \n\r instead of \r\n...
+	    # Some versions of IFUNC uses \n\r instead of \r\n...
 	    if s == "\r":
 		continue
 
 	    if not s or s[0] == chr(0) or s[0] == chr(26):
 		break
 
-	    # FIXME: risky; may read whole file if not a text file
+	    # FIXME: this may read whole file if not a text file
 	    s = s + self.fp.readline()
 
 	    if len(s) > 100:
@@ -136,8 +148,8 @@ class ImImageFile(ImageFile.ImageFile):
 		    if i >= 0:
 			v = v[:i] + "," + v[i+1:]
 		    v = eval(v)
-		elif k == MODE and OLDMODES.has_key(v):
-		    v, self.rawmode = OLDMODES[v]
+		elif k == MODE and OPEN.has_key(v):
+		    v, self.rawmode = OPEN[v]
 
 		# Add to dictionary. Note that COMMENT tags are
 		# combined into a list of strings.
@@ -167,18 +179,35 @@ class ImImageFile(ImageFile.ImageFile):
 	while s and s[0] != chr(26):
 	    s = self.fp.read(1)
 	if not s:
-	    return
+	    raise SyntaxError, "File truncated"
 
 	if self.info.has_key(LUT):
-	    self.palette = ImagePalette.raw("RGB;L", self.fp.read(768))
+	    # convert lookup table to palette or lut attribute
+	    palette = self.fp.read(768)
+	    greyscale = 1 # greyscale palette
+	    linear = 1 # linear greyscale palette
+	    for i in range(256):
+		if palette[i] == palette[i+256] == palette[i+512]:
+		    if palette[i] != chr(i):
+			linear = 0
+		else:
+		    greyscale = 0
 	    if self.mode == "L":
-		self.mode = "P"
+		if greyscale:
+		    if not linear:
+			self.lut = map(ord, palette[:256])
+		else:
+		    self.mode = self.rawmode = "P"
+		    self.palette = ImagePalette.raw("RGB;L", palette)
+	    elif self.mode == "RGB":
+		if not greyscale or not linear:
+		    self.lut = map(ord, palette)
 
 	self.frame = 0
 
-	self.offset = offs = self.fp.tell()
+	self.__offset = offs = self.fp.tell()
 
-	self.fp2 = self.fp # FIXME: hack
+	self.__fp = self.fp # FIXME: hack
 
         if self.rawmode[:2] == "F;":
 
@@ -220,9 +249,9 @@ class ImImageFile(ImageFile.ImageFile):
 	    bits = 8 * len(self.mode)
 
 	size = ((self.size[0] * bits + 7) / 8) * self.size[1]
-	offs = self.offset + frame * size
+	offs = self.__offset + frame * size
 
-	self.fp = self.fp2
+	self.fp = self.__fp
 
 	self.tile = [("raw", (0,0)+self.size, offs, (self.rawmode, 0, -1))]
 
@@ -235,27 +264,35 @@ class ImImageFile(ImageFile.ImageFile):
 # Save IM files
 
 SAVE = {
+    # mode: (im type, raw mode)
     "1": ("0 1", "1"),
     "L": ("Greyscale", "L"),
     "P": ("Greyscale", "P"),
-    "F": ("L 32F", "F"),
-    "I": ("L 32S", "I"),
+    "I": ("L 32S", "I;32S"),
+    "I;16": ("L 16", "I;16"),
+    "I;16B": ("L 16B", "I;16B"),
+    "F": ("L 32F", "F;32F"),
     "RGB": ("RGB", "RGB;L"),
     "RGBA": ("RGBA", "RGBA;L"),
+    "RGBX": ("RGBX", "RGBX;L"),
     "CMYK": ("CMYK", "CMYK;L"),
+    "YCbCr": ("YCC", "YCbCr;L")
 }
 
-def _save(im, fp, filename):
+def _save(im, fp, filename, check=0):
 
     try:
 	type, rawmode = SAVE[im.mode]
     except KeyError:
-	raise IOError, "Cannot save %s images as IM" % im.mode
+	raise ValueError, "Cannot save %s images as IM" % im.mode
 
     try:
 	frames = im.encoderinfo["frames"]
     except KeyError:
 	frames = 1
+
+    if check:
+	return check
 
     fp.write("Image type: %s image\r\n" % type)
     if filename:
@@ -266,8 +303,7 @@ def _save(im, fp, filename):
 	fp.write("Lut: 1\r\n")
     fp.write("\000" * (511-fp.tell()) + "\032")
     if im.mode == "P":
-	# 768 bytes, line-interleaved
-	fp.write(im.im.getpalette("RGB", "RGB;L"))
+	fp.write(im.im.getpalette("RGB", "RGB;L")) # 768 bytes
     ImageFile._save(im, fp, [("raw", (0,0)+im.size, 0, (rawmode, 0, -1))])
 
 #

@@ -26,9 +26,9 @@
  * Note that _tkinter.c must be compiled with WITH_APPINIT.
  *
  * History:
- *	95-09-12 fl	Created
- *	96-04-08 fl	Ready for release
- *	97-05-09 fl	Use command instead of image type
+ * 95-09-12 fl	Created
+ * 96-04-08 fl	Ready for release
+ * 97-05-09 fl	Use command instead of image type
  *
  * Copyright (c) Fredrik Lundh 1995-97.
  * Copyright (c) Secret Labs AB 1997.
@@ -186,7 +186,6 @@ PyImagingPhoto(ClientData clientdata, Tcl_Interp* interp,
 void
 TkImaging_Init(Tcl_Interp* interp)
 {
-    printf("create command\n");
     Tcl_CreateCommand(interp, "PyImagingPhoto", PyImagingPhoto,
                       (ClientData) 0, (Tcl_CmdDeleteProc*) NULL);
 }

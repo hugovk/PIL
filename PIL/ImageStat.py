@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: ImageStat.py,v 1.2 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # global statistics
 #
@@ -8,6 +8,7 @@
 #	96-04-05 fl	Created
 #	97-05-21 fl	Added mask; added rms, var, stddev attributes
 #	97-08-05 fl	Added median
+#	98-07-05 hk	Fixed integer overflow error
 #
 # Notes:
 #       This class shows how to implement delayed evaluation of
@@ -91,7 +92,7 @@ class Stat:
 	for i in range(0, len(self.h), 256):
 	    sum2 = 0.0
 	    for j in range(256):
-		sum2 = sum2 + (j ** 2) * self.h[i+j]
+		sum2 = sum2 + (j ** 2) * float(self.h[i+j])
 	    v.append(sum2)
 	return v
 

@@ -1,17 +1,16 @@
 /*
  * The Python Imaging Library
- * $Id: Crop.c,v 1.2 1996/05/09 21:20:18 fredrik Exp $
+ * $Id$
  *
  * cut region from image
  *
- * to do:
- *	FIXME: Allow regions outside the source image.
- *
  * history:
- *	95-11-27 fl:	Created
+ * 95-11-27 fl	Created
+ * 98-07-10 fl	Fixed "null result" error
+ * 99-02-05 fl	Rewritten to use Paste primitive
  *
+ * Copyright (c) Secret Labs AB 1997-99.
  * Copyright (c) Fredrik Lundh 1995.
- * Copyright (c) Secret Labs AB 1997.
  *
  * See the README file for information on usage and redistribution.
  */
@@ -21,45 +20,38 @@
 
 
 Imaging
-ImagingCrop(Imaging im, int x0, int y0, int x1, int y1)
+ImagingCrop(Imaging imIn, int sx0, int sy0, int sx1, int sy1)
 {
     Imaging imOut;
-    int y;
     int xsize, ysize;
-    int xoff, yoff;
+    int dx0, dy0, dx1, dy1;
+    
+    if (!imIn)
+	return (Imaging) ImagingError_ModeError();
 
-    if (!im)
-	return (Imaging) ImagingError_Argument(NULL);
+    xsize = sx1 - sx0;
+    if (xsize < 0)
+        xsize = 0;
+    ysize = sy1 - sy0;
+    if (ysize < 0)
+        ysize = 0;
 
-    xsize = x1 - x0;
-    ysize = y1 - y0;
-
-    imOut = ImagingNew(im->mode, x1-x0, y1-y0);
+    imOut = ImagingNew(imIn->mode, xsize, ysize);
     if (!imOut)
 	return NULL;
 
-    ImagingCopyInfo(imOut, im);
+    ImagingCopyInfo(imOut, imIn);
 
-    /* Determine which region to copy */
-    xoff = yoff = 0;
-    if (x0 < 0)
-	xsize += x0, xoff = -x0, x0 = 0;
-    if (x0 + xsize > imOut->xsize)
-	xsize = imOut->xsize - x0;
-    if (y0 < 0)
-	ysize += y0, yoff = -y0, y0 = 0;
-    if (y0 + ysize > imOut->ysize)
-	ysize = imOut->ysize - y0;
+    dx0 = -sx0;
+    dy0 = -sy0;
+    dx1 = imIn->xsize - sx0;
+    dy1 = imIn->ysize - sy0;
 
-    if (xsize <= 0 || ysize <= 0)
-	return 0;
-
-
-
-    for (y = 0; y < imOut->ysize; y++)
-	memcpy(imOut->image[y], im->image[y+y0]+x0*im->pixelsize,
-	       imOut->linesize);
+    /* paste the source image on top of the output image!!! */
+    if (ImagingPaste(imOut, imIn, NULL, dx0, dy0, dx1, dy1) < 0) {
+        ImagingDelete(imOut);
+        return NULL;
+    }
 
     return imOut;
 }
-

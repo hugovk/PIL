@@ -1,10 +1,35 @@
 
+# sane.py
+#
+# Python wrapper on top of the _sane module, which is in turn a very
+# thin wrapper on top of the SANE library.  For a complete understanding
+# of SANE, consult the documentation at the SANE home page:
+# http://www.mostang.com/sane/ .
+            
 import Image
-import _sane
 
+import _sane
 from _sane import *
 
 class Option:
+    """Class representing a SANE option.
+    Attributes:
+    index -- number from 0 to n, giving the option number
+    name -- a string uniquely identifying the option
+    title -- single-line string containing a title for the option
+    desc -- a long string describing the option; useful as a help message
+    type -- type of this option.  Possible values: TYPE_BOOL,
+            TYPE_INT, TYPE_STRING, and so forth.
+    unit -- units of this option.  Possible values: UNIT_NONE,
+            UNIT_PIXEL, etc.
+    size -- size of the value in bytes
+    cap -- capabilities available; CAP_EMULATED, CAP_SOFT_SELECT, etc.
+    constraint -- constraint on values.  Possible values:
+        None : No constraint
+        (min,max,step)  Integer values, from min to max, stepping by
+        list of integers or strings: only the listed values are allowed
+    """
+    
     def __init__(self, args):
 	import string
 	self.index, self.name = args[0], args[1]
@@ -18,7 +43,34 @@ class Option:
 	if type(self.name)!=type(''): self.py_name=str(self.name)
 	else: self.py_name=string.join(map(f, self.name), '')
 
+    def is_active(self):
+        return _sane.OPTION_IS_ACTIVE(self.cap)
+    def is_settable(self):
+        return _sane.OPTION_IS_SETTABLE(self.cap)
+
 class SaneDev:
+    """Class representing a SANE device.
+    Methods:
+    start() -- initiate a scan, using the current settings
+    snap() -- snap a picture, returning an Image object
+    cancel() -- cancel an in-progress scanning operation
+    fileno() -- return the file descriptor for the scanner (handy for select)
+
+    Also available, but rather low-level:
+    get_parameters() -- get the current parameter settings of the device
+    get_options() -- return a list of tuples describing all the options.
+                     Use .opt and .optlist attributes instead.
+    Attributes:
+    optlist -- list of option names
+    opt -- a dictionary mapping option names to Option objects.
+    
+    You can also access an option name to retrieve its value, and to
+    set it.  For example, if one option has a .name attribute of
+    imagemode, and scanner is a SaneDev object, you can do:
+         print scanner.imagemode
+         scanner.imagemode = 'Full frame'
+         scanner.opt['imagemode'] returns the corresponding Option object.
+    """
     def __init__(self, devname): 
 	d=self.__dict__
 	d['dev']=_sane._open(devname)
@@ -48,6 +100,8 @@ class SaneDev:
     def __getattr__(self, key):
 	dev=self.__dict__['dev']
 	optdict=self.__dict__['opt']
+        if key=='optlist':
+            return self.opt.keys()
 	if not optdict.has_key(key):
 	    raise AttributeError, 'No such attribute: '+key
 	opt=optdict[key]
@@ -60,17 +114,35 @@ class SaneDev:
 	self.last_opt, value = dev.get_option(opt.index)
 	return value
 
-    def get_parameters(self): return self.dev.get_parameters()
-    def get_options(self): return self.dev.get_options()
-    def start(self): return self.dev.start()
-    def cancel(self): return self.dev.cancel()
-    def fileno(self): return self.dev.fileno()
+    def get_parameters(self):
+        "Return a tuple holding all the current device settings"
+        return self.dev.get_parameters()
+    
+    def get_options(self):
+        "Return a list of tuples describing all the available options"
+        return self.dev.get_options()
+    
+    def start(self):
+        "Initiate a scanning operation"
+        return self.dev.start()
+
+    def cancel(self):
+        "Cancel an in-progress scanning operation"
+        return self.dev.cancel()
+
     def snap(self):
+        "Snap a picture, returning a PIL image object with the results"
 	format, last_frame, (xsize, ysize), depth, bytes_per_line = self.get_parameters()
+	if (format=='G') or (format=='R') or (format=='B'): format='L'
 	im=Image.new(format, (xsize,ysize))
 	self.dev.snap( im.im.id )
 	return im
 
+    def fileno(self):
+        "Return the file descriptor for the scanning device"
+        return self.dev.fileno()
+
 def open(devname):
+    "Open a device for scanning"
     new=SaneDev(devname)
     return new

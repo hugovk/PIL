@@ -1,16 +1,15 @@
-# $Id: Makefile.in,v 1.1 1996/03/25 08:51:49 fredrik Exp fredrik $
 #
 # The Python Imaging Library
+# $Makefile.in$
 #
-# File:
-#	Makefile.in -- makefile template for PIL
+# makefile template for PIL
 #
-# Note:
-#	Makefile.in is converted into Makefile by the configure script
-#	in the parent directory.  Once configure has run, you can recreate
-#	the Makefile by running just config.status.
+# Makefile.in is converted into Makefile by the configure script
+# in the parent directory.  Once configure has run, you can recreate
+# the Makefile by running just config.status.
 #
-# Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
+# Copyright (c) Secret Labs AB 1998-99.
+# Copyright (c) Fredrik Lundh 1995-98.
 #
 
 # --------------------------------------------------------------------
@@ -42,9 +41,9 @@ SHELL=		/bin/sh
 # --------------------------------------------------------------------
 # Fixed definitions
 
-OBJS=		Storage.o Except.o \
+OBJS=		Storage.o Access.o Except.o \
 		Bands.o Blend.o \
-		Chops.o Convert.o Copy.o Crop.o Crc32.o \
+		Chops.o Convert.o ConvertYCbCr.o Copy.o Crop.o Crc32.o \
 		Dib.o Draw.o \
 		Effects.o \
 		File.o Fill.o Filter.o \
@@ -53,7 +52,7 @@ OBJS=		Storage.o Except.o \
 		Matrix.o Negative.o \
 		Offset.o \
 		Pack.o Palette.o Paste.o Point.o \
-		Quantize.o \
+                Quant.o QuantHash.o QuantHeap.o \
 		Unpack.o \
 		UnpackYCC.o \
 		BitDecode.o \
@@ -66,43 +65,12 @@ OBJS=		Storage.o Except.o \
 		MspDecode.o \
 		PackDecode.o \
 		PcdDecode.o \
-		PcxDecode.o \
+		PcxDecode.o PcxEncode.o \
 		RawDecode.o RawEncode.o \
 		SunRleDecode.o \
 		TgaRleDecode.o \
 		XbmDecode.o XbmEncode.o \
 		ZipDecode.o ZipEncode.o
-
-SRCS=		Storage.c Except.c \
-		Bands.c Blend.c \
-		Chops.c Convert.c Copy.c Crop.c Crc32.c \
-		Dib.c Draw.c \
-		Effects.c \
-		File.c Fill.c Filter.c \
-		Geometry.c GetBBox.c \
-		Histo.c \
-		Matrix.c Negative.c \
-		Offset.c \
-		Pack.c Palette.c Paste.c Point.c \
-		Quantize.c \
-		Unpack.c \
-		UnpackYCC.c \
-		BitDecode.c \
-		EpsEncode.c \
-		FliDecode.c \
-		GifDecode.c GifEncode.c \
-		HexDecode.c \
-		JpegDecode.c JpegEncode.c \
-		LzwDecode.c \
-		MspDecode.c \
-		PackDecode.c \
-		PcdDecode.c \
-		PcxDecode.c \
-		RawDecode.c RawEncode.c \
-		SunRleDecode.c \
-		TgaRleDecode.c \
-		XbmDecode.c XbmEncode.c \
-		ZipDecode.c ZipEncode.c
 
 LIB=		libImaging.a
 

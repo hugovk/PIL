@@ -1,12 +1,12 @@
 /*
  * The Python Imaging Library.
- * $Id: RawEncode.c,v 1.2 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * coder for ZIP (deflated) image data
  *
- * history:
- *	96-12-29 fl	created
- *	96-12-30 fl	adaptive filter selection, encoder tuning
+ * History:
+ * 96-12-29 fl	created
+ * 96-12-30 fl	adaptive filter selection, encoder tuning
  *
  * Copyright (c) Fredrik Lundh 1996.
  * Copyright (c) Secret Labs AB 1997.
@@ -221,7 +221,8 @@ ImagingZipEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 
 			    /* pick predictor with the shortest distance */
 			    v = state->buffer[i] -
-				((pa <= pb && pa <= pc) ? a : (pb <= pc) ? b : c);
+				((pa <= pb && pa <= pc) ? a :
+                                 (pb <= pc) ? b : c);
 			    context->paeth[i] = v;
 			    s += (v < 128) ? v : 256 - v;
 			}
@@ -236,7 +237,12 @@ ImagingZipEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 		context->z_stream.next_in = context->output;
 		context->z_stream.avail_in = state->bytes+1;
 
-		err = deflate(&context->z_stream, Z_NO_FLUSH);
+		/* err = deflate(&context->z_stream, Z_NO_FLUSH); */
+
+                /* FIXME: temporary workaround for problem with recent
+                   versions of zlib -- 990709/fl */
+
+		err = deflate(&context->z_stream, Z_SYNC_FLUSH);
 
 		if (err < 0) {
 		    /* Something went wrong inside the compression library */

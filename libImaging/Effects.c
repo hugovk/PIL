@@ -1,6 +1,6 @@
 /* 
  * The Python Imaging Library
- * $Id: Effects.c,v 1.5 1996/10/04 19:45:07 fredrik Exp fredrik $
+ * $Id$
  *
  * various special effects and image generators
  *
@@ -32,7 +32,7 @@ ImagingEffectMandelbrot(int xsize, int ysize, double extent[4], int quality)
     width  = extent[2] - extent[0];
     height = extent[3] - extent[1];
     if (width < 0.0 || height < 0.0 || quality < 2)
-        return (Imaging) ImagingError_Argument(NULL);
+        return (Imaging) ImagingError_ValueError(NULL);
 
     im = ImagingNew("L", xsize, ysize);
     if (!im)

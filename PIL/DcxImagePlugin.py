@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: DcxImagePlugin.py,v 1.2 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # DCX file handling
 #
@@ -12,8 +12,9 @@
 # History:
 #	95-09-09 fl	Created
 #	96-03-20 fl	Properly derived from PcxImageFile.
+#	98-07-15 fl	Renamed offset attribute to avoid name clash
 #
-# Copyright (c) Secret Labs AB 1997.
+# Copyright (c) Secret Labs AB 1997-98.
 # Copyright (c) Fredrik Lundh 1995-96.
 #
 # See the README file for information on usage and redistribution.
@@ -50,20 +51,20 @@ class DcxImageFile(PcxImageFile):
 	    raise SyntaxError, "not a DCX file"
 
 	# Component directory
-	self.offset = []
+	self._offset = []
 	for i in range(1024):
 	    offset = i32(self.fp.read(4))
 	    if not offset:
 		break
-	    self.offset.append(offset)
+	    self._offset.append(offset)
 
         self.seek(0)
 
     def seek(self, frame):
-	if frame >= len(self.offset):
+	if frame >= len(self._offset):
 	    raise IndexError, "attempt to seek outside DCX directory"
 	self.frame = frame
-	self.fp.seek(self.offset[frame])
+	self.fp.seek(self._offset[frame])
 	PcxImageFile._open(self)
 
     def tell(self):

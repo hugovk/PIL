@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: RawDecode.c,v 1.5 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * decoder for raw (uncompressed) image data
  *

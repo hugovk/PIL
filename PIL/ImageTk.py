@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: ImageTk.py,v 1.5 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # a Tk display interface
 #
@@ -13,6 +13,10 @@
 # 97-05-17 fl	Support the "pilbitmap" booster patch
 # 97-06-05 fl	Added file= and data= argument to image constructors
 # 98-03-09 fl	Added width and height methods to Image classes
+# 98-07-02 fl	Use default mode for "P" images without palette attribute
+# 98-07-02 fl	Explicitly destroy Tkinter image objects
+# 99-07-24 fl	Support multiple Tk interpreters (from Greg Couch)
+# 99-07-26 fl	Automatically hook into Tkinter (if possible)
 #
 # Copyright (c) Secret Labs AB 1997-98.
 # Copyright (c) Fredrik Lundh 1996-97.
@@ -23,7 +27,7 @@
 import Image, Tkinter
 
 # --------------------------------------------------------------------
-# Check for optional "pilbitmap" booster patch
+# Check for Tkinter interface hooks
 
 _pilbitmap_ok = None
 
@@ -43,7 +47,7 @@ def _pilbitmap_check():
 
 class PhotoImage:
 
-    def __init__(self, image = None, size = None, **kw):
+    def __init__(self, image=None, size=None, **kw):
 
         # Tk compatibility: file or data
 	if image is None:
@@ -61,7 +65,10 @@ class PhotoImage:
             if mode == "P":
                 # palette mapped data
                 image.load()
-                mode = image.palette.mode
+		try:
+		    mode = image.palette.mode
+		except AttributeError:
+		    mode = "RGB" # default
 	    size = image.size
 	    kw["width"], kw["height"] = size
 	else:
@@ -69,16 +76,21 @@ class PhotoImage:
 	    image = None
 
 	if mode not in ["1", "L", "RGB", "RGBA"]:
-            if mode == "F":
-                mode = "L"
-            else:
-                mode = "RGB"
+	    mode = Image.getmodebase(mode)
 
 	self.__mode = mode
 	self.__size = size
 	self.__photo = apply(Tkinter.PhotoImage, (), kw)
 	if image:
 	    self.paste(image)
+
+    def __del__(self):
+	name = self.__photo.name
+	self.__photo.name = None
+	try:
+	    self.__photo.tk.call("image", "delete", name)
+	except:
+	    pass # ignore internal errors
 
     def __str__(self):
 	return str(self.__photo)
@@ -100,8 +112,20 @@ class PhotoImage:
             block = image.new_block(self.__mode, im.size)
             image.convert2(block, image) # convert directly between buffers
 
-        self.__photo.tk.call("PyImagingPhoto", self.__photo, block.id)
+	tk = self.__photo.tk
 
+	try:
+	    tk.call("PyImagingPhoto", self.__photo, block.id)
+	except Tkinter.TclError, v:
+	    # activate Tkinter hook
+	    try:
+		try:
+		    Image.core.tkinit(tk.interpaddr(), 1)
+		except AttributeError:
+		    Image.core.tkinit(id(tk), 0)
+		tk.call("PyImagingPhoto", self.__photo, block.id)
+	    except (AttributeError, Tkinter.TclError):
+		raise # configuration problem; cannot attach to Tkinter
 
 # --------------------------------------------------------------------
 # BitmapImage
@@ -133,6 +157,14 @@ class BitmapImage:
             kw["data"] = image.tobitmap()
         self.__photo = apply(Tkinter.BitmapImage, (), kw)
 
+    def __del__(self):
+	name = self.__photo.name
+	self.__photo.name = None
+	try:
+	    self.__photo.tk.call("image", "delete", name)
+	except:
+	    pass # ignore internal errors
+
     def width(self):
 	return self.__size[0]
 
@@ -148,14 +180,12 @@ class BitmapImage:
 
 def _show(image, title):
 
-    import Tkinter
-
     class UI(Tkinter.Label):
 	def __init__(self, master, im):
 	    if im.mode == "1":
-		self.image = BitmapImage(im, foreground="white")
+		self.image = BitmapImage(im, foreground="white", master=master)
 	    else:
-		self.image = PhotoImage(im)
+		self.image = PhotoImage(im, master=master)
 	    Tkinter.Label.__init__(self, master, image=self.image,
 		bg="black", bd=0)
 

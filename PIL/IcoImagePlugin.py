@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: IcoImagePlugin.py,v 1.2 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # Windows Icon support for PIL
 #

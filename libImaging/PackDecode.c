@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: PackDecode.c,v 1.3 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * decoder for PackBits image data.
  *

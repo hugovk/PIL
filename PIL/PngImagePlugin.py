@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: PngImagePlugin.py,v 1.3 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # PNG support code
 #
@@ -13,14 +13,15 @@
 #	96-12-15 fl	Separate PNG stream parser
 # 	96-12-29 fl	Added write support, added getchunks
 # 0.3	96-12-30 fl	Eliminated circular references in decoder
+# 0.4	98-07-12 fl	Read/write 16-bit images as mode I
 #
-# Copyright (c) Secret Labs AB 1997.
+# Copyright (c) Secret Labs AB 1997-98.
 # Copyright (c) Fredrik Lundh 1996.
 #
 # See the README file for information on usage and redistribution.
 #
 
-__version__ = "0.3"
+__version__ = "0.4"
 
 import string
 
@@ -42,7 +43,7 @@ _MODES = {
     (2, 0): ("L", "L;2"),
     (4, 0): ("L", "L;4"),
     (8, 0): ("L", "L"),
-    (16,0): ("L", "L;16B"),
+    (16,0): ("I", "I;16B"),
     (8, 2): ("RGB", "RGB"),
     (16,2): ("RGB", "RGB;16B"),
     (1, 3): ("P", "P;1"),
@@ -109,7 +110,7 @@ class ChunkStream:
 		"(bad header checksum in %s)" % cid
 
     def crc_skip(self, cid, data):
-	"Read checksum.  Used of the C module is not present"
+	"Read checksum.  Used if the C module is not present"
 
 	self.fp.read(4)
 
@@ -214,7 +215,7 @@ class PngImageFile(ImageFile.ImageFile):
 	    raise SyntaxError, "not a PNG file"
 
 	#
-	# Parse headers, up until the first IDAT chunk
+	# Parse headers up to the first IDAT chunk
 
 	self.png = PngStream(self.fp)
 
@@ -310,6 +311,7 @@ _OUTMODES = {
     "L;2": ("L;2", chr(2)+chr(0)),
     "L;4": ("L;4", chr(4)+chr(0)),
     "L":   ("L", chr(8)+chr(0)),
+    "I":   ("I;16B", chr(16)+chr(0)),
     "P;1": ("P;1", chr(1)+chr(3)),
     "P;2": ("P;2", chr(2)+chr(3)),
     "P;4": ("P;4", chr(4)+chr(3)),
@@ -337,7 +339,7 @@ class _idat:
     def write(self, data):
 	self.chunk(self.fp, "IDAT", data)
 
-def _save(im, fp, filename, chunk = putchunk):
+def _save(im, fp, filename, chunk=putchunk, check=0):
     # save an image to disk (called by the save method)
 
     mode = im.mode
@@ -382,6 +384,9 @@ def _save(im, fp, filename, chunk = putchunk):
 	rawmode, mode = _OUTMODES[mode]
     except KeyError:
 	raise IOError, "cannot write mode %s as PNG" % mode
+
+    if check:
+	return check
 
     #
     # write minimal PNG file

@@ -1,6 +1,6 @@
 /* 
  * The Python Imaging Library
- * $Id: Chops.c,v 1.5 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * basic channel operations
  *
@@ -61,12 +61,10 @@ create(Imaging im1, Imaging im2, char* mode)
 {
     int xsize, ysize;
 
-    if (!im1 || !im2)
-	return (Imaging) ImagingError_Argument(NULL);
-    if (mode != NULL && (strcmp(im1->mode, "1") || strcmp(im2->mode, "1")))
-	return (Imaging) ImagingError_Argument("Bad mode for this operation");
-    if (im1->type  != 0 || im1->type  != im2->type  ||
-	im1->depth != 8 || im1->depth != im2->depth ||
+    if (!im1 || !im2 || im1->type != IMAGING_TYPE_UINT8 ||
+        (mode != NULL && (strcmp(im1->mode, "1") || strcmp(im2->mode, "1"))))
+	return (Imaging) ImagingError_ModeError();
+    if (im1->type  != im2->type  ||
         im1->bands != im2->bands)
 	return (Imaging) ImagingError_Mismatch();
 

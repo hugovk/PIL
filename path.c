@@ -10,11 +10,13 @@
  * 97-02-28 fl	Fixed getbbox
  * 97-06-12 fl	Added id attribute
  * 97-06-14 fl	Added slicing and setitem
+ * 98-12-29 fl	Improved sequence handling (from Richard Jones)
+ * 99-01-10 fl	Fixed IndexError test for 1.5 (from Fred Drake)
  *
  * notes:
  * FIXME: fill in remaining slots in the sequence api
  *
- * Copyright (c) Secret Labs AB 1997.
+ * Copyright (c) Secret Labs AB 1997-99.
  * Copyright (c) Fredrik Lundh 1997.
  *
  * See the README file for information on usage and redistribution.
@@ -105,12 +107,15 @@ PyPath_Flatten(PyObject* data, double **pxy)
     }
 	
     if (!PySequence_Check(data)) {
-	PyErr_SetString(PyExc_TypeError, "Argument must be sequence");
+	PyErr_SetString(PyExc_TypeError, "argument must be sequence");
 	return -1;
     }
 
     j = 0;
     n = PyObject_Length(data);
+    /* Just in case __len__ breaks (or doesn't exist) */
+    if (PyErr_Occurred())
+        return -1;
 
     /* Allocate for worst case */
     xy = malloc(2 * n * sizeof(double));
@@ -123,6 +128,16 @@ PyPath_Flatten(PyObject* data, double **pxy)
     for (i = 0; i < n; i++) {
 	double x, y;
 	PyObject *op = PySequence_GetItem(data, i);
+        if (!op) {
+            /* Treat IndexError as end of sequence */
+            if (PyErr_Occurred() && PyErr_ExceptionMatches(PyExc_IndexError)) {
+                PyErr_Clear();
+                break;
+            } else {
+                free(xy);
+                return -1;
+            }
+        }
 	if (PyNumber_Check(op))
 	    xy[j++] = PyFloat_AsDouble(op);
 	else if (PyArg_ParseTuple(op, "dd", &x, &y)) {
@@ -137,7 +152,7 @@ PyPath_Flatten(PyObject* data, double **pxy)
     }
 
     if (j & 1) {
-	PyErr_SetString(PyExc_ValueError, "Wrong number of coordinates");
+	PyErr_SetString(PyExc_ValueError, "wrong number of coordinates");
 	free(xy);
 	return -1;
     }

@@ -13,7 +13,7 @@
 #	96-05-16 fl:	Created (after an idea from David Ascher)
 #	96-08-07 fl:	Font metrics file uses network byte order
 #
-# Copyright (c) Fredrik Lundh 1996.
+# Copyright (c) Fredrik Lundh 1996.  All rights reserved.
 #
 
 VERSION = "1.0"
@@ -185,7 +185,7 @@ def puti16(fp, values):
 import glob, os, sys
 
 print "BDF2PIL", VERSION, "-- Font compiler for X BDF fonts."
-print "Copyright (c) Fredrik Lundh 1996."
+print "Copyright (c) Fredrik Lundh 1996.  All rights reserved."
 
 if len(sys.argv) <= 1:
     print

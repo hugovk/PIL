@@ -1,9 +1,8 @@
-/* $Id: ImPlatform.h,v 1.1 1996/03/25 08:46:34 fredrik Exp $
- *
+/* 
  * The Python Imaging Library
+ * $Id$
  *
- * File:
- *	ImPlatform.h -- platform declarations for the imaging core library
+ * platform declarations for the imaging core library
  *
  * Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
  */
@@ -24,6 +23,8 @@
 #define	INT16 short
 #elif SIZEOF_INT == 2
 #define	INT16 int
+#else
+#define	INT16 short /* most things works just fine anyway... */
 #endif
 
 #if SIZEOF_SHORT == 4

@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: PdfImagePlugin.py,v 1.3 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # PDF (Acrobat) file handling
 #
@@ -36,7 +36,7 @@ def _obj(fp, obj, **dict):
     if dict:
 	fp.write("<<\n")
 	for k, v in dict.items():
-	    if v != None:
+	    if v is not None:
 		fp.write("/%s %s\n" % (k, v))
 	fp.write(">>\n")
 

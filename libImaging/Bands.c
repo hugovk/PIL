@@ -1,6 +1,6 @@
 /* 
  * The Python Imaging Library
- * $Id: Bands.c,v 1.2 1996/03/29 00:23:23 fredrik Exp $
+ * $Id$
  * 
  * stuff to extract and paste back individual bands
  *
@@ -25,8 +25,11 @@ ImagingGetBand(Imaging imIn, int band)
     int x, y;
 
     /* Check arguments */
-    if (!imIn || imIn->type != 0 || band < 0 || band >= imIn->bands)
-	return (Imaging) ImagingError_Mismatch();
+    if (!imIn || imIn->type != IMAGING_TYPE_UINT8)
+	return (Imaging) ImagingError_ModeError();
+
+    if (band < 0 || band >= imIn->bands)
+	return (Imaging) ImagingError_ValueError("band index out of range");
 
     /* Shortcuts */
     if (imIn->bands == 1)
@@ -55,11 +58,13 @@ ImagingPutBand(Imaging imOut, Imaging imIn, int band)
     int x, y;
 
     /* Check arguments */
-    if (!imIn || imIn->bands != 1 || !imOut || band < 0 || band >= imOut->bands)
-	return (Imaging) ImagingError_Argument(NULL);
+    if (!imIn || imIn->bands != 1 || !imOut)
+	return (Imaging) ImagingError_ModeError();
+
+    if (band < 0 || band >= imOut->bands)
+	return (Imaging) ImagingError_ValueError("band index out of range");
 
     if (imIn->type  != imOut->type  ||
-	imIn->depth != imOut->depth ||
 	imIn->xsize != imOut->xsize ||
 	imIn->ysize != imOut->ysize)
 	return (Imaging) ImagingError_Mismatch();

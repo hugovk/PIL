@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: PsdImagePlugin.py,v 1.3 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # Adobe PSD 2.5/3.0 file handling
 #

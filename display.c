@@ -1,15 +1,14 @@
-/* $Id: display.c,v 1.2 1996/08/15 13:13:26 fredrik Exp $
- *
+/*
  * The Python Imaging Library.
+ * $Id$
  *
- * File:
- *	display.c -- display support
+ * display support
  *
  * History:
- *	96-05-13 fl	Windows DIB support
- *	96-05-21 fl	Added palette stuff
- *	96-05-28 fl	Added display_mode stuff
- *	97-09-21 fl	Added draw primitive
+ * 96-05-13 fl	Windows DIB support
+ * 96-05-21 fl	Added palette stuff
+ * 96-05-28 fl	Added display_mode stuff
+ * 97-09-21 fl	Added draw primitive
  *
  * Copyright (c) Secret Labs AB 1997.
  * Copyright (c) Fredrik Lundh 1996-97.

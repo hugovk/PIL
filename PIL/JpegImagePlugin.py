@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: JpegImagePlugin.py,v 1.6 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # JPEG (JFIF) file handling
 #
@@ -15,14 +15,16 @@
 # 0.1	96-05-28 fl	Added draft support, JFIF version
 # 0.2	96-12-30 fl	Added encoder options, added progression property
 # 0.3	97-08-27 fl	Save mode 1 images as BW
+# 0.4	98-07-12 fl	Added YCbCr to draft and save methods
+# 0.4.1	98-10-19 fl	Don't hang on files using 16-bit DQT's
 #
-# Copyright (c) Secret Labs AB 1997.
+# Copyright (c) Secret Labs AB 1997-98.
 # Copyright (c) Fredrik Lundh 1995-96.
 #
 # See the README file for information on usage and redistribution.
 #
 
-__version__ = "0.3"
+__version__ = "0.4.1"
 
 import array, string
 import Image, ImageFile
@@ -105,7 +107,7 @@ def DQT(self, marker):
 	    self.quantization[v&15] = array.array("b", s[1:65])
 	    s = s[65:]
 	else:
-	    pass
+	    return # FIXME: add code to read 16-bit tables!
 	    # raise SyntaxError, "bad quantization table element size"
 
 
@@ -213,14 +215,14 @@ class JpegImageFile(ImageFile.ImageFile):
 	    if MARKER.has_key(i):
 		name, description, handler = MARKER[i]
 		# print hex(i), name, description
-		if handler != None:
+		if handler is not None:
 		    handler(self, i)
 		if i == 0xFFDA: # start of scan
 		    rawmode = self.mode
 		    if self.mode == "CMYK" and self.info.has_key("adobe"):
 			rawmode = "CMYK;I" # Photoshop 2.5 is broken!
 		    self.tile = [("jpeg", (0,0) + self.size, 0, (rawmode, ""))]
-		    # self.offset = self.fp.tell()
+		    # self.__offset = self.fp.tell()
 		    break
 		s = self.fp.read(1)
 	    else:
@@ -234,8 +236,9 @@ class JpegImageFile(ImageFile.ImageFile):
 	d, e, o, a = self.tile[0]
 	scale = 0
 
-	if a == "RGB" and mode in ["L", "YCC"]:
-	    self.mode = a = mode
+	if a[0] == "RGB" and mode in ["L", "YCbCr"]:
+	    self.mode = mode
+	    a = mode, ""
 
 	if size:
 	    scale = max(self.size[0] / size[0], self.size[1] / size[1])
@@ -251,7 +254,7 @@ class JpegImageFile(ImageFile.ImageFile):
 
 	return self
 
-    def load_hack(self):
+    def load_djpeg(self):
 
 	# ALTERNATIVE: handle JPEGs via the IJG command line utilities
 
@@ -282,23 +285,28 @@ RAWMODE = {
     "L": "L",
     "RGB": "RGB",
     "RGBA": "RGB",
+    "RGBX": "RGB",
     "CMYK": "CMYK",
+    "YCbCr": "YCbCr",
 }
 
 def _save(im, fp, filename):
+
     try:
         rawmode = RAWMODE[im.mode]
     except KeyError:
 	raise IOError, "cannot write mode %s as JPEG" % im.mode
+
     # get keyword arguments
     im.encoderconfig = (_fetch(im.encoderinfo, "quality", 0),
 			im.encoderinfo.has_key("progressive"),
 			_fetch(im.encoderinfo, "smooth", 0),
 			im.encoderinfo.has_key("optimize"),
 			_fetch(im.encoderinfo, "streamtype", 0))
+
     ImageFile._save(im, fp, [("jpeg", (0,0)+im.size, 0, rawmode)])
 
-def _save_hack(im, fp, filename):
+def _save_cjpeg(im, fp, filename):
     # ALTERNATIVE: handle JPEGs via the IJG command line utilities.
     import os
     file = im._dump()

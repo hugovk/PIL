@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: EpsEncode.c,v 1.4 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * encoder for Xbm data
  *

@@ -1,21 +1,22 @@
 /*
  * The Python Imaging Library.
- * $Id: GifDecode.c,v 1.4 1996/08/15 13:12:44 fredrik Exp $
+ * $Id$
  *
  * a fast, suspendable GIF decoder
  *
  * history:
- *	95-09-03 fl	Created
- *	95-09-05 fl	Fixed sign problem on 16-bit platforms
- *	95-09-13 fl	Added some storage shortcuts
- *	96-03-28 fl	Revised API, integrated with PIL
- *	96-12-10 fl	Added interlace support
- *	96-12-16 fl	Fixed premature termination bug introduced by last fix
- *	97-01-05 fl	Don't mess up on bogus configuration
- *	97-01-17 fl	Don't mess up on very small, interlaced files
+ * 95-09-03 fl	Created
+ * 95-09-05 fl	Fixed sign problem on 16-bit platforms
+ * 95-09-13 fl	Added some storage shortcuts
+ * 96-03-28 fl	Revised API, integrated with PIL
+ * 96-12-10 fl	Added interlace support
+ * 96-12-16 fl	Fixed premature termination bug introduced by last fix
+ * 97-01-05 fl	Don't mess up on bogus configuration
+ * 97-01-17 fl	Don't mess up on very small, interlaced files
+ * 99-02-07 fl	Minor speedups
  *
+ * Copyright (c) Secret Labs AB 1997-99.
  * Copyright (c) Fredrik Lundh 1995-97.
- * Copyright (c) Secret Labs AB 1997.
  *
  * See the README file for information on usage and redistribution.
  */
@@ -51,6 +52,8 @@
 	default:\
 	    return -1;\
         }\
+    if (state->y < state->ysize)\
+        out = im->image8[state->y + state->yoff] + state->xoff;\
 }
 
 
@@ -58,6 +61,7 @@ int
 ImagingGifDecode(Imaging im, ImagingCodecState state, UINT8* buffer, int bytes)
 {
     UINT8* p;
+    UINT8* out;
     int c, i;
     int thiscode;
     GIFDECODERSTATE *context = (GIFDECODERSTATE*) state->context;
@@ -87,6 +91,9 @@ ImagingGifDecode(Imaging im, ImagingCodecState state, UINT8* buffer, int bytes)
 
 	state->state = 1;
     }
+
+    if (state->y < state->ysize)
+        out = im->image8[state->y + state->yoff] + state->xoff + state->x;
 
     for (;;) {
 
@@ -156,7 +163,7 @@ ImagingGifDecode(Imaging im, ImagingCodecState state, UINT8* buffer, int bytes)
 	    context->bitbuffer >>= context->codesize;
 	    context->bitcount -= context->codesize;
 
-	    /* If c is less than clear, it's a data byte.  Otherwise,
+	    /* If c is less than "clear", it's a data byte.  Otherwise,
 	       it's either clear/end or a code symbol which should be
 	       expanded. */
 
@@ -255,22 +262,22 @@ ImagingGifDecode(Imaging im, ImagingCodecState state, UINT8* buffer, int bytes)
 	    return -1;
 	}
 
-	/* To squeeze some extra pixels out every second, we test
-	   for some common cases and handle them separately. */ 
+	/* To squeeze some extra pixels out of this loop, we test for
+	   some common cases and handle them separately. */
 
 	/* FIXME: should we handle the transparency index in here??? */
 
 	if (i == 1) {
 	    if (state->x < state->xsize-1) {
 		/* Single pixel, not at the end of the line. */
-		im->image8[state->y+state->yoff][state->x+state->xoff] = p[0];
+		*out++ = p[0];
 		state->x++;
 		continue;
 	    }
 	} else if (state->x + i <= state->xsize) {
 	    /* This string fits into current line. */
-	    memcpy(im->image8[state->y+state->yoff] + state->x +
-	    	   state->xoff, p, i);
+	    memcpy(out, p, i);
+            out += i;
 	    state->x += i;
 	    if (state->x == state->xsize) {
 		NEWLINE(state, context);
@@ -278,9 +285,9 @@ ImagingGifDecode(Imaging im, ImagingCodecState state, UINT8* buffer, int bytes)
 	    continue;
 	}
 
-	/* Didn't find a shortcut */
+	/* No shortcut, copy pixel by pixel */
 	for (c = 0; c < i; c++) {
-	    im->image8[state->y+state->yoff][state->x+state->xoff] = p[c];
+	    *out++ = p[c];
 	    if (++state->x >= state->xsize) {
 		NEWLINE(state, context);
 	    }

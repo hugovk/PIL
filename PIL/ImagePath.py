@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library
-# $Id: ImagePath.py,v 1.1 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # path interface
 #

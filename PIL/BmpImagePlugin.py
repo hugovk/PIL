@@ -1,16 +1,18 @@
 #
 # The Python Imaging Library.
-# $Id: BmpImagePlugin.py,v 1.5 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # BMP file handler
 #
 # Windows (and OS/2) native bitmap storage format.
 #
 # History:
-#	95-09-01 fl	Created
-#	96-04-30 fl	Added save
-#	97-08-27 fl	Fixed save of 1-bit images
-#	98-03-06 fl	Fixed load of L images
+# 95-09-01 fl	Created
+# 96-04-30 fl	Added save
+# 97-08-27 fl	Fixed save of 1-bit images
+# 98-03-06 fl	Load P images as L where possible
+# 98-07-03 fl	Load P images as 1 where possible
+# 98-12-29 fl	Handle small palettes
 #
 # Copyright (c) Secret Labs AB 1997-98.
 # Copyright (c) Fredrik Lundh 1995-97.
@@ -19,7 +21,7 @@
 #
 
 
-__version__ = "0.4"
+__version__ = "0.5"
 
 
 import string
@@ -38,7 +40,8 @@ def i32(c):
 
 
 BIT2MODE = {
-    1: ("1", "1"),
+    # mode, rawmode
+    1: ("P", "1"),
     4: ("P", "P;4"),
     8: ("P", "P"),
     24: ("RGB", "BGR")
@@ -61,14 +64,13 @@ class BmpImageFile(ImageFile.ImageFile):
 	s = self.fp.read(4)
 	s = s + self.fp.read(i32(s)-4)
 
-	colors = 0
-
 	if len(s) == 12:
 
 	    # OS/2 1.0 CORE
 	    bits = i16(s[10:])
 	    self.size = i16(s[4:]), i16(s[6:])
 	    lutsize = 3
+	    colors = 0
 
 	elif len(s) in [40, 64]:
 
@@ -77,9 +79,13 @@ class BmpImageFile(ImageFile.ImageFile):
 	    self.size = i32(s[4:]), i32(s[8:])
 	    self.info["compression"] = i32(s[16:])
 	    lutsize = 4
+	    colors = i32(s[32:])
 
 	else:
 	    raise IOError, "Unknown BMP header type"
+
+	if not colors:
+	    colors = 1 << bits
 
 	# MODE
 	try:
@@ -88,29 +94,36 @@ class BmpImageFile(ImageFile.ImageFile):
 	    raise IOError, "Unsupported BMP pixel depth"
 
 	# LUT
-	if self.mode != "RGB":
-	    colors = 1<<bits
+	if self.mode == "P":
             palette = []
             greyscale = 1
-            for i in range(colors):
+	    if colors == 2:
+		indices = (0, 255)
+	    else:
+		indices = range(colors)
+            for i in indices:
                 rgb = self.fp.read(lutsize)[:3]
                 if rgb != chr(i)*3:
                     greyscale = 0
                 palette.append(rgb)
-	    if self.mode == "P" and greyscale:
-		self.mode = "L"
+	    if greyscale:
+		if colors == 2:
+		    self.mode = "1"
+		else:
+		    self.mode = rawmode = "L"
 	    else:
+		self.mode = "P"
 		self.palette = ImagePalette.raw(
 		    "BGR", string.join(palette, "")
 		    )
 
-	if offset == 0:
+	if not offset:
 	    offset = self.fp.tell()
-		
+
 	self.tile = [("raw",
 		     (0, 0) + self.size,
 		     offset,
-		     (rawmode, ((self.size[0]*bits+31)>>3)&(-4), -1))]
+		     (rawmode, ((self.size[0]*bits+31)>>3)&(~3), -1))]
 
     def _open(self):
 
@@ -121,7 +134,6 @@ class BmpImageFile(ImageFile.ImageFile):
 	offset = i32(s[10:])
 
 	self._bitmap()
-
 
 #
 # --------------------------------------------------------------------
@@ -137,18 +149,20 @@ SAVE = {
     "1": ("1", 1, 2),
     "L": ("L", 8, 256),
     "P": ("P", 8, 256),
-    "RGB": ("RGB", 24, 0),
-    "RGBA": ("RGB", 24, 0)
+    "RGB": ("BGR", 24, 0),
 }
 
-def _save(im, fp, filename):
+def _save(im, fp, filename, check=0):
 
     try:
 	rawmode, bits, colors = SAVE[im.mode]
     except KeyError:
 	raise IOError, "cannot write mode %s as BMP" % im.mode
 
-    stride = ((im.size[0]*bits+7)/8+3)&-4
+    if check:
+	return check
+
+    stride = ((im.size[0]*bits+7)/8+3)&(~3)
     header = 40 # or 64 for OS/2 version 2
     offset = 14 + header + colors * 4
     image  = stride * im.size[1]

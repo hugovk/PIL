@@ -1,30 +1,35 @@
 #
 # The Python Imaging Library.
-# $Id: ImageFile.py,v 1.8 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # base class for image file handlers
 #
-# History:
-#	95-09-09 fl	Created
-#	96-03-11 fl	Fixed load mechanism.
-#	96-04-15 fl	Added pcx/xbm decoders.
-#	96-04-30 fl	Added encoders.
-#	96-12-14 fl	Added load helpers
-#	97-01-11 fl	Use encode_to_file where possible
-#	97-08-27 fl	Flush output in _save
-#	98-03-05 fl	Use memory mapping where possible
+# history:
+# 95-09-09 fl	Created
+# 96-03-11 fl	Fixed load mechanism.
+# 96-04-15 fl	Added pcx/xbm decoders.
+# 96-04-30 fl	Added encoders.
+# 96-12-14 fl	Added load helpers
+# 97-01-11 fl	Use encode_to_file where possible
+# 97-08-27 fl	Flush output in _save
+# 98-03-05 fl	Use memory mapping for some modes
+# 99-02-04 fl	Use memory mapping also for "I;16" and "I;16B" 
+# 99-05-31 fl	Added image parser
 #
-# Copyright (c) Secret Labs AB 1997-98.
+# Copyright (c) Secret Labs AB 1997-99.
 # Copyright (c) Fredrik Lundh 1995-97.
 #
 # See the README file for information on usage and redistribution.
 #
 
-
 import Image
 import traceback, sys
 
 MAXBLOCK = 65536
+
+# raw modes that may be memory mapped.  NOTE: if you change this, you
+# may have to modify the stride calculation in map.c too!
+MAPMODES = ("L", "P", "RGBX", "RGBA", "CMYK", "I;16", "I;16B")
 
 #
 # --------------------------------------------------------------------
@@ -54,9 +59,11 @@ class ImageFile(Image.Image):
 	self.decodermaxblock = MAXBLOCK
 
         if type(fp) == type(""):
+	    # filename
 	    self.fp = open(fp, "rb")
 	    self.filename = fp
 	else:
+	    # stream
 	    self.fp = fp
 	    self.filename = filename
 
@@ -95,20 +102,17 @@ class ImageFile(Image.Image):
 
 	Image.Image.load(self)
 
-	if self.tile == None:
+	if self.tile is None:
 	    raise IOError, "cannot load this image"
 	if not self.tile:
 	    return
 
-	# ------------------------------------------------------------
-	# memory mapping.  
-
 	self.map = None
 
 	if self.filename and len(self.tile) == 1:
+	    # try memory mapping
 	    d, e, o, a = self.tile[0]
-	    if d == "raw" and a[0] in ("L", "P", "RGBX", "RGBA"):
-		# FIXME: add support for "F" and "I" too
+	    if d == "raw" and a[0] == self.mode and a[0] in MAPMODES:
 		try:
 		    self.map = Image.core.map(self.filename)
 		    self.map.seek(o)
@@ -118,22 +122,15 @@ class ImageFile(Image.Image):
 		except (AttributeError, IOError):
 		    self.map = None
 
-	# create image if necessary
-	if not self.im or\
-	   self.im.mode != self.mode or self.im.size != self.size:
-	    self.im = Image.core.new(self.mode, self.size)
-
-	# create palette (optional)
-        if self.mode == "P":
-            Image.Image.load(self)
+	self.load_prepare()
 
 	if not self.map:
 
-	    # process tiles in file order
+	    # sort tiles in file order
 	    self.tile.sort(_tilesort)
 
 	    for d, e, o, a in self.tile:
-		d = Image._getdecoder(d, e, a, self.decoderconfig)
+		d = Image._getdecoder(self.mode, d, a, self.decoderconfig)
 		self.load_seek(o)
 		try:
 		    d.setimage(self.im, e)
@@ -171,8 +168,14 @@ class ImageFile(Image.Image):
 
 	self.load_end()
 
-    #
-    # FIXME: don't like these.  make them go away...
+    def load_prepare(self):
+	# create image memory if necessary
+	if not self.im or\
+	   self.im.mode != self.mode or self.im.size != self.size:
+	    self.im = Image.core.new(self.mode, self.size)
+	# create palette (optional)
+        if self.mode == "P":
+            Image.Image.load(self)
 
     def load_end(self):
 	# may be overridden
@@ -186,6 +189,145 @@ class ImageFile(Image.Image):
 	# may be overridden for blocked formats (e.g. PNG)
 	return self.fp.read(bytes)
 
+
+class _ParserFile:
+    # parser support class.
+
+    def __init__(self, data):
+	self.data = data
+	self.offset = 0
+
+    def close(self):
+	self.data = self.offset = None
+
+    def tell(self):
+	return self.offset
+
+    def seek(self, offset, whence=0):
+	if whence == 0:
+	    self.offset = offset
+	elif whence == 1:
+	    self.offset = self.offset + offset
+	else:
+	    # force error in Image.open
+	    raise IOError, "illegal argument to seek"
+
+    def read(self, bytes=0):
+	pos = self.offset
+	if bytes:
+	    data = self.data[pos:pos+bytes]
+	else:
+	    data = self.data[pos:]
+	self.offset = pos + len(data)
+	return data
+
+    def readline(self):
+	# FIXME: this is slow!
+	s = ""
+	while 1:
+	    c = self.read(1)
+	    if not c:
+		break
+	    s = s + c
+	    if c == "\n":
+		break
+	return s
+
+class Parser:
+    # incremental image parser.  implements the consumer
+    # interface.
+
+    image = None
+    data = None
+    decoder = None
+    finished = 0
+
+    def reset(self):
+	assert self.data is None, "cannot reuse parsers"
+
+    def feed(self, data):
+	# collect data
+
+	if self.finished:
+	    return
+
+	if self.data is None:
+	    self.data = data
+	else:
+	    self.data = self.data + data
+
+	# parse what we have
+	if self.decoder:
+
+	    if self.offset > 0:
+		# skip header
+		skip = min(len(self.data), self.offset)
+		self.data = self.data[skip:]
+		self.offset = self.offset - skip
+		if self.offset > 0 or not self.data:
+		    return
+
+	    n, e = self.decoder.decode(self.data)
+
+	    if n < 0:
+		# end of stream
+		self.data = None
+		self.finished = 1
+		if e < 0:
+		    # decoding error
+		    self.image = None
+		    raise IOError,\
+			  "decoder error %d when reading image file" % e
+		else:
+		    # end of image
+		    return
+	    self.data = self.data[n:]
+
+	else:
+
+	    # attempt to open this file
+	    try:
+		try:
+		    fp = _ParserFile(self.data)
+		    im = Image.open(fp)
+		finally:
+		    fp.close() # explicitly close the virtual file
+	    except IOError:
+		pass # not enough data
+	    else:
+
+		# sanity check
+		if len(im.tile) != 1:
+		    raise IOError, "cannot parse this image"
+
+		# initialize decoder
+		im.load_prepare()
+		d, e, o, a = im.tile[0]
+		im.tile = []
+		self.decoder = Image._getdecoder(
+		    im.mode, d, a, im.decoderconfig
+		    )
+		self.decoder.setimage(im.im, e)
+
+		# calculate decoder offset
+		self.offset = o
+		if self.offset <= len(self.data):
+		    self.data = self.data[self.offset:]
+		    self.offset = 0
+
+		self.image = im
+
+    def close(self):
+	# finish decoding
+	if self.decoder:
+	    # get rid of what's left in the buffers
+	    self.feed("")
+	    self.data = self.decoder = None
+	    if not self.finished:
+		raise IOError, "image was incomplete"
+	if not self.image:
+	    raise IOError, "cannot parse this image"
+	return self.image
 
 #
 # --------------------------------------------------------------------

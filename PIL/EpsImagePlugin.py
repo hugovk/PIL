@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: EpsImagePlugin.py,v 1.7 1996/11/10 17:52:14 fredrik Exp $
+# $Id$
 #
 # EPS file handling
 #
