@@ -1,13 +1,16 @@
 /*
  * The Python Imaging Library
- * $Id: Matrix.c,v 1.3 1996/12/16 18:51:03 fl Exp $
+ * $Id: Matrix.c,v 1.1 1996/06/19 11:28:39 fredrik Exp $
  *
  * colour and luminance matrix transforms
  *
  * history:
  *	96-05-18 fl:	created (brute force implementation)
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -21,7 +24,7 @@ Imaging
 ImagingConvertMatrix(Imaging im, const char *mode, float m[])
 {
     Imaging imOut;
-    unsigned x, y;
+    int x, y;
 
     /* Assume there's enough data in the buffer */
     if (!im)

@@ -1,13 +1,16 @@
 /*
  * The Python Imaging Library.
- * $Id: HexDecode.c,v 1.3 1996/11/07 12:11:30 fredrik Exp $
+ * $Id: HexDecode.c,v 1.2 1996/08/15 13:12:44 fredrik Exp $
  *
  * decoder for hex encoded image data
  *
  * history:
  *	96-05-16 fl	Created
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 

@@ -1,49 +1,58 @@
-
 The Python Imaging Library
-$Id: README,v 1.9 1997/01/14 18:01:06 fl Exp fl $
+$Id: README,v$
 
-Release 0.2b4 (January 10, 1997)
+Release 0.3b1 (March 9, 1998)
 
 ====================================================================
-The Python Imaging Library 0.2b4
+The Python Imaging Library 0.3b1
 ====================================================================
 
-This is a beta release of the Python Imaging Library (PIL).  Many
-features planned for 0.2 are still not being distributed, and some of
-the new stuff in this release may not work as expected.
+Contents
+--------
 
-News highlights:
++ Introduction
++ Software License
++ Build instructions for UNIX
++ Build instructions for Windows
 
-+ Plugged a number of serious memory leaks; PIL leaked lots of
-  memory when loading PNG and tiled/striped TIFF images, and
-  even more when saving images in *any* format.
+--------------------------------------------------------------------
+Introduction
+--------------------------------------------------------------------
 
-+ PIL now reads nearly all formats that previous versions could
-  only identify.  This includes FLI/FLC, MSP, PSD, TIFF w. pre-
-  dictor, TGA, and XPM.  Decoders for compressed versions of SUN
-  and TGA have also been added, but they are completely untested
-  (sample files would be much appreciated).
+This is an intermediate release, initially shipped as a binary
+distribution for Windows 95 and NT.  A source release will be made
+available before the end of this month.
 
-+ PIL now writes BMP, uncompressed GIF, uncompressed MSP, and PNG.
+The PIL handbook is available via http://www.pythonware.com
+(currently as HTML only).
 
-+ PIL now handles ARG, FLI, and GIF animations.  Use the "player"
-  script to view an animation.  The "gifmaker" script can be
-  used to create GIF animations.
+News highlights in 0.3b1 (as compared to 0.2b4):
 
-+ PIL now allows you to control the quality when writing JPEG
-  files.  You can also write progressive JPEG files.
++ Uses memory mapping to read some uncompressed formats
+  (currently on Win32 only).
 
-+ The "image2py" script converts an image to a Python module.
++ The "save" method now automatically converts images on the fly
+  in some cases.  This includes converting "1" to "L" (JPEG) and
+  "RGBA" to "RGB" (JPEG, PPM, BMP).
+
++ Support 32-bit integer and floating point images.
+
++ The Tk interface now supports transparent images.
+  *** NOTE: the Tk interface has been changed; you need to update
+  *** your Tkinter build to properly handle the new interface.
+
++ Added read support for McIdas, Pixar Raster, FlashPix (FPX),
+  IPTC/NAA and Microsoft Image Composer (MIC).
+
++ Fixed the FLI/FLC reader to properly read FLC files.
+
++ Fixed the PDF writer.  It now properly writes "L" and "RGB"
+  images.
+
++ Lots of bug fixes.
 
 For more information on these and other changes, see the CHANGES
 document.
-
---------------------------------------------------------------------
-NOTE: This version of PIL has only been tested with Python 1.4.  It
-is likely to work with 1.3 under Unix, but to build the Windows
-version using the provided makefiles, you'll need Python 1.4 final
-and Visual C++ 4.0 or later.
---------------------------------------------------------------------
 
 For installation and licensing details, see below.
 
@@ -52,52 +61,91 @@ For questions, comments and bug reports, send mail to
 
 
 --------------------------------------------------------------------
+Software License
+--------------------------------------------------------------------
+
+The Python Imaging Library is
+
+Copyright (c) 1997-1998 by Secret Labs AB
+Copyright (c) 1995-1997 by Fredrik Lundh
+
+By obtaining, using, and/or copying this software and/or its
+associated documentation, you agree that you have read, understood,
+and will comply with the following terms and conditions:
+
+Permission to use, copy, modify, and distribute this software and its
+associated documentation for any purpose and without fee is hereby
+granted, provided that the above copyright notice appears in all
+copies, and that both that copyright notice and this permission notice
+appear in supporting documentation, and that the name of Secret Labs
+AB or the author is not used in advertising or publicity pertaining to
+distribution of the software without specific, written prior
+permission.
+
+SECRET LABS AB AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO
+THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS.  IN NO EVENT SHALL SECRET LABS AB OR THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+--------------------------------------------------------------------
 Build instructions for UNIX
 --------------------------------------------------------------------
 
-NOTE: To build the Python Imaging Library, you need an ANSI C
-compiler.  The "cc" compiler on SunOS 4 is not ANSI compliant.  On
-that platform, use "acc" or "gcc" instead.
+NOTE: To build the Python Imaging Library, you need an ANSI C com-
+piler.  The "cc" compiler on SunOS 4 is *not* ANSI compliant.  On that
+platform, use "acc" or "gcc" instead.  On some platforms, you may have
+to use compiler options like "-ansi" or "-std" to get full ANSI C
+support.
 
 1. If you need JPEG and/or PNG support, make sure to get and build
    the necessary external libraries:
 
-   - for JPEG support, get the IJG JPEG library, version 6 (version
-     6a is fine, but require some minor modifications to the inter-
-     face.  See the IJG changelog for details).
+   - for JPEG support, get the IJG JPEG library, version 6a or 6b.
 
    - for PNG and ZIP support, get the ZLIB library (by Gailly/Adler).
      PIL was tested with version 1.0.4, but is likely to work with
      versions from 0.95 and onwards.
 
+     If you have RedHat 4.2 or newer, you can use the libraries pro-
+     vided with the operating system.
 
-2. Unpack the PIL distribution (the file Imaging-0.2b1.tar.gz) in your
+
+2. Unpack the PIL distribution (the file Imaging-0.3b1.tar.gz) in your
    Python/Extensions directory.
 
-	$ cd Python-1.4/Extensions (example)
-	$ gunzip Imaging-0.2b1.tar.gz
-	$ tar xvf Imaging-0.2b1.tar
+	$ cd Python-1.5/Extensions # example
+	$ gunzip Imaging-0.3b1.tar.gz
+	$ tar xvf Imaging-0.3b1.tar
 
 
-3. Now build the Imaging core library (libImaging.a).  Type:
+3. Now build the Imaging core library (libImaging.a):
 
-	$ cd Imaging/libImaging
+	$ cd Imaging-0.3b1/libImaging
 	$ ./configure
 	$ make
+
+   If you need to specify additional compiler options, the
+   second line should look something like:
+
+	$ CC="cc -ansi" ./configure
 
 
 4. To check that this library works as it should, type:
 
 	$ make check
 
-   It isn't much of a test, but it shouldn't crash, at least :-)
+   It isn't much of a test, but it shouldn't crash :-)
 
 
 5. Go back to the Imaging directory.
 
-   If you don't have the IJG JPEG or ZLIB libraries, or wish to install
-   Python in a non-standard place, copy the "Setup.in" file to "Setup"
-   and edit it according to the instructions in it.
+   If you don't have the IJG JPEG or ZLIB libraries (or you have them,
+   but not in a standard place), copy the "Setup.in" file to "Setup"
+   and edit it according to the instructions in the file.
 
 
 6. Edit Makefile.pre.in and build a Makefile following the instructions
@@ -122,7 +170,7 @@ that platform, use "acc" or "gcc" instead.
 	>>> import Image
 
    If both imports works, you've successfully added PIL to your Python
-   environment.  There's a few demo scripts in the Imaging/Scripts
+   environment.  There are a few demo scripts in the Imaging/Scripts
    directory that you can use to further test the library.
 
 
@@ -136,39 +184,34 @@ that platform, use "acc" or "gcc" instead.
    Python distribution), after the MOREBUTTONS stuff:
 
 	{
-	    extern void TkImaging_Init(void);
-	    TkImaging_Init();
+	    extern void TkImaging_Init(Tcl_Interp* interp);
+	    TkImaging_Init(interp);
 	}
 
-   This registers a image type called "PyImagingCore", which is
+   This registers a Tcl command called "PyImagingPhoto", which is
    use to communicate between PIL and Tk's PhotoImage handler.
 
-2. Compile Python's _tkinter.c with the WITH_APPINIT flag set
-   (see the Setup file for details).
+2. Compile Python's _tkinter.c with the WITH_APPINIT flag set,
+   and link it with tkImaging.c and tkappinit.c.  The easiest
+   way to do this is to copy the former to the Modules directory,
+   and edit the _tkinter line in Setup to something like (on
+   one line):
 
-3. Link the _tkinter module with _tkinter.c and tkappinit.c (you
-   have to edit Python's Setup file to get this effect).
+   _tkinter _tkinter.c tkImaging.c tkappinit.c -DWITH_APPINIT
+	-I/usr/local/include -L/usr/local/lib -ltk4.2 -ltcl7.6 -lX11
 
 
 --------------------------------------------------------------------
 Build instructions for Windows
 --------------------------------------------------------------------
 
---------------------------------------------------------------------
-NOTE: If possible, use the prebuilt PIL distribution for Windows.
-It includes the IJG JPEG and ZLIB libraries, and has been tested
-with Python 1.4 as well as with Mark Hammond's PythonWin.  To build
-the library yourself, you need Visual C++ 4.0 or later, and a locally
-compiled version of the 1.4 distribution.
---------------------------------------------------------------------
-
-PIL is shipped with a Visual C++ project makefile.  It contains
+PIL is shipped with a Visual C++ 4.2 project makefile.  It contains
 subprojects for the IJG JPEG and ZLIB libraries as well.  Unless
 you're really lucky, you'll probably have to tweak the makefile
 somewhat to fit your configuration.
 
 
-1. Unpack the PIL distribution (the file Imaging-0.2b1.tar.gz) in
+1. Unpack the PIL distribution (the file Imaging-0.3b1.tar.gz) in
    a suitable directory.  The provided makefile assumes PIL to
    be located in a sibling to Python's own 'PC' directory.
 
@@ -192,40 +235,13 @@ somewhat to fit your configuration.
 
 * Adding Tkinter support
 
-See the Unix section.  Instead of modifying the Setup file, you have
-to add tkappinit.c to the project file, and -DWITH_APPINIT to the
-_tkinter.c compile options.
+See the Unix section.  Instead of modifying the Setup file, just add
+tkImaging.c and tkappinit.c to the project file, and -DWITH_APPINIT
+to the _tkinter.c compile options.
 
 --------------------------------------------------------------------
-NOTE: If you use Tk 4.2, you may wish to install the booster patch
-which provides dramatic performance improvements for 16- and 24-bit
-displays.  See the description in the Tk subdirectory for details.
+NOTE: If you use Tk on Windows, you may wish to install the booster
+patch which provides dramatic performance improvements for 16- and
+24-bit displays.  See the description in the Tk subdirectory for
+details.
 --------------------------------------------------------------------
-
-
---------------------------------------------------------------------
-Software License
---------------------------------------------------------------------
-
-The Python Imaging Library is Copyright (c) 1995-97 by Fredrik Lundh.
-
-By obtaining, using, and/or copying this software and/or its
-associated documentation, you agree that you have read, understood,
-and will comply with the following terms and conditions:
-
-Permission to use, copy, modify, and distribute this software and its
-associated documentation for any purpose and without fee is hereby
-granted, provided that the above copyright notice appears in all
-copies, and that both that copyright notice and this permission
-notice appear in supporting documentation, and that the name of the
-author not be used in advertising or publicity pertaining to
-distribution of the software without specific, written prior
-permission.
-
-THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
-INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS.  IN
-NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, INDIRECT OR
-CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
-OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
-OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
-USE OR PERFORMANCE OF THIS SOFTWARE.

@@ -5,7 +5,7 @@
  * File:
  *	ImConfig.win -- ImConfig.h template for Windows (from ImConfig.h)
  *
- * Copyright (c) Fredrik Lundh 1995.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
  */
 
 /* -------------------------------------------------------------------- */
@@ -16,14 +16,14 @@
 /* Define if you have the Greg Ward's mpeg library (-lmpeg).  */
 #undef HAVE_LIBMPEG
 
-/* Define if you have the zlib compression library (-lz).  */
+/* Define if you have the zlib compression library (-lzlib).  */
 #define HAVE_LIBZ
 
 /* -------------------------------------------------------------------- */
 
 /* Note: this configuration file was designed for Visual C++ 4.0 and
  * later.  It might need some tweaking to work with other compilers,
- * including 16-bit environments. */
+ * especially for 16-bit environments. */
 #ifndef	WIN32
 #define	WIN32
 #endif

@@ -1,13 +1,16 @@
 /*
  * The Python Imaging Library.
- * $Id: XbmDecode.c,v 1.5 1996/11/07 12:11:30 fredrik Exp $
+ * $Id: XbmDecode.c,v 1.4 1996/08/15 13:12:44 fredrik Exp $
  *
  * decoder for XBM hex image data
  *
  * history:
  *	96-04-13 fl	Created
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 

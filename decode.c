@@ -1,4 +1,4 @@
-/* $Id: decode.c,v 1.5 1997/01/14 16:40:31 fl Exp $
+/* $Id: decode.c,v 1.2 1996/08/15 13:13:26 fredrik Exp $
  *
  * The Python Imaging Library.
  *
@@ -17,8 +17,12 @@
  *	96-12-30 fl	Plugged potential memory leak for tiled images
  *	97-01-03 fl	Added fli and msp decoders
  *	97-01-04 fl	Added sun_rle and tga_rle decoders
+ *	97-05-31 fl	Added bitfield decoder
  *
- * Copyright (c) Fredrik Lundh 1995-97.  All rights reserved.
+ * Copyright (c) Secret Labs AB 1997.
+ * Copyright (c) Fredrik Lundh 1995-97.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -29,6 +33,7 @@
 #include "Gif.h"
 #include "Lzw.h"
 #include "Raw.h"
+#include "Bit.h"
 
 
 /* -------------------------------------------------------------------- */
@@ -218,6 +223,40 @@ get_unpacker(ImagingDecoderObject* decoder, const char* rawmode)
 
 
 /* -------------------------------------------------------------------- */
+/* BIT (packed fields)          					*/
+/* -------------------------------------------------------------------- */
+
+PyObject*
+PyImaging_BitDecoderNew(PyObject* self, PyObject* args)
+{
+    ImagingDecoderObject* decoder;
+
+    int bits  = 8;
+    int pad   = 8;
+    int fill  = 0;
+    int sign  = 0;
+    int ystep = 1;
+    if (!PyArg_ParseTuple(args, "|iiiii", &bits, &pad, &fill, &sign, &ystep))
+	return NULL;
+
+    decoder = PyImaging_DecoderNew(sizeof(BITSTATE));
+    if (decoder == NULL)
+	return NULL;
+
+    decoder->decode = ImagingBitDecode;
+
+    decoder->state.ystep = ystep;
+
+    ((BITSTATE*)decoder->state.context)->bits = bits;
+    ((BITSTATE*)decoder->state.context)->pad  = pad;
+    ((BITSTATE*)decoder->state.context)->fill = fill;
+    ((BITSTATE*)decoder->state.context)->sign = sign;
+
+    return (PyObject*) decoder;
+}
+
+
+/* -------------------------------------------------------------------- */
 /* FLI									*/
 /* -------------------------------------------------------------------- */
 
@@ -244,11 +283,9 @@ PyObject*
 PyImaging_GifDecoderNew(PyObject* self, PyObject* args)
 {
     ImagingDecoderObject* decoder;
-    int bits, interlace;
 
-    bits = 8;
-    interlace = 0;
-
+    int bits      = 8;
+    int interlace = 0;
     if (!PyArg_ParseTuple(args, "|ii", &bits, &interlace))
 	return NULL;
 
@@ -273,8 +310,8 @@ PyObject*
 PyImaging_HexDecoderNew(PyObject* self, PyObject* args)
 {
     ImagingDecoderObject* decoder;
-    char* rawmode;
 
+    char* rawmode;
     if (!PyArg_ParseTuple(args, "s", &rawmode))
 	return NULL;
 
@@ -299,10 +336,9 @@ PyObject*
 PyImaging_TiffLzwDecoderNew(PyObject* self, PyObject* args)
 {
     ImagingDecoderObject* decoder;
+
     char *rawmode;
-
     int filter = 0;
-
     if (!PyArg_ParseTuple(args, "s|i", &rawmode, &filter))
 	return NULL;
 
@@ -351,8 +387,8 @@ PyObject*
 PyImaging_PackbitsDecoderNew(PyObject* self, PyObject* args)
 {
     ImagingDecoderObject* decoder;
-    char *rawmode;
 
+    char *rawmode;
     if (!PyArg_ParseTuple(args, "s", &rawmode))
 	return NULL;
 
@@ -382,6 +418,10 @@ PyImaging_PcdDecoderNew(PyObject* self, PyObject* args)
     if (decoder == NULL)
 	return NULL;
 
+    /* Unpack from PhotoYCC to RGB */
+    if (get_unpacker(decoder, "YCC;P") < 0)
+	return NULL;
+
     decoder->decode = ImagingPcdDecode;
 
     return (PyObject*) decoder;
@@ -396,8 +436,8 @@ PyObject*
 PyImaging_PcxDecoderNew(PyObject* self, PyObject* args)
 {
     ImagingDecoderObject* decoder;
-    char *rawmode;
 
+    char *rawmode;
     if (!PyArg_ParseTuple(args, "s", &rawmode))
 	return NULL;
 
@@ -422,12 +462,10 @@ PyObject*
 PyImaging_RawDecoderNew(PyObject* self, PyObject* args)
 {
     ImagingDecoderObject* decoder;
+
     char *rawmode;
-    int stride, ystep;
-
-    stride = 0;
-    ystep = 1;
-
+    int stride = 0;
+    int ystep  = 1;
     if (!PyArg_ParseTuple(args, "s|ii", &rawmode, &stride, &ystep))
 	return NULL;
 
@@ -456,8 +494,8 @@ PyObject*
 PyImaging_SunRleDecoderNew(PyObject* self, PyObject* args)
 {
     ImagingDecoderObject* decoder;
-    char *rawmode;
 
+    char *rawmode;
     if (!PyArg_ParseTuple(args, "s", &rawmode))
 	return NULL;
 
@@ -482,9 +520,10 @@ PyObject*
 PyImaging_TgaRleDecoderNew(PyObject* self, PyObject* args)
 {
     ImagingDecoderObject* decoder;
-    char *rawmode;
 
-    if (!PyArg_ParseTuple(args, "s", &rawmode))
+    char *rawmode;
+    int ystep = 1;
+    if (!PyArg_ParseTuple(args, "s|i", &rawmode, &ystep))
 	return NULL;
 
     decoder = PyImaging_DecoderNew(0);
@@ -495,6 +534,8 @@ PyImaging_TgaRleDecoderNew(PyObject* self, PyObject* args)
 	return NULL;
 
     decoder->decode = ImagingTgaRleDecode;
+
+    decoder->state.ystep = ystep;
 
     return (PyObject*) decoder;
 }
@@ -568,6 +609,7 @@ PyImaging_ZipDecoderNew(PyObject* self, PyObject* args)
 #undef	UINT8
 #undef	UINT16
 #undef	UINT32
+#undef	INT8
 #undef	INT16
 #undef	INT32
 
@@ -577,14 +619,17 @@ PyObject*
 PyImaging_JpegDecoderNew(PyObject* self, PyObject* args)
 {
     ImagingDecoderObject* decoder;
-    char *rawmode;
-    int scale, draft;
 
-    scale = 1;
-    draft = 0;
+    char* rawmode; /* what we wan't from the decoder */
+    char* jpegmode; /* what's in the file */
+    int scale = 1;
+    int draft = 0;
 
-    if (!PyArg_ParseTuple(args, "s|ii", &rawmode, &scale, &draft))
+    if (!PyArg_ParseTuple(args, "sz|ii", &rawmode, &jpegmode, &scale, &draft))
 	return NULL;
+
+    if (!jpegmode)
+	jpegmode = "";
 
     decoder = PyImaging_DecoderNew(sizeof(JPEGSTATE));
     if (decoder == NULL)
@@ -596,6 +641,7 @@ PyImaging_JpegDecoderNew(PyObject* self, PyObject* args)
     decoder->decode = ImagingJpegDecode;
 
     strncpy(((JPEGSTATE*)decoder->state.context)->rawmode, rawmode, 8);
+    strncpy(((JPEGSTATE*)decoder->state.context)->jpegmode, jpegmode, 8);
 
     ((JPEGSTATE*)decoder->state.context)->scale = scale;
     ((JPEGSTATE*)decoder->state.context)->draft = draft;

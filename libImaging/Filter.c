@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library
- * $Id: Filter.c,v 1.3 1996/11/07 12:11:30 fredrik Exp $
+ * $Id: Filter.c,v 1.2 1996/03/29 00:23:23 fredrik Exp $
  *
  * apply convolution kernel to image
  *
@@ -13,7 +13,10 @@
  *	95-11-26 fl:	Created, supports 3x3 kernels
  *	95-11-27 fl:	Added 5x5 kernels, copy border
  *
- * Copyright (c) Fredrik Lundh 1995.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1995.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -153,7 +156,7 @@ Imaging
 ImagingFilter(Imaging im, const int* kernel)
 {
     Imaging imOut;
-    unsigned x, y;
+    int x, y;
     int xkernel, ykernel;
     int sum, divisor, offset;
 

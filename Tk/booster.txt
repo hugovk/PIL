@@ -1,18 +1,20 @@
+====================================================================
+The Photoimage Booster Patch (for Windows 95/NT)
+====================================================================
 
-(taken from a mail posted to the image-sig and wintcl mailing lists)
+  This patch kit boosts performance for 16/24-bit displays.  The
+first patch is required on Tk 4.2 (where it fixes the problems for
+16-bit displays) and later versions, with the exception for Tk 8.0b1
+where Sun added something similar themselves, only to remove it in
+8.0b2.  By installing both patches, Tk's PhotoImage handling becomes
+much faster on both 16-bit and 24-bit displays.  The patch has been
+tested with Tk 4.2 and 8.0.
 
-  The Tk 4.2 PhotoImage code is seriously broken for 16-bit
-"HighColor" Windows displays (at least for Windows 95).
-
-  The first of the attached patches fixes the bug in a rather crude
-fashion (tested on win95 only), while the second is a Windows-
-specific patch that boosts performance for 16/24-bit displays.
-
-  Here's the result from a sample program which loads two 512x512
-greyscale PGM's, and two 512x512 colour PPM's, and displays each of
-them in a separate toplevel windows.  Tcl/Tk was compiled with Visual
-C 4.0, and run on a P100 under Win95.  Image load times are not
-included in the timings:
+  Here's a benchmark, made with a sample program which loads two
+512x512 greyscale PGM's, and two 512x512 colour PPM's, and displays
+each of them in a separate toplevel windows.  Tcl/Tk was compiled
+with Visual C 4.0, and run on a P100 under Win95.  Image load times
+are not included in the timings:
 
 			8-bit		16-bit		24-bit
 --------------------------------------------------------------------
@@ -23,13 +25,26 @@ included in the timings:
 
 ====================================================================
 
-1. For portability and speed, the best thing under Windows is to treat
-   16-bit displays as if they were 24-bit. The Windows device drivers
-   take care of the rest. In tkWinImage.c, change:
+Here's the patches:
+
+1. For portability and speed, the best thing under Windows is to
+treat 16-bit displays as if they were 24-bit. The Windows device
+drivers take care of the rest.
+
+   ----------------------------------------------------------------
+   If you have Tk 4.1 or Tk 8.0b1, you don't have to apply this
+   patch!  It only applies to Tk 4.2, Tk 8.0a[12] and Tk 8.0b2.
+   ----------------------------------------------------------------
+
+In win/tkWinImage.c, change the following line in XCreateImage:
 
     imagePtr->bits_per_pixel = depth;
 
 to
+
+/* ==================================================================== */
+/* The tk photo image booster patch -- patch section 1                  */
+/* ==================================================================== */
 
     if (visual->class == TrueColor)
 	/* true colour is stored as 3 bytes: (blue, green, red) */
@@ -37,24 +52,20 @@ to
     else
 	imagePtr->bits_per_pixel = depth;
 
-NOTE: This turned out to be quite similar to how this was done in
-4.1, which worked fine (albeit much too slow) on 16-bit displays.
-There's probably some reason for the change; it is mentioned in the
-CHANGES file as a fix to make sure *image* depths other than 8 and 24
-bits works, but I have still to find a machine where 4.2 works for
-*display* depths other than 8 and 24 bits...
+/* ==================================================================== */
 
 
 2. The DitherInstance implementation is not good.  It's especially
-bad on highend truecolour displays; it crawls under Windows, it
-crawls on my fast 64-bit workstation.  IMO, it should be rewritten
-from scratch (stay tuned ;-)...
+bad on highend truecolour displays.  IMO, it should be rewritten from
+scratch (some other day...).
 
   Anyway, the following band-aid makes the situation a little bit
 better under Windows.  This hack trades some marginal quality (no
 dithering on 16-bit displays) for a dramatic performance boost.
-Requires patch 1 to be in place.
+Requires patch 1, unless you're using Tk 4.1 or Tk 8.0b1.
 
+In generic/tkImgPhoto.c, add the #ifdef section to the DitherInstance
+function:
 
     for (; height > 0; height -= nLines) {
 	if (nLines > height) {
@@ -62,6 +73,11 @@ Requires patch 1 to be in place.
 	}
 	dstLinePtr = (unsigned char *) imagePtr->data;
 	yEnd = yStart + nLines;
+
+/* ==================================================================== */
+/* The tk photo image booster patch -- patch section 2                  */
+/* ==================================================================== */
+
 #ifdef __WIN32__
 	if (colorPtr->visualInfo.class == TrueColor
 		&& instancePtr->gamma == 1.0) {
@@ -80,9 +96,13 @@ Requires patch 1 to be in place.
 	    }
 	} else
 #endif
+
+/* ==================================================================== */
+
 	for (y = yStart; y < yEnd; ++y) {
 	    srcPtr = srcLinePtr;
 	    errPtr = errLinePtr;
 	    destBytePtr = dstLinePtr;
 
 ====================================================================
+last updated: 97-07-03/fl

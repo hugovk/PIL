@@ -5,9 +5,11 @@
  * File:
  *	ImDib.h -- Windows DIB specifics
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996.
+ * Copyright (c) Secret Labs AB 1997, 98.
+ *
+ * See the README file for information on usage and redistribution.
  */
-
 
 #ifdef WIN32
 
@@ -21,6 +23,7 @@ struct ImagingDIBInstance {
     /* Windows interface */
     HDC dc;
     HBITMAP bitmap;
+    BITMAPINFO *info;
     UINT8 *bits;
     HPALETTE palette;
     /* Used by cut and paste */
@@ -40,13 +43,12 @@ extern ImagingDIB ImagingNewDIB(const char *mode, int xsize, int ysize);
 
 extern void ImagingDeleteDIB(ImagingDIB im);
 
+extern void ImagingDrawDIB(ImagingDIB dib, int dc, int dst[4], int src[4]);
 extern void ImagingExposeDIB(ImagingDIB dib, int dc);
 
 extern int ImagingQueryPaletteDIB(ImagingDIB dib, int dc);
 
-extern void ImagingPasteDIB(ImagingDIB dib, Imaging im,
-			    int x0, int y0, int x1, int y1);
-
+extern void ImagingPasteDIB(ImagingDIB dib, Imaging im, int xy[4]);
 
 #if defined(__cplusplus)
 }

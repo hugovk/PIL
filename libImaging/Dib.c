@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library
- * $Id: Dib.c,v 1.4 1996/11/07 12:11:30 fredrik Exp $
+ * $Id: Dib.c,v 1.3 1996/08/15 13:12:44 fredrik Exp $
  *
  * imaging display object for Windows
  *
@@ -9,8 +9,13 @@
  *	96-05-17 fl:	Up and running
  *	96-05-21 fl:	Added palette stuff
  *	96-05-26 fl:	Added query palette and mode inquery
+ *	97-09-21 fl:	Added draw primitive
+ *	98-01-20 fl:	Use StretchDIBits instead of StretchBlt
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996.
+ * Copyright (c) Secret Labs AB 1997, 98.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -55,8 +60,7 @@ ImagingNewDIB(const char *mode, int xsize, int ysize)
     /* Create a Windows bitmap */
 
     ImagingDIB dib;
-    BITMAPINFOHEADER info;
-    RGBQUAD palette[256];
+    RGBQUAD *palette;
     int i;
 
     /* Check mode */
@@ -64,36 +68,37 @@ ImagingNewDIB(const char *mode, int xsize, int ysize)
 	strcmp(mode, "RGB") != 0)
 	return (ImagingDIB) ImagingError_Argument("bad mode");
 
-    memset(&info, 0, sizeof(info));
-
-    info.biSize = sizeof(info);
-    info.biWidth = xsize;
-    info.biHeight = ysize;
-    info.biPlanes = 1;
-    info.biBitCount = strlen(mode)*8;
-    info.biCompression = BI_RGB;
-
-    /* Create DIB context */
+    /* Create DIB context and info header */
     dib = (ImagingDIB) malloc(sizeof(*dib));
     if (!dib)
 	return (ImagingDIB) ImagingError_NoMemory();
+    dib->info = (BITMAPINFO*) malloc(sizeof(BITMAPINFOHEADER) +
+                                     256 * sizeof(RGBQUAD));
+    if (!dib->info) {
+        free(dib);
+	return (ImagingDIB) ImagingError_NoMemory();
+    }
+
+    memset(dib->info, 0, sizeof(BITMAPINFOHEADER));
+    dib->info->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    dib->info->bmiHeader.biWidth = xsize;
+    dib->info->bmiHeader.biHeight = ysize;
+    dib->info->bmiHeader.biPlanes = 1;
+    dib->info->bmiHeader.biBitCount = strlen(mode)*8;
+    dib->info->bmiHeader.biCompression = BI_RGB;
 
     /* Create DIB */
     dib->dc = CreateCompatibleDC(NULL);
-
     if (!dib->dc) {
+	free(dib->info);
 	free(dib);
 	return (ImagingDIB) ImagingError_NoMemory();
     }
 
-    if (strcmp(mode, "P") == 0)
-	dib->bitmap = CreateDIBSection(dib->dc, (BITMAPINFO*) &info,
-				       DIB_PAL_COLORS, &dib->bits, NULL, 0);
-    else
-	dib->bitmap = CreateDIBSection(dib->dc, (BITMAPINFO*) &info,
-				       DIB_RGB_COLORS, &dib->bits, NULL, 0);
-
+    dib->bitmap = CreateDIBSection(dib->dc, dib->info, DIB_RGB_COLORS,
+                                   &dib->bits, NULL, 0);
     if (!dib->bitmap) {
+        free(dib->info);
 	free(dib);
 	return (ImagingDIB) ImagingError_NoMemory();
     }
@@ -114,6 +119,8 @@ ImagingNewDIB(const char *mode, int xsize, int ysize)
 
     /* Bind the DIB to the device context */
     SelectObject(dib->dc, dib->bitmap);
+
+    palette = dib->info->bmiColors;
 
     /* Bind a palette to it as well (only required for 8-bit DIBs) */
     if (dib->pixelsize == 1) {
@@ -219,14 +226,16 @@ ImagingNewDIB(const char *mode, int xsize, int ysize)
 }
 
 void
-ImagingPasteDIB(ImagingDIB dib, Imaging im, int x0, int y0, int x1, int y1)
+ImagingPasteDIB(ImagingDIB dib, Imaging im, int xy[4])
 {
     /* Paste image data into a bitmap */
 
+    /* FIXME: check size! */
+
     int y;
     for (y = 0; y < im->ysize; y++)
-	dib->pack(dib->bits + dib->linesize*(dib->ysize-(y0+y)-1) +
-		  x0*dib->pixelsize, im->image[y], im->xsize);
+	dib->pack(dib->bits + dib->linesize*(dib->ysize-(xy[1]+y)-1) +
+		  xy[0]*dib->pixelsize, im->image[y], im->xsize);
 
 }
 
@@ -238,6 +247,26 @@ ImagingExposeDIB(ImagingDIB dib, int dc)
     if (dib->palette != 0)
 	SelectPalette((HDC) dc, dib->palette, FALSE);
     BitBlt((HDC) dc, 0, 0, dib->xsize, dib->ysize, dib->dc, 0, 0, SRCCOPY);
+}
+
+void
+ImagingDrawDIB(ImagingDIB dib, int dc, int dst[4], int src[4])
+{
+    /* Copy bitmap to printer/display */
+
+    if (GetDeviceCaps((HDC) dc, RASTERCAPS) & RC_STRETCHDIB) {
+        /* stretchdib (printers) */
+        StretchDIBits((HDC) dc, dst[0], dst[1], dst[2]-dst[0], dst[3]-dst[1],
+                      src[0], src[1], src[2]-src[0], src[3]-src[1], dib->bits,
+                      dib->info, DIB_RGB_COLORS, SRCCOPY);
+    } else {
+        /* stretchblt (displays) */
+        if (dib->palette != 0)
+            SelectPalette((HDC) dc, dib->palette, FALSE);
+        StretchBlt((HDC) dc, dst[0], dst[1], dst[2]-dst[0], dst[3]-dst[1],
+                   dib->dc, src[0], src[1], src[2]-src[0], src[3]-src[1],
+                   SRCCOPY);
+    }
 }
 
 int
@@ -273,6 +302,7 @@ ImagingDeleteDIB(ImagingDIB dib)
 	DeleteObject(dib->bitmap);
     if (dib->dc)
 	DeleteDC(dib->dc);
+    free(dib->info);
 }
 
 #endif /* WIN32 */

@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library
- * $Id: Negative.c,v 1.2 1996/11/07 12:11:30 fredrik Exp $
+ * $Id: Negative.c,v 1.1 1996/03/25 08:46:34 fredrik Exp $
  *
  * negate image
  *
@@ -10,7 +10,10 @@
  * history:
  *	95-11-27 fl:	Created
  *
- * Copyright (c) Fredrik Lundh 1995.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1995.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -21,7 +24,7 @@ Imaging
 ImagingNegative(Imaging im)
 {
     Imaging imOut;
-    unsigned x, y;
+    int x, y;
 
     if (!im)
 	return (Imaging) ImagingError_Argument(NULL);

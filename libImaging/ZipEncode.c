@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: ZipEncode.c,v 1.1 1997/01/14 16:40:04 fl Exp $
+ * $Id: RawEncode.c,v 1.2 1996/08/15 13:12:44 fredrik Exp $
  *
  * coder for ZIP (deflated) image data
  *
@@ -8,7 +8,10 @@
  *	96-12-29 fl	created
  *	96-12-30 fl	adaptive filter selection, encoder tuning
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -29,6 +32,8 @@ ImagingZipEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
     if (!state->state) {
 
 	/* Initialization */
+
+	/* Valid modes are ZIP_PNG, ZIP_PNG_PALETTE, and ZIP_TIFF */
 
 	/* Expand standard buffer to make room for the filter selector,
 	   and allocate filter buffers */
@@ -73,19 +78,19 @@ ImagingZipEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 			   Z_DEFLATED,
 			   /* compression memory resources */
 			   15, 9,
-			   /* compression strategy */
-			   (context->palette) ? Z_DEFAULT_STRATEGY
-					      : Z_FILTERED);
+			   /* compression strategy (image data are filtered)*/
+			   (context->mode == ZIP_PNG) ? Z_FILTERED
+						      : Z_DEFAULT_STRATEGY);
 	if (err < 0) {
-	    state->errcode == IMAGING_CODEC_CONFIG;
+	    state->errcode = IMAGING_CODEC_CONFIG;
 	    return -1;
 	}
 
 	if (context->dictionary && context->dictionary_size > 0) {
-	    err = deflateSetDictionary(&context->z_stream, context->dictionary,
+	    err = deflateSetDictionary(&context->z_stream, (unsigned char *)context->dictionary,
 				       context->dictionary_size);
 	    if (err < 0) {
-		state->errcode == IMAGING_CODEC_CONFIG;
+		state->errcode = IMAGING_CODEC_CONFIG;
 		return -1;
 	    }
 	}
@@ -125,7 +130,7 @@ ImagingZipEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 
 		context->output = state->buffer;
 
-		if (!context->palette) {
+		if (context->mode == ZIP_PNG) {
 
 		    /* Filter the image data.  For each line, select
 		       the filter that gives the least total distance
@@ -172,9 +177,9 @@ ImagingZipEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 			}
 		    }
 
-#if 0 /* this filter is hardly ever used */
-		    /* 3. Average */
-		    if (sum > 0) {
+		    /* 3. Average (not very common in real-life images,
+		       so its only used with the optimize option) */
+		    if (context->optimize && sum > 0) {
 			for (i = 1, s = 0; i <= bpp; i++) {
 			    UINT8 v = state->buffer[i] - context->previous[i]/2;
 			    context->average[i] = v;
@@ -191,7 +196,6 @@ ImagingZipEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 			    sum = s;
 			}
 		    }
-#endif
 
 		    /* 4. Paeth */
 		    if (sum > 0) {

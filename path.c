@@ -1,15 +1,23 @@
-/* $Id: path.c,v 1.1 1996/12/08 15:32:19 fl Exp $
- *
+/*
  * The Python Imaging Library.
+ * $Id$
  *
- * File:
- *	path.c -- 2D path utilities
+ * 2D path utilities
  *
- * History:
- *	96-11-04 fl	Added to PIL (incomplete)
- *	96-11-05 fl	Added sequence semantics
+ * history:
+ * 96-11-04 fl  Added to PIL (incomplete)
+ * 96-11-05 fl	Added sequence semantics
+ * 97-02-28 fl	Fixed getbbox
+ * 97-06-12 fl	Added id attribute
+ * 97-06-14 fl	Added slicing and setitem
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * notes:
+ * FIXME: fill in remaining slots in the sequence api
+ *
+ * Copyright (c) Secret Labs AB 1997.
+ * Copyright (c) Fredrik Lundh 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -32,9 +40,21 @@ typedef struct {
 staticforward PyTypeObject PyPathType;
 
 static PyPathObject*
-_new(int count, double *xy)
+_new(int count, double* xy, int duplicate)
 {
     PyPathObject *path;
+
+    if (duplicate) {
+        /* duplicate path */
+        double* p;
+        p = malloc(count * 2 * sizeof(double));
+        if (!p) {
+            PyErr_NoMemory();
+            return NULL;
+        }
+        memcpy(p, xy, count * 2 * sizeof(double));
+        xy = p;
+    }
 
     path = PyObject_NEW(PyPathObject, &PyPathType);
     if (path == NULL)
@@ -99,7 +119,7 @@ PyPath_Flatten(PyObject* data, double **pxy)
 	return -1;
     }
 
-    /* Copy table to lut array (clip values to proper range) */
+    /* Copy table to path array */
     for (i = 0; i < n; i++) {
 	double x, y;
 	PyObject *op = PySequence_GetItem(data, i);
@@ -138,14 +158,28 @@ PyPath_Create(PyObject* self, PyObject* args)
     int count;
     double *xy;
 
-    if (!PyArg_ParseTuple(args, "O", &data))
-	return NULL;
+    if (PyArg_ParseTuple(args, "i", &count)) {
 
-    count = PyPath_Flatten(data, &xy);
-    if (count < 0)
-	return NULL;
+        /* number of vertices */
+        xy = malloc(2 * count * sizeof(double));
+        if (!xy) {
+            PyErr_NoMemory();
+            return NULL;
+        }
 
-    return (PyObject*) _new(count, xy);
+    } else {
+
+        /* sequence or other path */
+        PyErr_Clear();
+        if (!PyArg_ParseTuple(args, "O", &data))
+            return NULL;
+
+        count = PyPath_Flatten(data, &xy);
+        if (count < 0)
+            return NULL;
+    }
+
+    return (PyObject*) _new(count, xy, 0);
 }
 
 
@@ -200,13 +234,12 @@ _getbbox(PyPathObject* self, PyObject* args)
     x0 = x1 = xy[0];
     y0 = y1 = xy[1];
 
-    /* remove bogus vertices */
     for (i = 1; i < self->count; i++) {
 	if (xy[i+i] < x0)
 	    x0 = xy[i+i];
 	if (xy[i+i] > x1)
 	    x1 = xy[i+i];
-	if (xy[i+i+1] > y0)
+	if (xy[i+i+1] < y0)
 	    y0 = xy[i+i+1];
 	if (xy[i+i+1] > y1)
 	    y1 = xy[i+i+1];
@@ -224,6 +257,24 @@ _getitem(PyPathObject* self, int i)
     }
 
     return Py_BuildValue("dd", self->xy[i+i], self->xy[i+i+1]);
+}
+
+static PyObject*
+_getslice(PyPathObject* self, int ilow, int ihigh)
+{
+    /* adjust arguments */
+    if (ilow < 0)
+        ilow = 0;
+    else if (ilow >= self->count)
+        ilow = self->count;
+    if (ihigh < 0)
+        ihigh = 0;
+    if (ihigh < ilow)
+        ihigh = ilow;
+    else if (ihigh > self->count)
+        ihigh = self->count;
+    
+    return (PyObject*) _new(ihigh - ilow, self->xy + ilow * 2, 1);
 }
 
 static int
@@ -261,6 +312,29 @@ _map(PyPathObject* self, PyObject* args)
 
     Py_INCREF(Py_None);
     return Py_None;
+}
+
+static int
+_setitem(PyPathObject* self, int i, PyObject* op)
+{
+    double* xy;
+
+    if (i < 0 || i >= self->count) {
+        PyErr_SetString(PyExc_IndexError, "path assignment index out of range");
+        return -1;
+    }
+
+    if (op == NULL) {
+        PyErr_SetString(PyExc_TypeError, "cannot delete from path");
+        return -1;
+    }
+
+    xy = &self->xy[i+i];
+
+    if (!PyArg_ParseTuple(op, "dd", &xy[0], &xy[1]))
+        return -1;
+
+    return 0;
 }
 
 static PyObject*
@@ -339,7 +413,19 @@ static struct PyMethodDef methods[] = {
 static PyObject*  
 _getattr(PyPathObject* self, char* name)
 {
-    return Py_FindMethod(methods, (PyObject*) self, name);
+    PyObject* res;
+
+    res = Py_FindMethod(methods, (PyObject*) self, name);
+    if (res)
+	return res;
+
+    PyErr_Clear();
+
+    if (strcmp(name, "id") == 0)
+	return Py_BuildValue("l", (long) self->xy);
+
+    PyErr_SetString(PyExc_AttributeError, name);
+    return NULL;
 }
 
 static PySequenceMethods path_as_sequence = {
@@ -347,8 +433,8 @@ static PySequenceMethods path_as_sequence = {
 	(binaryfunc)0, /*sq_concat*/
 	(intargfunc)0, /*sq_repeat*/
 	(intargfunc)_getitem, /*sq_item*/
-	(intintargfunc)0, /*sq_slice*/
-	(intobjargproc)0, /*sq_ass_item*/
+	(intintargfunc)_getslice, /*sq_slice*/
+	(intobjargproc)_setitem, /*sq_ass_item*/
 	(intintobjargproc)0, /*sq_ass_slice*/
 };
 

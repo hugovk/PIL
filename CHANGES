@@ -1,20 +1,206 @@
 
 The Python Imaging Library
-$Id: CHANGES,v 1.12 1997/01/14 18:01:06 fl Exp fl $
+$Id: CHANGES,v$
 
-This is release 0.2b4 (January 10, 97)
+*** Changes from release 0.2b4 to 0.3b1 ***
 
-*** Changes from release 0.1b1 to 0.2b4 ***
+ACKNOWLEDGEMENTS: David Ascher, Phil Austin, Anthony Baxter, Jan Blom,
+Greg Coats, Fred Drake, Tim Docker, Robin Friedrich, Jack Jansen,
+Richard Jones, Fredrik Nehr, Mark Hammond, Håkan Karlsson, Skip
+Montanaro, Bertil Reinhammar, Joel Shprentz, Perry Stoll, Paul
+Svensson, Ivan Tkatchev, and others have contributed bug reports, code
+snippets, ideas, and inspiration for new features.
 
-ACKNOWLEDGEMENTS: David Ascher, Phil Austin, Anthony Baxter, Jan
-Blom, Fred Drake, Robin Friedrich, Jack Jansen, Richard Jones,
-Fredrik Nehr, Mark Hammond, Bertil Reinhammar, Joel Shprentz, Ivan
-Tkatchev, and others have contributed bug reports, ideas, and
-inspiration for new features (many of which are yet to come ;-).
+Here's what's new this far in PIL 0.3:
 
-Here's what's new this far in PIL 0.2:
+(0.3b1 released)
 
-(0.2b4 released)
++ Added IPTC/NAA support (experimental).
+
++ Eliminated AttributeError exceptions after "crop" (thanks
+  to Skip Montanaro)
+
++ Reads some uncompressed formats via memory mapping (this
+  is currently supported on Win32 only)
+
++ Fixed some last minute glitches in the alpha release (Types
+  instead of types in Image.py, version numbers, etc.)
+
++ Eliminated some more bogus compiler warnings.
+
++ Various fixes to make PIL compile and run smoother on Macs
+  (from Jack Jansen).
+
++ Fixed fromstring/tostring for mode "I" images.
+
+(0.3a3 released)
+
+The test suite includes 17 groups (530 individual tests).
+
++ Eliminated unexpected side-effect in "paste" with matte.  "paste"
+  now works properly also if compiled with "gcc".
+
++ Adapted to Python 1.5 (build issues only)
+
++ Fixed the ImageDraw "point" method to draw also the last
+  point (!).
+
++ Fixed Image.new to support "I" and "RGBX" modes.
+
++ The plugin path is now properly prepended to the module search
+  path when a plugin module is imported.
+
++ Added "draw" method to the ImageWin.Dib class.  This is used by
+  the tzPrint module (Topaz) to print images on Windows printers.
+
++ "convert" now supports conversions from "P" to "1" and "F".
+
++ "paste" can now take a colour instead of an image as the first argument.
+  The colour must match the colour argument given to the new function, and
+  match the mode of the target image.
+
++ Fixed "paste" to allow a mask also for mode "F" images.
+
++ The BMP driver now saves mode "1" images.  When loading images, the mode
+  is set to "L" for 8-bit files with greyscale palettes, and to "P" for
+  other 8-bit files.
+
++ The IM driver now reads and saves "1" images (file modes "0 1" or "L 1").
+
++ The JPEG and GIF drivers now saves "1" images.  For JPEG, the image
+  is saved as 8-bit greyscale (it will load as mode "L").  For GIF, the
+  image will be loaded as a "P" image.
+
++ Fixed a potential buffer overrun in the GIF encoder.
+
+(0.3a2 released)
+
+The test suite includes 12 groups (400 individual tests).
+
++ Improvements to the test suite revealed a number of minor bugs, which
+  are all fixed.  Note that crop/paste, 32-bit ImageDraw, and ImageFont
+  are still weak spots in this release.
+
++ Added "putpalette" method to the Image class.  You can use this
+  to add or modify the palette for "P" and "L" images.  If a palette
+  is added to an "L" image, it is automatically converted to a "P"
+  image.
+
++ Fixed ImageDraw to properly handle 32-bit image memories
+  (RGB, RGBA, CMYK, F)
+
++ Fixed "fromstring" and "tostring" not to mess up the mode attribute
+  in default mode.
+
++ Changed ImPlatform.h to work on CRAY's (don't have one at home, so I
+  haven't tried it).  The previous version assumed that either "short"
+  or "int" were 16-bit wide. PIL still won't compile on platforms where
+  neither "short", "int" nor "long" are 32-bit wide.
+
++ Added file= and data= keyword arguments to PhotoImage and BitmapImage.
+  This allows you to use them as drop-in replacements for the corre-
+  sponding Tkinter classes.
+
++ Removed bogus references to the crack coder (ImagingCrack).
+
+(0.3a1 released)
+
++ Make sure image is loaded in "tostring".
+
++ Added floating point packer (native 32-bit floats only).
+
+*** Changes from release 0.1b1 to 0.2 (b5) ***
+
++ Modified "fromstring" and "tostring" methods to use file codecs.
+  Also added "fromstring" factory method to create an image directly
+  from data in a string.
+
++ Added support for 32-bit floating point images (mode "F").  You
+  can convert between "L" and "F" images, and apply a subset of the
+  available image processing methods on the "F" image.  You can also
+  read virtually any data format into a floating point image memory;
+  see the section on "Decoding Floating Point Data" in the handbook
+  for more information.
+
+(0.2b5 released; on windows only)
+
++ Fixed the tobitmap() method to work properly for small bitmaps.
+
++ Added RMS and standard deviation to the ImageStat.Stat class.  Also
+  modified the constructor to take an optional feature mask, and also
+  to accept either an image or a list containing the histogram data.
+
++ The BitmapImage code in ImageTk can now use a special bitmap
+  decoder, which has to be patched into Tk.  See the "Tk/pilbitmap.txt"
+  file for details.  If not installed, bitmaps are transferred to Tk as
+  XBM strings.
+
++ The PhotoImage code in ImageTk now uses a Tcl command ("PyImagingPaste")
+  instead of a special image type.  This gives somewhat better performance,
+  and also allows PIL to support transparency.
+  *** WARNING: TKAPPINIT MUST BE MODIFIED ***
+
++ ImageTk now honours the alpha layer in RGBA images.  Only fully
+  transparent pixels are made transparent (that is, the alpha layer
+  is treated as a mask).  To treat the alpha laters as a matte, you
+  must paste the image on the background before handing it over to
+  ImageTk.
+
++ Added McIdas reader (supports 8-bit images only).
+
++ PIL now preloads drivers for BMP, GIF, JPEG, PPM, and TIFF.  As
+  long as you only load and save these formats, you don't have to
+  wait for a full scan for drivers.  To force scanning, call the
+  Image.init() function.
+
++ The "seek" and "tell" methods are now always available, also for
+  single-frame images.
+
++ Added optional mask argument to histogram method.  The mask may
+  be an "1" or "L" image with the same size as the original image.
+  Only pixels where the mask is non-zero are included in the
+  histogram.
+
++ The paste method now allows you to specify only the lower left
+  corner (a 2-tuple), instead of the full region (a 4-tuple).
+
++ Reverted to old plugin scanning model; now scans all directory
+  names in the path when looking for plugins.
+
++ Added PIXAR raster support.  Only uncompressed ("dumped") RGB
+  images can currently be read.
+
++ Added FlashPix (FPX) read support.  Reads all pixel formats, but
+  only the highest resolution is read, and the viewing transform is
+  currently ignored.
+
++ Made PNG encoding somewhat more efficient in "optimize" mode; a
+  bug in 0.2b4 didn't enable all predictor filters when optimized
+  storage were requested.
+
++ Added Microsoft Image Composer (MIC) read support.  When opened,
+  the first sprite in the file is loaded.  You can use the seek method
+  to load additional sprites from the file.
+
++ Properly reads "P" and "CMYK" PSD images.
+
++ "pilconvert" no longer optimizes by default; use the -o option to
+  make the file as small as possible (at the expense of speed); use
+  the -q option to set the quality when compressing to JPEG.
+
++ Fixed "crop" not to drop the palette for "P" images.
+
++ Added and verified FLC support.
+
++ Paste with "L" or "RGBA" alpha is now several times faster on most
+  platforms.
+
++ Changed Image.new() to initialize the image to black, as described
+  in the handbook.  To get an uninitialized image, use None as the
+  colour.
+
++ Fixed the PDF encoder to produce a valid header; Acrobat no longer
+  complains when you load PDF images created by PIL.
 
 + PIL only scans fully-qualified directory names in the path when
   looking for plugins.
@@ -26,10 +212,9 @@ Here's what's new this far in PIL 0.2:
 + Fixed the "crop" method not to crash if the region extends
   outside the source image.
 
-+ Eliminated a very serious memory leak in the "save" function,
-  which caused PIL to leak encoding buffers.
++ Eliminated a massive memory leak in the "save" function.
 
-+ The GIF decoder doesn't crash if the code is set to an illegal
++ The GIF decoder doesn't crash if the code size is set to an illegal
   value.  This could happen since another bug didn't handle local
   palettes properly if they didn't have the same size as the
   global palette (not very common).
@@ -51,7 +236,7 @@ Here's what's new this far in PIL 0.2:
 + Reads 8-bit "L" and "P" TGA images.  Also reads 16-bit "RGB"
   images.
 
-+ Added FLI/FLC read support.  This driver has only been tested
++ Added FLI read support.  This driver has only been tested
   on a few FLI samples.
 
 + Reads 2-bit and 4-bit PCX images.
@@ -174,8 +359,8 @@ Here's what's new this far in PIL 0.2:
   drawing capabilities can be used to render vector and metafile
   formats.
 
-+ Added limited drivers for images from Image Tools (greyscale only)
-  and LabEye/IFUNC (interchange modes only).
++ Added restricted drivers for images from Image Tools (greyscale
+  only) and LabEye/IFUNC (common interchange modes only).
 
 + Some minor improvements to the sample scripts provided in the
   "Scripts" directory.
@@ -271,12 +456,9 @@ Here's what's new this far in PIL 0.2:
   JPEG compression for "L", "RGB", and "CMYK" images, and hex encoding
   (same as for PostScript) for other formats.
 
-  *** NOTE: Acrobat complains on files produced by this driver, but
-  ****      still renders them correctly.
-
 + The paste method now accepts "1" masks.  Zero means transparent,
-  any other pixel value means opaque.  This is *much* faster than
-  using an "L" transparency mask.
+  any other pixel value means opaque.  This is faster than using an
+  "L" transparency mask.
 
 + Properly writes EPS files (and properly prints images to postscript
   printers as well).
@@ -325,7 +507,7 @@ Here's what's new this far in PIL 0.2:
 + Only the Image module imports _imaging directly.  Other modules
   should refer to the binding module as "Image.core".
 
-*** Changes from release 0.0 to 0.1b1 ***
+*** Changes from release 0.0 to 0.1 (b1) ***
 
 + A handbook is available (distributed separately).
 

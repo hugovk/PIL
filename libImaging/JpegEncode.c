@@ -10,7 +10,7 @@
  *	96-12-30 fl	added quality and progressive settings
  *	97-01-08 fl	added streamtype settings
  *
- * Copyright (c) Fredrik Lundh 1996-97.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996-97.
  */
 
 
@@ -32,20 +32,20 @@
 /* Suspending output handler						*/
 /* -------------------------------------------------------------------- */
 
-METHODDEF void
+METHODDEF(void)
 stub(j_compress_ptr cinfo)
 {
     /* empty */
 }
 
-METHODDEF boolean
+METHODDEF(boolean)
 empty_output_buffer (j_compress_ptr cinfo)
 {
     /* Suspension */
     return FALSE;
 }
 
-GLOBAL void
+GLOBAL(void)
 jpeg_buffer_dest(j_compress_ptr cinfo, JPEGDESTINATION* destination)
 {
     cinfo->dest = (void*) destination;
@@ -60,7 +60,7 @@ jpeg_buffer_dest(j_compress_ptr cinfo, JPEGDESTINATION* destination)
 /* Error handler							*/
 /* -------------------------------------------------------------------- */
 
-METHODDEF void
+METHODDEF(void)
 error(j_common_ptr cinfo)
 {
   JPEGERROR* error;

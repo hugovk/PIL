@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: GifEncode.c,v 1.1 1997/01/14 16:40:04 fl Exp $
+ * $Id: RawEncode.c,v 1.2 1996/08/15 13:12:44 fredrik Exp $
  *
  * coder for uncompressed GIF data
  *
@@ -11,8 +11,12 @@
  *
  * history:
  *	97-01-05 fl	created
+ *	97-08-27 fl	fixed off-by-one error in buffer size test
  *
- * Copyright (c) Fredrik Lundh 1997.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1997.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -147,7 +151,7 @@ ImagingGifEncode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	    if (context->blocksize > 1) {
 
 		/* check if it fits into output buffer */
-		if (bytes < context->blocksize)
+		if (bytes <= context->blocksize)
 		    return ptr - buf;
 
 		ptr[0] = context->blocksize-1;

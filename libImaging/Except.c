@@ -1,6 +1,6 @@
 /* 
  * The Python Imaging Library
- * $Id: Except.c,v 1.4 1996/11/07 12:11:30 fredrik Exp $
+ * $Id: Except.c,v 1.3 1996/03/29 00:23:23 fredrik Exp $
  *
  * default exception handling
  *
@@ -10,7 +10,10 @@
  * history:
  *	95-06-15 fl:	Created
  *
- * Copyright (c) Fredrik Lundh 1995.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1995.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 

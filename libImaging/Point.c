@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library
- * $Id: Point.c,v 1.5 1996/11/07 12:11:30 fredrik Exp $
+ * $Id: Point.c,v 1.4 1996/08/15 13:12:44 fredrik Exp $
  *
  * point (pixel) translation
  *
@@ -8,8 +8,12 @@
  *	95-11-27 fl:	Created
  *	96-03-31 fl:	Fixed colour support
  *	96-08-13 fl:	Support 8-bit to "1" thresholding
+ *	97-05-31 fl:	Added floating point transform
  *
- * Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1995-97.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -19,9 +23,11 @@
 Imaging
 ImagingPoint(Imaging imIn, const char* mode, const UINT8* table)
 {
+    /* integer lookup table transform */
+
     Imaging imOut;
-    unsigned x, y, i;
-    unsigned xx;
+    int x, y, i;
+    int xx;
 
     if (!imIn || (mode && strcmp(mode, "1") != 0))
 	return (Imaging) ImagingError_Argument(NULL);
@@ -50,6 +56,34 @@ ImagingPoint(Imaging imIn, const char* mode, const UINT8* table)
 		xx += 4;
 	    }
 	}
+    }
+
+    return imOut;
+}
+
+
+Imaging
+ImagingPointTransform(Imaging imIn, double scale, double offset)
+{
+    /* floating point transform */
+
+    Imaging imOut;
+    int x, y;
+
+    if (!imIn || strcmp(imIn->mode, "F") != 0)
+	return (Imaging) ImagingError_Argument(NULL);
+
+    imOut = ImagingNew(imIn->mode, imIn->xsize, imIn->ysize);
+    if (!imOut)
+	return NULL;
+
+    ImagingCopyInfo(imOut, imIn);
+
+    for (y = 0; y < imIn->ysize; y++) {
+        FLOAT32* in  = (FLOAT32*) imIn->image32[y];
+        FLOAT32* out = (FLOAT32*) imOut->image32[y];
+        for (x = 0; x < imIn->xsize; x++)
+            out[x] = in[x] * scale + offset;
     }
 
     return imOut;

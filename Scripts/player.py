@@ -7,6 +7,7 @@
 from Tkinter import *
 import Image, ImageTk
 import sys
+import os
 
 
 Image.DEBUG = 0
@@ -96,7 +97,13 @@ class UI(Label):
 # --------------------------------------------------------------------
 # script interface
 
-if __name__ == "__main__":
+def main():
+
+    if os.name == 'mac' and not sys.argv[1:]:
+    	import macfs
+    	fss, ok = macfs.StandardGetFile()
+    	if not ok: sys.exit(0)
+    	sys.argv[1:] = [fss.as_pathname()]
 
     if not sys.argv[1:]:
 	print "Syntax: python player.py imagefile(s)"
@@ -120,3 +127,6 @@ if __name__ == "__main__":
     UI(root, im).pack()
 
     root.mainloop()
+
+
+main()

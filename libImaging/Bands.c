@@ -1,13 +1,17 @@
 /* 
  * The Python Imaging Library
- * $Id: Bands.c,v 1.3 1996/11/07 12:11:30 fredrik Exp $
+ * $Id: Bands.c,v 1.2 1996/03/29 00:23:23 fredrik Exp $
  * 
  * stuff to extract and paste back individual bands
  *
  * history:
  *	96-03-20 fl:	Created
+ *	97-08-27 fl:	Fixed putband for single band targets.
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996-97.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for details on usage and redistribution.
  */
 
 
@@ -18,10 +22,10 @@ Imaging
 ImagingGetBand(Imaging imIn, int band)
 {
     Imaging imOut;
-    unsigned x, y;
+    int x, y;
 
     /* Check arguments */
-    if (!imIn || band < 0 || band >= imIn->bands)
+    if (!imIn || imIn->type != 0 || band < 0 || band >= imIn->bands)
 	return (Imaging) ImagingError_Mismatch();
 
     /* Shortcuts */
@@ -37,7 +41,7 @@ ImagingGetBand(Imaging imIn, int band)
 	UINT8* in = (UINT8*) imIn->image[y] + band;
 	UINT8* out = imOut->image8[y];
 	for (x = 0; x < imIn->xsize; x++) {
-	    *out++ = *in;
+	    out[x] = *in;
 	    in += 4;
 	}
     }
@@ -45,33 +49,34 @@ ImagingGetBand(Imaging imIn, int band)
     return imOut;
 }
 
-int
+Imaging
 ImagingPutBand(Imaging imOut, Imaging imIn, int band)
 {
-    unsigned x, y;
+    int x, y;
 
     /* Check arguments */
-    if (!imIn || imIn->bands != 1 ||
-	!imOut || band < 0 || band >= imOut->bands) {
-	ImagingError_Argument(NULL);
-	return -1;
-    }
+    if (!imIn || imIn->bands != 1 || !imOut || band < 0 || band >= imOut->bands)
+	return (Imaging) ImagingError_Argument(NULL);
+
     if (imIn->type  != imOut->type  ||
 	imIn->depth != imOut->depth ||
 	imIn->xsize != imOut->xsize ||
-	imIn->ysize != imOut->ysize) {
-	ImagingError_Mismatch();
-	return -1;
-    }
+	imIn->ysize != imOut->ysize)
+	return (Imaging) ImagingError_Mismatch();
 
-    /* Extract band from image */
+    /* Shortcuts */
+    if (imOut->bands == 1)
+	return ImagingCopy2(imOut, imIn);
+
+    /* Insert band into image */
     for (y = 0; y < imIn->ysize; y++) {
 	UINT8* in = imIn->image8[y];
 	UINT8* out = (UINT8*) imOut->image[y] + band;
 	for (x = 0; x < imIn->xsize; x++) {
-	    *out = *in++;
+	    *out = in[x];
 	    out += 4;
 	}
     }
-    return 0;
+
+    return imOut;
 }

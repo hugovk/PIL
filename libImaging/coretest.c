@@ -1,19 +1,28 @@
 /*
  * The Python Imaging Library.
- * $Id: coretest.c,v 1.9 1996/12/16 18:51:03 fl Exp $
+ * $Id: coretest.c,v 1.7 1996/10/04 19:41:10 fredrik Exp $
  *
  * minimal test hack for the core library
  *
  * history:
  *	95-11-26 fl:	Created
  *
- * Copyright (c) Fredrik Lundh 1995.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1995.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
 #include <time.h>	/* clock() */
 
 #include "Imaging.h"
+
+#ifdef macintosh
+#define TESTFILE "::Images:lena.ppm"
+#else
+#define TESTFILE "../Images/lena.ppm"
+#endif /* macintosh */
 
 
 int
@@ -34,7 +43,7 @@ main()
 
     /* Library test */
 
-    im = ImagingOpenPPM("../Images/lena.ppm");
+    im = ImagingOpenPPM(TESTFILE);
 
     im1 = ImagingFillRadialGradient("L");
     im3 = ImagingResize(im1, im->xsize, im->ysize);

@@ -1,13 +1,16 @@
 /*
  * The Python Imaging Library
- * $Id: Offset.c,v 1.3 1996/12/16 18:51:03 fl Exp $
+ * $Id: Offset.c,v 1.1 1996/08/15 13:12:44 fredrik Exp $
  *
  * offset an image in x and y directions
  *
  * history:
  *	96-07-22 fl:	Created
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 

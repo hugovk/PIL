@@ -2,14 +2,18 @@
  * THIS IS WORK IN PROGRESS.
  *
  * The Python Imaging Library
- * $Id: Quantize.c,v 1.3 1996/12/08 15:32:31 fl Exp $
+ * $Id: Quantize.c,v 1.1 1996/08/15 13:12:44 fredrik Exp $
  *
- * create palette from RGB image
+ * create adaptive palette from L/P/RGB image
  *
  * history:
  *	96-05-27 fl:	Created
+ *	97-01-18 fl:	Added support for L and P images
  *
- * Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996-97.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -40,7 +44,7 @@
 
 /* Colour weights */
 #define	RSCALE	2
-#define	GSCALE	4
+#define	GSCALE	3
 #define	BSCALE	1
 
 /* Calculated scaled distances */
@@ -147,7 +151,7 @@ b1ok:
 ImagingPalette
 ImagingQuantize(Imaging imIn, int count)
 {
-    unsigned x, y;
+    int x, y;
     int i, imax;
     long cmax;
     BOXES bx;
@@ -170,15 +174,41 @@ ImagingQuantize(Imaging imIn, int count)
     if (!h)
 	return (ImagingPalette) ImagingError_NoMemory();
 
-    for (y = 0; y < imIn->ysize; y++) {
-	UINT8* in = (UINT8*) imIn->image[y];
-	for (x = 0; x < imIn->xsize; x++) {
-	    INT16* hp = &HISTO(h, in[0], in[1], in[2]);
-	    if (++hp[0] <= 0)
-		--hp[0];
-	    in += 4;
+    if (strcmp(imIn->mode, "L") == 0) {
+	/* Greyscale image */
+	for (y = 0; y < imIn->ysize; y++) {
+	    UINT8* in = imIn->image8[y];
+	    for (x = 0; x < imIn->xsize; x++) {
+		INT16* hp = &HISTO(h, in[x], in[x], in[x]);
+		if (++hp[0] <= 0)
+		    --hp[0];
+	    }
 	}
-    }
+    } else if (strcmp(imIn->mode, "P") == 0 && imIn->palette &&
+	       strcmp(imIn->palette->mode, "RGB") == 0) {
+	/* Palette image */
+	unsigned char* p = imIn->palette->palette;
+	for (y = 0; y < imIn->ysize; y++) {
+	    UINT8* in = imIn->image8[y];
+	    for (x = 0; x < imIn->xsize; x++) {
+		INT16* hp = &HISTO(h, p[in[x]*4], p[in[x]*4+1], p[in[x]*4+2]);
+		if (++hp[0] <= 0)
+		    --hp[0];
+	    }
+	}
+    } else if (strcmp(imIn->mode, "RGB") == 0) {
+	/* True colour */
+	for (y = 0; y < imIn->ysize; y++) {
+	    UINT8* in = (UINT8*) imIn->image[y];
+	    for (x = 0; x < imIn->xsize; x++) {
+		INT16* hp = &HISTO(h, in[0], in[1], in[2]);
+		if (++hp[0] <= 0)
+		    --hp[0];
+		in += 4;
+	    }
+	}
+    } else
+	return ImagingError_Argument(NULL);
 
     printf("quantize...\n");
 

@@ -1,4 +1,4 @@
-/* $Id: display.c,v 1.3 1996/12/08 15:32:19 fl Exp $
+/* $Id: display.c,v 1.2 1996/08/15 13:13:26 fredrik Exp $
  *
  * The Python Imaging Library.
  *
@@ -9,8 +9,12 @@
  *	96-05-13 fl	Windows DIB support
  *	96-05-21 fl	Added palette stuff
  *	96-05-28 fl	Added display_mode stuff
+ *	97-09-21 fl	Added draw primitive
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Secret Labs AB 1997.
+ * Copyright (c) Fredrik Lundh 1996-97.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -63,11 +67,27 @@ static PyObject*
 _expose(ImagingDisplayObject* display, PyObject* args)
 {
     int hdc;
-
     if (!PyArg_ParseTuple(args, "i", &hdc))
 	return NULL;
 
     ImagingExposeDIB(display->dib, hdc);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject* 
+_draw(ImagingDisplayObject* display, PyObject* args)
+{
+    int hdc;
+    int dst[4];
+    int src[4];
+    if (!PyArg_ParseTuple(args, "i(iiii)(iiii)", &hdc,
+                          dst+0, dst+1, dst+2, dst+3,
+                          src+0, src+1, src+2, src+3))
+	return NULL;
+
+    ImagingDrawDIB(display->dib, hdc, dst, src);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -78,25 +98,23 @@ extern Imaging PyImaging_AsImaging(PyObject *op);
 static PyObject*
 _paste(ImagingDisplayObject* display, PyObject* args)
 {
-    PyObject* op;
     Imaging im;
-    int x0, y0, x1, y1;
 
-    x0 = y0 = x1 = y1 = 0;
-
-    /* FIXME: should publish the ImagingType descriptor */
-    if (!PyArg_ParseTuple(args, "O|(iiii)", &op, &x0, &y0, &x1, &y1))
+    PyObject* op;
+    int xy[4];
+    xy[0] = xy[1] = xy[2] = xy[3] = 0;
+    if (!PyArg_ParseTuple(args, "O|(iiii)", &op, xy+0, xy+1, xy+2, xy+3))
 	return NULL;
     im = PyImaging_AsImaging(op);
     if (!im)
 	return NULL;
 
-    if (x1 <= x0)
-	x1 = x0 + im->xsize;
-    if (y1 <= y0)
-	y1 = y0 + im->ysize;
+    if (xy[2] <= xy[0])
+	xy[2] = xy[0] + im->xsize;
+    if (xy[3] <= xy[1])
+	xy[3] = xy[1] + im->ysize;
 
-    ImagingPasteDIB(display->dib, im, x0, y0, x1, y1);
+    ImagingPasteDIB(display->dib, im, xy);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -117,6 +135,7 @@ _query_palette(ImagingDisplayObject* display, PyObject* args)
 }
 
 static struct PyMethodDef methods[] = {
+    {"draw", (PyCFunction)_draw, 1},
     {"expose", (PyCFunction)_expose, 1},
     {"paste", (PyCFunction)_paste, 1},
     {"query_palette", (PyCFunction)_query_palette, 1},

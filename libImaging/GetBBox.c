@@ -1,6 +1,6 @@
 /* 
  * The Python Imaging Library
- * $Id: GetBBox.c,v 1.3 1997/01/14 16:40:04 fl Exp $
+ * $Id: GetBBox.c,v 1.1 1996/08/15 13:12:44 fredrik Exp $
  *
  * get bounding box for image
  *
@@ -8,7 +8,10 @@
  *	96-07-22 fl:	Created
  *	96-12-30 fl:	Added projection stuff
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for details on usage and redistribution.
  */
 
 

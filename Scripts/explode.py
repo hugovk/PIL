@@ -6,17 +6,64 @@
 #
 
 import Image
-import os, sys
+import os, string, sys
+
+class Interval:
+
+    def __init__(self, interval = "0"):
+
+        self.setinterval(interval)
+
+    def setinterval(self, interval):
+
+        self.hilo = []
+
+        for s in string.split(interval, ","):
+            if not string.strip(s):
+                continue
+            try:
+                v = string.atoi(s)
+                if v < 0:
+                    lo, hi = 0, -v
+                else:
+                    lo = hi = v
+            except ValueError:
+                i = string.find(s, "-")
+                lo, hi = string.atoi(s[:i]), string.atoi(s[i+1:])
+
+            self.hilo.append((hi, lo))
+
+        if not self.hilo:
+            self.hilo = [(sys.maxint, 0)]
+
+    def __getitem__(self, index):
+
+        for hi, lo in self.hilo:
+            if hi >= index >= lo:
+                return 1
+        return 0
+
+# --------------------------------------------------------------------
+# main program
 
 if not sys.argv[2:]:
-    print "Syntax: python explode.py infile template"
-    print "The template argument is used to construct the names of"
-    print "the individual frame files.  Use %d to insert the frame"
-    print "number (1..n)."
+    print
+    print "Syntax: python explode.py infile template [range]"
+    print
+    print "The template argument is used to construct the names of the"
+    print "individual frame files.  The frames are numbered file001.ext,"
+    print "file002.ext, etc.  You can insert %d to control the placement"
+    print "and syntax of the frame number."
+    print
+    print "The optional range argument specifies which frames to extract."
+    print "You can give one or more ranges like 1-10, 5, -15 etc.  If"
+    print "omitted, all frames are extracted."
     sys.exit(1)
 
 infile = sys.argv[1]
 outfile = sys.argv[2]
+
+frames = Interval(string.join(sys.argv[3:], ","))
 
 try:
     outfile % 1
@@ -30,8 +77,9 @@ im = Image.open(infile)
 
 while 1:
 
-    im.save(outfile % ix)
-    print outfile % ix
+    if frames[ix]:
+        im.save(outfile % ix)
+        print outfile % ix
 
     try:
 	im.seek(ix)

@@ -4,7 +4,7 @@
 # Short Instructions
 # ------------------
 
-# 1. Build and install Python (1.4 or newer).
+# 1. Build and install Python (1.5 or newer).
 # 2. "make -f Makefile.pre.in boot"
 # 3. "make"
 # You should now have a shared library.
@@ -12,8 +12,9 @@
 # Long Instructions
 # -----------------
 
-# Build *and install* the basic Python 1.4 distribution.  See the
-# Python README for instructions.
+# Build *and install* the basic Python 1.5 distribution.  See the
+# Python README for instructions.  (This version of Makefile.pre.in
+# only withs with Python 1.5, alpha 3 or newer.)
 
 # Create a file Setup.in for your extension.  This file follows the
 # format of the Modules/Setup.in file; see the instructions there.
@@ -46,9 +47,13 @@
 # config.c, incorporating the values for sys.prefix, sys.exec_prefix
 # and sys.version from the installed Python binary.  For this to work,
 # the python binary must be on your path.  If this fails, try
-#   make -f Makefile.pre.in Makefile VERSION=1.4 installdir=<prefix>
+#   make -f Makefile.pre.in Makefile VERSION=1.5 installdir=<prefix>
 # where <prefix> is the prefix used to install Python for installdir
 # (and possibly similar for exec_installdir=<exec_prefix>).
+
+# Note: "make boot" implies "make clobber" -- it assumes that when you
+# bootstrap you may have changed platforms so it removes all previous
+# output files.
 
 # If you are building your extension as a shared library (your
 # Setup.in file starts with *shared*), run "make" or "make sharedmods"
@@ -86,8 +91,11 @@ VPATH=		.
 # (Static) build target
 TARGET=		python
 
+# Installed python binary (used only by boot target)
+PYTHON=		python
+
 # Add more -I and -D options here
-CFLAGS=		$(OPT) -I$(INCLUDEPY) -I$(LIBPL) $(DEFS)
+CFLAGS=		$(OPT) -I$(INCLUDEPY) -I$(EXECINCLUDEPY) $(DEFS)
 
 # These two variables can be set in Setup to merge extensions.
 # See example[23].
@@ -105,6 +113,8 @@ MODLIBS=	_MODLIBS_
 
 VERSION=	@VERSION@
 CC=		@CC@
+LINKCC=		@LINKCC@
+SGI_ABI=	@SGI_ABI@
 OPT=		@OPT@
 LDFLAGS=	@LDFLAGS@
 DEFS=		@DEFS@
@@ -117,6 +127,7 @@ SO=		@SO@
 LDSHARED=	@LDSHARED@
 CCSHARED=	@CCSHARED@
 LINKFORSHARED=	@LINKFORSHARED@
+#@SET_CCC@
 
 # Install prefix for architecture-independent files
 prefix=		/usr/local
@@ -140,14 +151,13 @@ SCRIPTDIR=	$(prefix)/lib
 BINLIBDEST=	$(LIBDIR)/python$(VERSION)
 LIBDEST=	$(SCRIPTDIR)/python$(VERSION)
 INCLUDEPY=	$(INCLUDEDIR)/python$(VERSION)
+EXECINCLUDEPY=	$(exec_installdir)/include/python$(VERSION)
 LIBP=		$(exec_installdir)/lib/python$(VERSION)
+DESTSHARED=	$(BINLIBDEST)/site-packages
 
 LIBPL=		$(LIBP)/config
 
-PYTHONLIBS=	$(LIBPL)/libModules.a \
-		$(LIBPL)/libPython.a \
-		$(LIBPL)/libObjects.a \
-		$(LIBPL)/libParser.a
+PYTHONLIBS=	$(LIBPL)/libpython$(VERSION).a
 
 MAKESETUP=	$(LIBPL)/makesetup
 MAKEFILE=	$(LIBPL)/Makefile
@@ -157,7 +167,14 @@ SETUP=		$(LIBPL)/Setup
 
 SYSLIBS=	$(LIBM) $(LIBC)
 
-ADDOBJS=	$(LIBPL)/main.o getpath.o config.o
+ADDOBJS=	$(LIBPL)/python.o config.o
+
+# Portable install script (configure doesn't always guess right)
+INSTALL=	$(LIBPL)/install-sh -c
+# Shared libraries must be installed with executable mode on some systems;
+# rather than figuring out exactly which, we always give them executable mode.
+# Also, making them read-only seems to be a good idea...
+INSTALL_SHARED=	${INSTALL} -m 555
 
 # === Fixed rules ===
 
@@ -177,12 +194,20 @@ $(TARGET):	$(ADDOBJS) lib.a $(PYTHONLIBS) Makefile $(BASELIB)
 		 $(LINKPATH) $(BASELIB) $(MODLIBS) $(LIBS) $(SYSLIBS) \
 		 -o $(TARGET)
 
+install:	sharedmods
+		if test ! -d $(DESTSHARED) ; then \
+			mkdir $(DESTSHARED) ; else true ; fi
+		-for i in X $(SHAREDMODS); do \
+			if test $$i != X; \
+			then $(INSTALL_SHARED) $$i $(DESTSHARED)/$$i; \
+			fi; \
+		done
+
 # Build the library containing our extension modules
 lib.a:		$(MODOBJS)
 		-rm -f lib.a
 		ar cr lib.a $(MODOBJS)
-		-$(RANLIB) lib.a || \
-		echo "don't worry if ranlib fails -- probably SYSV or equiv"
+		-$(RANLIB) lib.a 
 
 # This runs makesetup *twice* to use the BASESETUP definition from Setup
 config.c Makefile:	Makefile.pre Setup $(BASESETUP) $(MAKESETUP)
@@ -198,10 +223,6 @@ do-it-again:
 # Make config.o from the config.c created by makesetup
 config.o:	config.c
 		$(CC) $(CFLAGS) -c config.c
-
-# Make our own private getpath.o from the installed source and our PYTHONPATH
-getpath.o:	$(LIBPL)/getpath.c Makefile
-	$(CC) $(CFLAGS) -DPYTHONPATH=\"$(PYTHONPATH)\" -c $(LIBPL)/getpath.c
 
 # Setup is copied from Setup.in *only* if it doesn't yet exist
 Setup:
@@ -224,6 +245,8 @@ sedscript:	$(MAKEFILE)
 	 -e '2s%.*%# $H%p' \
 	 -e '/^VERSION=/s/^VERSION=[ 	]*\(.*\)/s%@VERSION[@]%\1%/p' \
 	 -e '/^CC=/s/^CC=[ 	]*\(.*\)/s%@CC[@]%\1%/p' \
+	 -e '/^CCC=/s/^CCC=[ 	]*\(.*\)/s%#@SET_CCC[@]%CCC=\1%/p' \
+	 -e '/^LINKCC=/s/^LINKCC=[ 	]*\(.*\)/s%@LINKCC[@]%\1%/p' \
 	 -e '/^OPT=/s/^OPT=[ 	]*\(.*\)/s%@OPT[@]%\1%/p' \
 	 -e '/^LDFLAGS=/s/^LDFLAGS=[ 	]*\(.*\)/s%@LDFLAGS[@]%\1%/p' \
 	 -e '/^DEFS=/s/^DEFS=[ 	]*\(.*\)/s%@DEFS[@]%\1%/p' \
@@ -239,6 +262,7 @@ sedscript:	$(MAKEFILE)
 	 -e '/^$P=/s/^$P=\(.*\)/s%^$P=.*%$P=\1%/p' \
 	 -e '/^$E=/s/^$E=\(.*\)/s%^$E=.*%$E=\1%/p' \
 	 $(MAKEFILE) >sedscript
+	echo "/^#@SET_CCC@/d" >>sedscript
 	echo "/^installdir=/s%=.*%=	$(installdir)%" >>sedscript
 	echo "/^exec_installdir=/s%=.*%=$(exec_installdir)%" >>sedscript
 	echo "/^srcdir=/s%=.*%=		$(srcdir)%" >>sedscript
@@ -249,9 +273,9 @@ sedscript:	$(MAKEFILE)
 
 # Bootstrap target
 boot:	clobber
-	VERSION=`python -c "import sys; print sys.version[:3]"`; \
-	installdir=`python -c "import sys; print sys.prefix"`; \
-	exec_installdir=`python -c "import sys; print sys.exec_prefix"`; \
+	VERSION=`$(PYTHON) -c "import sys; print sys.version[:3]"`; \
+	installdir=`$(PYTHON) -c "import sys; print sys.prefix"`; \
+	exec_installdir=`$(PYTHON) -c "import sys; print sys.exec_prefix"`; \
 	$(MAKE) -f $(srcdir)/Makefile.pre.in VPATH=$(VPATH) srcdir=$(srcdir) \
 		VERSION=$$VERSION \
 		installdir=$$installdir \
@@ -264,7 +288,7 @@ clean:
 
 # Handy target to remove everything that is easily regenerated
 clobber:	clean
-		-rm -f *.a tags TAGS config.c Makefile.pre python sedscript
+		-rm -f *.a tags TAGS config.c Makefile.pre $(TARGET) sedscript
 		-rm -f *.so *.sl so_locations
 
 

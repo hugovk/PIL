@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: RawEncode.c,v 1.4 1997/01/14 16:40:04 fl Exp $
+ * $Id: RawEncode.c,v 1.2 1996/08/15 13:12:44 fredrik Exp $
  *
  * coder for raw data
  *
@@ -14,7 +14,10 @@
  *	96-04-30 fl	created
  *	97-01-03 fl	fixed padding
  *
- * Copyright (c) Fredrik Lundh 1996-97.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996-97.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 

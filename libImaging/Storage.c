@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library
- * $Id: Storage.c,v 1.5 1996/12/16 18:51:03 fl Exp $
+ * $Id: Storage.c,v 1.3 1996/05/09 21:20:18 fredrik Exp $
  *
  * imaging storage object
  *
@@ -9,17 +9,21 @@
  *	handle large images, provided they fit into the available
  *	memory.
  *
- * to do:
- *	FIXME: A better block/array threshold is needed.
- *	FIXME: Implement memory mapping schemes (Win32, Unix)
- *
  * history:
  *	95-06-15 fl:	Created
  *	95-09-12 fl:	Updated API, compiles silently under ANSI C++
  *	95-11-26 fl:	Compiles silently under Borland 4.5 as well
  *	96-05-05 fl:	Correctly test status from Prologue
+ *	97-05-12 fl:	Increased THRESHOLD (to speed up Tk interface)
+ *	97-05-30 fl:	Added support for floating point images
+ *	97-11-17 fl:	Added support for RGBX images
+ *	98-01-11 fl:	Added support for integer images
+ *	98-03-05 fl:	Exported Prologue/Epilogue functions
  *
- * Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1995-97.
+ * Copyright (c) Secret Labs AB 1998.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -30,42 +34,81 @@
  * Standard image object.
  */
 
-static Imaging
+Imaging
 ImagingNewPrologue(const char *mode, unsigned xsize, unsigned ysize)
 {
     Imaging im;
-    unsigned bands;
-
-    bands = strlen(mode);
-    if (bands != 1 && bands != 3 && bands != 4)
-	return (Imaging) ImagingError_Argument("Illegal mode");
 
     im = (Imaging) calloc(1, sizeof(struct ImagingInstance));
     if (!im)
 	return (Imaging) ImagingError_NoMemory();
 
+    if (strcmp(mode, "1") == 0) {
+        /* 1-bit images */
+        im->bands = im->pixelsize = 1;
+        im->depth = 8;
+    } else if (strcmp(mode, "P") == 0) {
+        /* 8-bit palette mapped images */
+        im->bands = im->pixelsize = 1;
+        im->depth = 8;
+    } else if (strcmp(mode, "L") == 0) {
+        /* 8-bit greyscale (luminance) images */
+        im->bands = im->pixelsize = 1;
+        im->depth = 8;
+    } else if (strcmp(mode, "F") == 0) {
+        /* 32-bit floating point images */
+        im->bands = 1;
+        im->pixelsize = 4;
+        im->type = 2;
+        im->depth = 32;
+    } else if (strcmp(mode, "I") == 0) {
+        /* 32-bit integer images */
+        im->bands = 1;
+        im->pixelsize = 4;
+        im->type = 1;
+        im->depth = 32;
+    } else if (strcmp(mode, "RGB") == 0) {
+        /* 24-bit true colour images */
+        im->bands = 3;
+        im->pixelsize = 4;
+        im->depth = 8;
+    } else if (strcmp(mode, "RGBX") == 0) {
+        /* 32-bit true colour images with padding */
+        im->bands = im->pixelsize = 4;
+        im->depth = 8;
+    } else if (strcmp(mode, "RGBA") == 0) {
+        /* 32-bit true colour images with alpha */
+        im->bands = im->pixelsize = 4;
+        im->depth = 8;
+    } else if (strcmp(mode, "CMYK") == 0) {
+        /* 32-bit colour separation */
+        im->bands = im->pixelsize = 4;
+        im->depth = 8;
+    } else {
+        free(im);
+	return (Imaging) ImagingError_Argument(
+            "Unsupported mode");
+    }
+
     /* Setup image descriptor */
     strcpy(im->mode, mode);
+
     im->xsize = xsize;
     im->ysize = ysize;
 
-    im->type  = 0;
-    im->depth = 8;
-    im->bands = bands;
-
-    /* Some useful values */
-    im->pixelsize = (bands != 3) ? bands : 4;
     im->linesize = xsize * im->pixelsize;
 
+    /* Pointer array */
     im->image = (char **) calloc(ysize, sizeof(void *));
     if (!im->image) {
 	free(im);
 	return (Imaging) ImagingError_NoMemory();
     }
+
     return im;
 }
 
-static Imaging
+Imaging
 ImagingNewEpilogue(Imaging im)
 {
     /* If the raster data allocator didn't setup a destructor,
@@ -113,7 +156,7 @@ ImagingDelete(Imaging im)
 static void
 ImagingDeleteArray(Imaging im)
 {
-    unsigned y;
+    int y;
 
     if (im->image)
 	for (y = 0; y < im->ysize; y++)
@@ -122,10 +165,10 @@ ImagingDeleteArray(Imaging im)
 }
 
 Imaging
-ImagingNewArray(const char *mode, unsigned xsize, unsigned ysize)
+ImagingNewArray(const char *mode, int xsize, int ysize)
 {
     Imaging im;
-    unsigned y;
+    int y;
 
     im = ImagingNewPrologue(mode, xsize, ysize);
     if (!im)
@@ -159,10 +202,10 @@ ImagingDeleteBlock(Imaging im)
 }
 
 Imaging
-ImagingNewBlock(const char *mode, unsigned xsize, unsigned ysize)
+ImagingNewBlock(const char *mode, int xsize, int ysize)
 {
     Imaging im;
-    unsigned y, i;
+    int y, i;
 
     im = ImagingNewPrologue(mode, xsize, ysize);
     if (!im)
@@ -185,25 +228,47 @@ ImagingNewBlock(const char *mode, unsigned xsize, unsigned ysize)
     return ImagingNewEpilogue(im);
 }
 
-
 /* --------------------------------------------------------------------
  * Create a new, internally allocated, image.
  */
 
 /* FIXME: should check for 16-bit environments, not just "MSDOS" */
 #if defined(MSDOS)
-#define	THRESHOLD	10000L
+#define	THRESHOLD	16384L
 #else
-#define	THRESHOLD	65536L
+#define	THRESHOLD	1048576L
 #endif
 
 Imaging
-ImagingNew(const char *mode, unsigned xsize, unsigned ysize)
+ImagingNew(const char* mode, int xsize, int ysize)
 {
     if ((long) xsize * ysize * strlen(mode) <= THRESHOLD)
 	return ImagingNewBlock(mode, xsize, ysize);
     else
 	return ImagingNewArray(mode, xsize, ysize);
+}
+
+Imaging
+ImagingNew2(const char* mode, Imaging imOut, Imaging imIn)
+{
+    /* allocate or validate output image */
+
+    if (imOut) {
+        /* make sure images match */
+        if (strcmp(imOut->mode, mode) != 0
+            || imOut->xsize != imIn->xsize
+            || imOut->ysize != imIn->ysize) {
+            ImagingError_Mismatch();
+            return NULL;
+        }
+    } else {
+        /* create new image */
+        imOut = ImagingNew(mode, imIn->xsize, imIn->ysize);
+        if (!imOut)
+            return NULL;
+    }
+
+    return imOut;
 }
 
 void

@@ -1,6 +1,6 @@
 #! /usr/local/bin/python
 #
-# $Id: bdf2pil.py,v 1.1 1996/12/16 18:51:31 fl Exp fl $
+# $Id: bdf2pil.py,v 1.1 1996/12/16 18:51:31 fl Exp $
 #
 # File:
 #	bdf2pil.py -- font compiler for X bitmap distribution files
@@ -13,7 +13,7 @@
 #	96-05-16 fl:	Created (after an idea from David Ascher)
 #	96-08-07 fl:	Font metrics file uses network byte order
 #
-# Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+# Copyright (c) Fredrik Lundh 1996.
 #
 
 VERSION = "1.0"
@@ -185,7 +185,7 @@ def puti16(fp, values):
 import glob, os, sys
 
 print "BDF2PIL", VERSION, "-- Font compiler for X BDF fonts."
-print "Copyright (c) Fredrik Lundh 1996.  All rights reserved."
+print "Copyright (c) Fredrik Lundh 1996."
 
 if len(sys.argv) <= 1:
     print

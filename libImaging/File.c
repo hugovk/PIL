@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library
- * $Id: File.c,v 1.4 1996/11/07 12:11:30 fredrik Exp $
+ * $Id: File.c,v 1.3 1996/10/04 19:41:10 fredrik Exp $
  *
  * built-in image file handling
  *
@@ -8,7 +8,10 @@
  *	95-11-26 fl:	Created, supports PGM/PPM and PyPPM only
  *	96-08-07 fl:	Write "1" images as PGM
  *
- * Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1995-96.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -22,7 +25,7 @@ ImagingOpenPPM(const char* infile)
     FILE* fp;
     int i, c, v;
     char* mode;
-    unsigned x, y, max;
+    int x, y, max;
     Imaging im;
 
     if (!infile)
@@ -131,7 +134,7 @@ syntax:
 void
 ImagingSaveRaw(Imaging im, FILE* fp)
 {
-    unsigned x, y, i;
+    int x, y, i;
 
     if (strcmp(im->mode, "L") == 0) {
 

@@ -1,13 +1,16 @@
 /*
  * The Python Imaging Library.
- * $Id: MspDecode.c,v 1.1 1997/01/14 16:40:04 fl Exp $
+ * $Id: PcxDecode.c,v 1.3 1996/08/15 13:12:44 fredrik Exp $
  *
  * decoder for MSP version 2 data.
  *
  * history:
  *	97-01-03 fl	Created
  *
- * Copyright (c) Fredrik Lundh 1997.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1997.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 

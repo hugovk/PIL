@@ -1,21 +1,24 @@
 /*
  * The Python Imaging Library
- * $Id: Palette.c,v 1.4 1996/12/08 15:32:31 fl Exp $
+ * $Id: Palette.c,v 1.2 1996/08/15 13:12:44 fredrik Exp $
  *
  * imaging palette object
  *
  * history:
  *	96-05-05 fl:	Added to library
  *	96-05-27 fl:	Added colour mapping stuff
+ *	97-05-12 fl:	Support RGBA palettes
  *
- * Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1995-97.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
 #include <math.h>
 
 #include "Imaging.h"
-
 
 
 /* The palette buffer contains Lxxx, RGBx, or CMYK values */
@@ -32,7 +35,7 @@ ImagingPaletteNew(const char* mode)
     if (!palette)
 	return (ImagingPalette) ImagingError_NoMemory();
 
-    if (strcmp(mode, "L") && strcmp(mode, "RGB") && strcmp(mode, "CMYK"))
+    if (strcmp(mode, "RGB") && strcmp(mode, "RGBA"))
 	return (ImagingPalette) ImagingError_Argument("Illegal mode");
 
     strcpy(palette->mode, mode);
@@ -41,9 +44,36 @@ ImagingPaletteNew(const char* mode)
     for (i = 0; i < 256; i++) {
 	palette->palette[i*4+0] =
 	palette->palette[i*4+1] =
-	palette->palette[i*4+2] =
-	palette->palette[i*4+3] = (UINT8) i;
+	palette->palette[i*4+2] = (UINT8) i;
+	palette->palette[i*4+3] = 255; /* opaque */
     }
+
+    return palette;
+}
+
+ImagingPalette
+ImagingPaletteNewBrowser(void)
+{
+    /* Create a standard "browser" palette object */
+
+    int i, r, g, b;
+    ImagingPalette palette;
+
+    palette = ImagingPaletteNew("RGB");
+    if (!palette)
+	return NULL;
+
+    /* Simple 6x6x6 colour cube */
+
+    i = 10;
+    for (b = 0; b < 256; b += 51)
+	for (g = 0; g < 256; g += 51)
+	    for (r = 0; r < 256; r += 51) {
+		palette->palette[i*4+0] = r;
+		palette->palette[i*4+1] = g;
+		palette->palette[i*4+2] = b;
+		i++;
+	    }
 
     return palette;
 }
@@ -87,9 +117,6 @@ ImagingPaletteDelete(ImagingPalette palette)
 /* Colour mapping							*/
 /* -------------------------------------------------------------------- */
 
-/* THIS IS WORK IN PROGRESS.  The code runs, but it has not been
-   verified to produce 100% accurate results. */
-
 /* This code is used to map RGB triplets to palette indices, using
    a palette index cache. */
 
@@ -103,9 +130,9 @@ ImagingPaletteDelete(ImagingPalette palette)
 
 #define	DIST(a, b, s) (a - b) * (a - b) * s
 
-/* Colour weights */
-#define	RSCALE	2
-#define	GSCALE	4
+/* Colour weights (no scaling, for now) */
+#define	RSCALE	1
+#define	GSCALE	1
 #define	BSCALE	1
 
 /* Calculated scaled distances */
@@ -118,14 +145,9 @@ ImagingPaletteDelete(ImagingPalette palette)
 #define GSTEP	(4 * GSCALE)
 #define BSTEP	(4 * BSCALE)
 
-#define	RBOX	8
-#define	GBOX	8
-#define	BBOX	8
+#define	BOX	8
 
-#define	BOX	8*8*8
-
-/* TODO: add more defines so we can change the number of bits used
-   to index the cache, and the box size. */
+#define	BOXVOLUME BOX*BOX*BOX
 
 void
 ImagingPaletteCacheUpdate(ImagingPalette palette, int r, int g, int b)
@@ -135,11 +157,11 @@ ImagingPaletteCacheUpdate(ImagingPalette palette, int r, int g, int b)
     int r0, g0, b0;
     int r1, g1, b1;
     int rc, gc, bc;
-    unsigned int d[BOX];
-    UINT8 c[BOX];
+    unsigned int d[BOXVOLUME];
+    UINT8 c[BOXVOLUME];
 
-    /* Get box boundaries for (r,g,b)-triplet.  Each box covers
-       eight cache slots (32 colour values, that is). */
+    /* Get box boundaries for the given (r,g,b)-triplet.  Each box
+       covers eight cache slots (32 colour values, that is). */
 
     r0 = r & 0xe0; r1 = r0 + 0x1f; rc = (r0 + r1) / 2;
     g0 = g & 0xe0; g1 = g0 + 0x1f; gc = (g0 + g1) / 2;
@@ -147,8 +169,8 @@ ImagingPaletteCacheUpdate(ImagingPalette palette, int r, int g, int b)
 
     /* Step 1 -- Select relevant palette entries (after Heckbert) */
 
-    /* For each entry, calculate the min and max distances to any
-     * position in the box given by the colour we're looking for. */
+    /* For each palette entry, calculate the min and max distances to
+     * any position in the box given by the colour we're looking for. */
 
     dmax = (unsigned int) ~0;
 
@@ -178,11 +200,11 @@ ImagingPaletteCacheUpdate(ImagingPalette palette, int r, int g, int b)
 
     /* Step 2 -- Incrementally update cache slot (after Thomas) */
 
-    /* Find the box containing the nearest entry, and update all
-     * slots in that box.  We only check boxes for which the min
+    /* Find the box containing the nearest palette entry, and update
+     * all slots in that box.  We only check boxes for which the min
      * distance is less than or equal the smallest max distance */
 
-    for (i = 0; i < BOX; i++)
+    for (i = 0; i < BOXVOLUME; i++)
 	d[i] = (unsigned int) ~0;
 
     for (i = 0; i < 256; i++)
@@ -193,9 +215,9 @@ ImagingPaletteCacheUpdate(ImagingPalette palette, int r, int g, int b)
 	    int ri, gi, bi;
 	    int rx, gx, bx;
 
-	    ri = (r0 - palette->palette[i*4+0]) * RSTEP;
-	    gi = (g0 - palette->palette[i*4+1]) * GSTEP;
-	    bi = (b0 - palette->palette[i*4+2]) * BSTEP;
+	    ri = (r0 - palette->palette[i*4+0]) * RSCALE;
+	    gi = (g0 - palette->palette[i*4+1]) * GSCALE;
+	    bi = (b0 - palette->palette[i*4+2]) * BSCALE;
 
 	    rd = ri*ri + gi*gi + bi*bi;
 
@@ -204,11 +226,11 @@ ImagingPaletteCacheUpdate(ImagingPalette palette, int r, int g, int b)
 	    bi = bi * (2 * BSTEP) + BSTEP * BSTEP;
 
 	    rx = ri;
-	    for (r = j = 0; r < RBOX; r++) {
+	    for (r = j = 0; r < BOX; r++) {
 		gd = rd; gx = gi;
-		for (g = 0; g < GBOX; g++) {
+		for (g = 0; g < BOX; g++) {
 		    bd = gd; bx = bi;
-		    for (b = 0; b < BBOX; b++) {
+		    for (b = 0; b < BOX; b++) {
 			if ((unsigned int) bd < d[j]) {
 			    d[j] = bd;
 			    c[j] = (UINT8) i;
@@ -257,8 +279,9 @@ ImagingPaletteCachePrepare(ImagingPalette palette)
 	    return -1;
 	}
 
+	/* Mark all entries as empty */
 	for (i = 0; i < entries; i++)
-	    palette->cache[i] = 256;
+	    palette->cache[i] = 0x100;
 
     }
 

@@ -1,6 +1,6 @@
 /* 
  * The Python Imaging Library
- * $Id: Chops.c,v 1.7 1996/12/16 18:51:03 fl Exp $
+ * $Id: Chops.c,v 1.5 1996/08/15 13:12:44 fredrik Exp $
  *
  * basic channel operations
  *
@@ -9,15 +9,17 @@
  *	96-08-13 fl:	Added and/or/xor for "1" images
  *	96-12-14 fl:	Added add_modulo, sub_modulo
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for details on usage and redistribution.
  */
 
 
 #include "Imaging.h"
 
-
 #define	CHOP(operation, mode)\
-    unsigned x, y;\
+    int x, y;\
     Imaging imOut;\
     imOut = create(imIn1, imIn2, mode);\
     if (!imOut)\
@@ -39,7 +41,7 @@
     return imOut;
 
 #define	CHOP2(operation, mode)\
-    unsigned x, y;\
+    int x, y;\
     Imaging imOut;\
     imOut = create(imIn1, imIn2, mode);\
     if (!imOut)\
@@ -57,15 +59,15 @@
 static Imaging
 create(Imaging im1, Imaging im2, char* mode)
 {
-    unsigned xsize, ysize;
+    int xsize, ysize;
 
     if (!im1 || !im2)
 	return (Imaging) ImagingError_Argument(NULL);
     if (mode != NULL && (strcmp(im1->mode, "1") || strcmp(im2->mode, "1")))
 	return (Imaging) ImagingError_Argument("Bad mode for this operation");
-    if (im1->type  != im2->type  ||
-	im1->bands != im2->bands ||
-	im1->depth != im2->depth)
+    if (im1->type  != 0 || im1->type  != im2->type  ||
+	im1->depth != 8 || im1->depth != im2->depth ||
+        im1->bands != im2->bands)
 	return (Imaging) ImagingError_Mismatch();
 
     xsize = (im1->xsize < im2->xsize) ? im1->xsize : im2->xsize;

@@ -1,6 +1,6 @@
 /* 
  * The Python Imaging Library.
- * $Id: EpsEncode.c,v 1.5 1996/11/07 12:11:30 fredrik Exp $
+ * $Id: EpsEncode.c,v 1.4 1996/08/15 13:12:44 fredrik Exp $
  *
  * encoder for EPS hex data
  *
@@ -8,7 +8,13 @@
  *	96-04-19 fl	created
  *	96-06-27 fl	don't drop last block of encoded data
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * notes:
+ *	FIXME: rename to HexEncode.c ??
+ *
+ * Copyright (c) Fredrik Lundh 1996.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 

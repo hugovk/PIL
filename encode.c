@@ -1,4 +1,4 @@
-/* $Id: encode.c,v 1.6 1997/01/14 16:40:31 fl Exp $
+/* $Id: encode.c,v 1.3 1996/10/04 19:40:33 fredrik Exp $
  *
  * The Python Imaging Library.
  *
@@ -12,8 +12,12 @@
  *	97-01-03 fl	Added GIF encoder
  *	97-01-05 fl	Plugged encoder buffer leaks
  *	97-01-11 fl	Added encode_to_file method
+ *	98-03-09 fl	Added mode argument to encoders
  *
- * Copyright (c) Fredrik Lundh 1996-97.  All rights reserved.
+ * Copyright (c) Secret Labs AB 1997-98.
+ * Copyright (c) Fredrik Lundh 1996-97.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -251,12 +255,13 @@ statichere PyTypeObject ImagingEncoderType = {
 /* -------------------------------------------------------------------- */
 
 int
-get_packer(ImagingEncoderObject* encoder, const char* rawmode)
+get_packer(ImagingEncoderObject* encoder, const char* mode,
+           const char* rawmode)
 {
     int bits;
     ImagingShuffler pack;
 
-    pack = ImagingFindPacker(rawmode, &bits);
+    pack = ImagingFindPacker(mode, rawmode, &bits);
     if (!pack) {
 	Py_DECREF(encoder);
 	PyErr_SetString(PyExc_SystemError, "unknown raw mode");
@@ -297,16 +302,17 @@ PyImaging_GifEncoderNew(PyObject* self, PyObject* args)
 {
     ImagingEncoderObject* encoder;
 
+    char *mode;
+    char *rawmode;
     int bits = 8;
-
-    if (!PyArg_ParseTuple(args, "|i", &bits))
+    if (!PyArg_ParseTuple(args, "ss|i", &mode, &rawmode, &bits))
 	return NULL;
 
     encoder = PyImaging_EncoderNew(sizeof(GIFENCODERSTATE));
     if (encoder == NULL)
 	return NULL;
 
-    if (get_packer(encoder, "P") < 0)
+    if (get_packer(encoder, mode, rawmode) < 0)
 	return NULL;
 
     encoder->encode = ImagingGifEncode;
@@ -326,18 +332,18 @@ PyImaging_RawEncoderNew(PyObject* self, PyObject* args)
 {
     ImagingEncoderObject* encoder;
 
+    char *mode;
     char *rawmode;
     int stride = 0;
     int ystep = 1;
-
-    if (!PyArg_ParseTuple(args, "s|ii", &rawmode, &stride, &ystep))
+    if (!PyArg_ParseTuple(args, "ss|ii", &mode, &rawmode, &stride, &ystep))
 	return NULL;
 
     encoder = PyImaging_EncoderNew(0);
     if (encoder == NULL)
 	return NULL;
 
-    if (get_packer(encoder, rawmode) < 0)
+    if (get_packer(encoder, mode, rawmode) < 0)
 	return NULL;
 
     encoder->encode = ImagingRawEncode;
@@ -361,7 +367,7 @@ PyImaging_XbmEncoderNew(PyObject* self, PyObject* args)
     if (encoder == NULL)
 	return NULL;
 
-    if (get_packer(encoder, "1;R") < 0)
+    if (get_packer(encoder, "1", "1;R") < 0)
 	return NULL;
 
     encoder->encode = ImagingXbmEncode;
@@ -381,13 +387,13 @@ PyObject*
 PyImaging_ZipEncoderNew(PyObject* self, PyObject* args)
 {
     ImagingEncoderObject* encoder;
-    char* rawmode;
 
+    char* mode;
+    char* rawmode;
     int optimize = 0;
     char* dictionary = NULL;
     int dictionary_size = 0;
-
-    if (!PyArg_ParseTuple(args, "s|is#", &rawmode, &optimize,
+    if (!PyArg_ParseTuple(args, "ss|is#", &mode, &rawmode, &optimize,
 			  &dictionary, &dictionary_size))
 	return NULL;
 
@@ -395,14 +401,14 @@ PyImaging_ZipEncoderNew(PyObject* self, PyObject* args)
     if (encoder == NULL)
 	return NULL;
 
-    if (get_packer(encoder, rawmode) < 0)
+    if (get_packer(encoder, mode, rawmode) < 0)
 	return NULL;
 
     encoder->encode = ImagingZipEncode;
 
     if (rawmode[0] == 'P')
 	/* disable filtering */
-	((ZIPSTATE*)encoder->state.context)->palette = 1;
+	((ZIPSTATE*)encoder->state.context)->mode = ZIP_PNG_PALETTE;
 
     ((ZIPSTATE*)encoder->state.context)->optimize = optimize;
     ((ZIPSTATE*)encoder->state.context)->dictionary = dictionary;
@@ -428,6 +434,7 @@ PyImaging_ZipEncoderNew(PyObject* self, PyObject* args)
 #undef	UINT8
 #undef	UINT16
 #undef	UINT32
+#undef	INT8
 #undef	INT16
 #undef	INT32
 
@@ -437,15 +444,15 @@ PyObject*
 PyImaging_JpegEncoderNew(PyObject* self, PyObject* args)
 {
     ImagingEncoderObject* encoder;
-    char *rawmode;
 
+    char *mode;
+    char *rawmode;
     int quality = 0;
     int progressive = 0;
     int smooth = 0;
     int optimize = 0;
     int streamtype = 0; /* 0=interchange, 1=tables only, 2=image only */
-
-    if (!PyArg_ParseTuple(args, "s|iiiii", &rawmode, &quality,
+    if (!PyArg_ParseTuple(args, "ss|iiiii", &mode, &rawmode, &quality,
 			  &progressive, &smooth, &optimize, &streamtype))
 	return NULL;
 
@@ -453,7 +460,7 @@ PyImaging_JpegEncoderNew(PyObject* self, PyObject* args)
     if (encoder == NULL)
 	return NULL;
 
-    if (get_packer(encoder, rawmode) < 0)
+    if (get_packer(encoder, mode, rawmode) < 0)
 	return NULL;
 
     encoder->encode = ImagingJpegEncode;

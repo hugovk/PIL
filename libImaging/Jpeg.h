@@ -30,7 +30,11 @@ typedef struct {
 
     /* CONFIGURATION */
 
-    /* Raw mode (may differ from real raw mode) */
+    /* Jpeg file mode (empty if not known) */
+    char jpegmode[8+1];
+
+    /* Converter output mode (input to the shuffler).  If empty,
+       convert conversions are disabled */
     char rawmode[8+1];
 
     /* If set, trade quality for speed */
@@ -74,7 +78,7 @@ typedef struct {
     /* Optimize Huffman tables (slow) */
     int optimize;
 
-    /* Stream type (0=interchange, 1=tables only, 2=image only) */
+    /* Stream type (0=full, 1=tables only, 2=image only) */
     int streamtype;
 
     /* PRIVATE CONTEXT (set by encoder) */

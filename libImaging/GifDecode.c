@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: GifDecode.c,v 1.7 1997/01/14 16:40:04 fl Exp $
+ * $Id: GifDecode.c,v 1.4 1996/08/15 13:12:44 fredrik Exp $
  *
  * a fast, suspendable GIF decoder
  *
@@ -12,8 +12,12 @@
  *	96-12-10 fl	Added interlace support
  *	96-12-16 fl	Fixed premature termination bug introduced by last fix
  *	97-01-05 fl	Don't mess up on bogus configuration
+ *	97-01-17 fl	Don't mess up on very small, interlaced files
  *
- * Copyright (c) Fredrik Lundh 1995-97.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1995-97.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -28,7 +32,7 @@
 #define NEWLINE(state, context) {\
     state->x = 0;\
     state->y += context->step;\
-    if (state->y >= state->ysize)\
+    while (state->y >= state->ysize)\
 	switch (context->interlace) {\
 	case 1:\
 	    context->repeat = state->y = 4;\
@@ -53,7 +57,7 @@
 int
 ImagingGifDecode(Imaging im, ImagingCodecState state, UINT8* buffer, int bytes)
 {
-    unsigned char *p;
+    UINT8* p;
     int c, i;
     int thiscode;
     GIFDECODERSTATE *context = (GIFDECODERSTATE*) state->context;

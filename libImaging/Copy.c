@@ -1,37 +1,55 @@
 /* 
  * The Python Imaging Library
- * $Id: Copy.c,v 1.3 1996/11/07 12:11:30 fredrik Exp $
+ * $Id: Copy.c,v 1.2 1996/05/09 21:20:18 fredrik Exp $
  *
  * copy image
  *
  * history:
  *	95-11-26 fl:	Moved from Imaging.c
+ *	97-05-12 fl:	Added ImagingCopy2
+ *	97-08-28 fl:	Allow imOut == NULL in ImagingCopy2
  *
- * Copyright (c) Fredrik Lundh 1995.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1995-97.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for details on usage and redistribution.
  */
 
 
 #include "Imaging.h"
 
 
-Imaging
-ImagingCopy(Imaging im)
+static Imaging
+_copy(Imaging imOut, Imaging imIn)
 {
-    Imaging imOut;
-    unsigned y;
+    int y;
 
-    if (!im)
+    if (!imIn)
 	return (Imaging) ImagingError_Argument(NULL);
 
-    imOut = ImagingNew(im->mode, im->xsize, im->ysize);
+    imOut = ImagingNew2(imIn->mode, imOut, imIn);
     if (!imOut)
-	return NULL;
+        return NULL;
 
-    ImagingCopyInfo(imOut, im);
+    ImagingCopyInfo(imOut, imIn);
 
-    for (y = 0; y < im->ysize; y++)
-	memcpy(imOut->image[y], im->image[y], im->linesize);
+    if (imIn->block != NULL && imOut->block != NULL)
+	memcpy(imOut->block, imIn->block, imIn->ysize * imIn->linesize);
+    else
+        for (y = 0; y < imIn->ysize; y++)
+            memcpy(imOut->image[y], imIn->image[y], imIn->linesize);
 
     return imOut;
 }
 
+Imaging
+ImagingCopy(Imaging imIn)
+{
+    return _copy(NULL, imIn);
+}
+
+Imaging
+ImagingCopy2(Imaging imOut, Imaging imIn)
+{
+    return _copy(imOut, imIn);
+}

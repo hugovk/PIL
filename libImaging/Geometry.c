@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library
- * $Id: Geometry.c,v 1.9 1996/12/08 15:32:31 fl Exp $
+ * $Id: Geometry.c,v 1.7 1996/08/15 13:12:44 fredrik Exp $
  *
  * the imaging geometry methods
  *
@@ -10,13 +10,19 @@
  *	96-05-18 fl:	Fixed rotate90/270 for rectangular images
  *	96-05-27 fl:	Added general purpose transform
  *	96-11-22 fl:	Don't crash when resizing from outside source image
+ *	97-08-09 fl:	Fixed rounding error in resize
+ *	98-03-10 fl:	Added bilinear interpolation hack (test only)
  *
- * Copyright (c) Fredrik Lundh 1995-96.  All rights reserved.
+ * Copyright (c) Secret Labs AB 1997-98.
+ * Copyright (c) Fredrik Lundh 1995-97.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
 #include "Imaging.h"
 
+#define BILINEAR(a, b, d) ( (a) + ( (b) - (a) ) * (d) )
 
 /* -------------------------------------------------------------------- */
 /* Transpose operations							*/
@@ -25,7 +31,7 @@ Imaging
 ImagingFlipLeftRight(Imaging im)
 {
     Imaging imOut;
-    unsigned x, y, xr;
+    int x, y, xr;
 
     if (!im)
 	return (Imaging) ImagingError_Argument(NULL);
@@ -56,7 +62,7 @@ Imaging
 ImagingFlipTopBottom(Imaging im)
 {
     Imaging imOut;
-    unsigned y, yr;
+    int y, yr;
 
     if (!im)
 	return (Imaging) ImagingError_Argument(NULL);
@@ -79,7 +85,7 @@ Imaging
 ImagingRotate90(Imaging im)
 {
     Imaging imOut;
-    unsigned x, y, xr;
+    int x, y, xr;
 
     if (!im)
 	return (Imaging) ImagingError_Argument(NULL);
@@ -110,7 +116,7 @@ Imaging
 ImagingRotate180(Imaging im)
 {
     Imaging imOut;
-    unsigned x, y, xr, yr;
+    int x, y, xr, yr;
 
     if (!im)
 	return (Imaging) ImagingError_Argument(NULL);
@@ -143,7 +149,7 @@ Imaging
 ImagingRotate270(Imaging im)
 {
     Imaging imOut;
-    unsigned x, y, yr;
+    int x, y, yr;
 
     if (!im)
 	return (Imaging) ImagingError_Argument(NULL);
@@ -174,15 +180,16 @@ ImagingRotate270(Imaging im)
 /* Transforms								*/
 
 static Imaging
-ImagingScaleAffine(Imaging im, unsigned xsize, unsigned ysize,
+ImagingScaleAffine(Imaging im, int xsize, int ysize,
 		   double a[6], int fill)
 {
     Imaging imOut;
-    unsigned x, y;
+    int x, y;
     int xin;
     double xo, yo;
-    unsigned xmin, xmax;
-    int *xinp;
+    int xmin, xmax;
+    int *xintab;
+    double *xremtab;
 
     if (!im)
 	return (Imaging) ImagingError_Argument(NULL);
@@ -193,8 +200,9 @@ ImagingScaleAffine(Imaging im, unsigned xsize, unsigned ysize,
 
     ImagingCopyInfo(imOut, im);
 
-    xinp = (int *) malloc(xsize * sizeof(int));
-    if (!xinp) {
+    xintab = (int *) malloc(xsize * sizeof(int));
+    xremtab = (double *) malloc(xsize * sizeof(double));
+    if (xintab == NULL || xremtab == NULL) {
 	ImagingDelete(imOut);
 	return (Imaging) ImagingError_NoMemory();
     }
@@ -207,19 +215,20 @@ ImagingScaleAffine(Imaging im, unsigned xsize, unsigned ysize,
 
     /* Pretabulate horizontal pixel positions */
     for (x = 0; x < xsize; x++) {
-	xin = (int) xo;
+	xin = (int) floor(xo);
 	if (xin >= 0 && xin < (int) im->xsize) {
 	    xmax = x+1;
 	    if (x < xmin)
 		xmin = x;
-	    xinp[x] = xin;
+	    xintab[x] = xin;
+	    xremtab[x] = xo - xin;
 	}
 	xo += a[1];
     }
 
 #define	AFFINE_SCALE(pixel, image)\
     for (y = 0; y < ysize; y++) {\
-	int yi = (int) yo;\
+	int yi = (int) floor(yo);\
 	pixel *in, *out;\
 	out = imOut->image[y];\
 	if (yi >= 0 && yi < im->ysize) {\
@@ -228,35 +237,80 @@ ImagingScaleAffine(Imaging im, unsigned xsize, unsigned ysize,
 	        for (x = 0; x < xmin; x++)\
 		    out[x] = 0;\
 	        for (; x < xmax; x++)\
-		    out[x] = in[xinp[x]];\
+		    out[x] = in[xintab[x]];\
 	        for (; x < xsize; x++)\
 		    out[x] = 0;\
 	    } else\
 	        for (x = xmin; x < xmax; x++)\
-		    out[x] = in[xinp[x]];\
+		    out[x] = in[xintab[x]];\
 	} else if (fill)\
 	    for (x = 0; x < xsize; x++)\
 		out[x] = 0;\
 	yo += a[5];\
     }
 
-    if (im->image8)
-	AFFINE_SCALE(UINT8, image8)
-    else
-	AFFINE_SCALE(INT32, image32)
+/* FIXME: now this is one ugly hack... */
+#define	AFFINE_SCALE_BILINEAR(pixel, image)\
+    for (y = 0; y < ysize; y++) {\
+	int yi = (int) floor(yo);\
+	pixel *in, *in2, *out, tmp, tmp2;\
+        double dx;\
+	out = imOut->image[y];\
+	if (yi >= 0 && yi < im->ysize) {\
+	    in = im->image[(int) yo];\
+	    in2 = im->image[((int) yo+1) % im->ysize];\
+	    if (fill) {\
+	        for (x = 0; x < xmin; x++)\
+		    out[x] = 0;\
+	        for (; x < xmax; x++) {\
+                    xin = xintab[x];\
+                    if (xin+1 < im->xsize && in2) {\
+                        dx = xremtab[x];\
+                        tmp    = BILINEAR(in[xin], in[xin+1], dx);\
+                        tmp2   = BILINEAR(in2[xin], in2[xin+1], dx);\
+                        out[x] = BILINEAR(tmp, tmp2, yo - yi);\
+                    } else\
+                        out[x] = in[xin];\
+                }\
+	        for (; x < xsize; x++)\
+		    out[x] = 0;\
+	    } else\
+	        for (x = xmin; x < xmax; x++)\
+		    out[x] = in[xintab[x]];\
+	} else if (fill)\
+	    for (x = 0; x < xsize; x++)\
+		out[x] = 0;\
+	yo += a[5];\
+    }
 
-    free(xinp);
+    if (1) {
+        if (im->image8) {
+            AFFINE_SCALE(UINT8, image8);
+        } else {
+            AFFINE_SCALE(INT32, image32);
+        }
+    } else {
+        if (im->image8) {
+            AFFINE_SCALE_BILINEAR(UINT8, image8);
+        } else {
+            AFFINE_SCALE_BILINEAR(INT32, image32);
+        }
+    }
+    
+    if (xremtab)
+        free(xremtab);
+    free(xintab);
 
     return imOut;
 }
 
 
 Imaging
-ImagingTransformAffine(Imaging im, unsigned xsize, unsigned ysize,
+ImagingTransformAffine(Imaging im, int xsize, int ysize,
 		       double a[6], int fill)
 {
     Imaging imOut;
-    unsigned x, y;
+    int x, y;
     int xin, yin;
     double xx, yy;
     double xo, yo;
@@ -281,8 +335,8 @@ ImagingTransformAffine(Imaging im, unsigned xsize, unsigned ysize,
 	yy = yo;\
 	out = imOut->image[y];\
 	for (x = 0; x < xsize; x++) {\
-	    xin = (int) xx;\
-	    yin = (int) yy;\
+	    xin = (int) floor(xx);\
+	    yin = (int) floor(yy);\
 	    if (xin >= 0 && xin < (int) im->xsize &&\
 		yin >= 0 && yin < (int) im->ysize)\
 		out[x] = im->image[yin][xin];\
@@ -305,14 +359,14 @@ ImagingTransformAffine(Imaging im, unsigned xsize, unsigned ysize,
 
 
 Imaging
-ImagingTransform(Imaging im, unsigned xsize, unsigned ysize,
+ImagingTransform(Imaging im, int xsize, int ysize,
 		 void (*transform)(double* X, double* Y,
 				   int x, int y, void* data),
 		 void* transform_data,
 		 int fill)
 {
     Imaging imOut;
-    unsigned x, y;
+    int x, y;
 
     imOut = ImagingNew(im->mode, xsize, ysize);
     if (!imOut)
@@ -328,8 +382,8 @@ ImagingTransform(Imaging im, unsigned xsize, unsigned ysize,
 	    double xx, yy;\
 	    int xin, yin;\
 	    (*transform)(&xx, &yy, x, y, transform_data);\
-	    xin = (int) xx;\
-	    yin = (int) yy;\
+	    xin = (int) floor(xx);\
+	    yin = (int) floor(yy);\
 	    if (xin >= 0 && xin < (int) im->xsize &&\
 		yin >= 0 && yin < (int) im->ysize)\
 		out[x] = im->image[yin][xin];\
@@ -350,7 +404,7 @@ ImagingTransform(Imaging im, unsigned xsize, unsigned ysize,
 /* Convenience transforms */
 
 Imaging
-ImagingResize(Imaging im, unsigned xsize, unsigned ysize)
+ImagingResize(Imaging im, int xsize, int ysize)
 {
     double a[6];
 
@@ -368,7 +422,7 @@ ImagingResize(Imaging im, unsigned xsize, unsigned ysize)
 Imaging
 ImagingRotate(Imaging im, double theta)
 {
-    unsigned xsize, ysize;
+    int xsize, ysize;
     double sintheta, costheta;
     double a[6];
 
@@ -391,6 +445,7 @@ ImagingRotate(Imaging im, double theta)
     sintheta = sin(theta);
     costheta = cos(theta);
 
+    /* FIXME: should calculate a new size */
     xsize = im->xsize;
     ysize = im->ysize;
 

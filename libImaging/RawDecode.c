@@ -1,13 +1,16 @@
 /*
  * The Python Imaging Library.
- * $Id: RawDecode.c,v 1.6 1996/11/07 12:11:30 fredrik Exp $
+ * $Id: RawDecode.c,v 1.5 1996/08/15 13:12:44 fredrik Exp $
  *
  * decoder for raw (uncompressed) image data
  *
  * history:
  *	96-03-07 fl	rewritten
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 

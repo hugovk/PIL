@@ -5,24 +5,14 @@
 #
 # 1) Edit the configuration settings as described below.
 #
-# 2) Run "make -f Makefile.pre.in Makefile installdir=<prefix>"
-#    where <prefix> is the same as the prefix variable used to build
-#    (or at least install) Python.
+# 2) Go to the libImaging directory and build the support library.
+#
+# 3) Run "make -f Makefile.pre.inboot"
+#
+# 4) Run "make"
 #
 # This file has the same format as <pythonroot>/Modules/Setup.in.
 #
-
-# --------------------------------------------------------------------
-# Edit IMAGINGPATH to match where you will install the Lib files (or
-# where they are in the source tree if you don't plan on removing it.)
-# *** Note the leading colon!
-
-IMAGINGPATH=:/usr/local/lib/python/Imaging:/usr/local/lib/python/Imaging/Lib
-
-# The Python path is derived from the core path plus the path defined
-# above. 
-
-PYTHONPATH=$(COREPYTHONPATH)$(IMAGINGPATH)
 
 # --------------------------------------------------------------------
 # Remove (or comment) the following line if you wish to build a
@@ -31,21 +21,16 @@ PYTHONPATH=$(COREPYTHONPATH)$(IMAGINGPATH)
 *noconfig*
 
 # --------------------------------------------------------------------
-# If you have installed the IJG JPEG or ZLIB libraries in a non-
-# standard place, edit the JPEGINCLUDE and JPEGLIB definitions.
-# If you don't have the library, you don't need to bother.
+# Edit or remove the library specifications to match your configura-
+# tion.  As they stand, they assume that you have the IJG JPEG library
+# 6.0a and zlib 1.0.4 (or newer versions of these libraries) in a
+# standard location.
 
-IMAGINGINCLUDE = libImaging
-IMAGINGLIB = libImaging/libImaging.a
-
-JPEGINCLUDE = /usr/local/include
-JPEGLIB = /usr/local/lib/libjpeg.a
-
-ZINCLUDE = /usr/local/include
-ZLIB = /usr/local/lib/libz.a
-
-# --------------------------------------------------------------------
-# If you don't have the IJG JPEG or ZLIB libraries, remove the corre-
-# sponding variables in the following line
-
-_imaging _imagingmodule.c decode.c encode.c display.c path.c -I$(IMAGINGINCLUDE) $(IMAGINGLIB)  -I$(JPEGINCLUDE) $(JPEGLIB)  -I$(ZINCLUDE) $(ZLIB)
+_imaging _imagingmodule.c decode.c encode.c display.c path.c \
+	-IlibImaging libImaging/libImaging.a\
+#
+# *** IJG JPEG library (libjpeg) location
+	-I/usr/local/include -L/usr/local/lib -ljpeg\
+#
+# *** ZLIB (libz) location
+	-I/usr/local/include -L/usr/local/lib -lz

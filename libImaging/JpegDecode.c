@@ -1,15 +1,18 @@
 /*
  * The Python Imaging Library.
- * $Id: JpegDecode.c,v 1.5 1996/12/16 18:51:03 fl Exp $
+ * $Id: JpegDecode.c,v 1.7 1997/06/01 18:13:07 fl Exp $
  *
  * decoder for JPEG image data.
  *
  * history:
  *	96-05-02 fl	Created
  *	96-05-05 fl	Handle small JPEG files correctly
- *	96-05-28 fl	Added draft support
+ *	96-05-28 fl	Added "draft mode" support
+ *	97-01-25 fl	Added colour conversion override
+ *	98-01-31 fl	Adapted to libjpeg 6a
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996-97.
+ * Copyright (c) Secret Labs AB 1998.
  */
 
 
@@ -32,25 +35,25 @@
 /* Suspending input handler						*/
 /* -------------------------------------------------------------------- */
 
-METHODDEF void
+METHODDEF(void)
 stub(j_decompress_ptr cinfo)
 {
     /* empty */
 }
 
-METHODDEF boolean
+METHODDEF(boolean)
 fill_input_buffer(j_decompress_ptr cinfo)
 {
     /* Suspension */
     return FALSE;
 }
 
-METHODDEF void
+METHODDEF(void)
 skip_input_data(j_decompress_ptr cinfo, long num_bytes)
 {
     JPEGSOURCE* source = (JPEGSOURCE*) cinfo->src;
 
-    if (num_bytes > source->pub.bytes_in_buffer) {
+    if (num_bytes > (long) source->pub.bytes_in_buffer) {
 	/* We need to skip more data than we have in the buffer.
 	   This will force the JPEG library to suspend decoding. */
 	source->skip = num_bytes - source->pub.bytes_in_buffer;
@@ -65,7 +68,7 @@ skip_input_data(j_decompress_ptr cinfo, long num_bytes)
 }
 
 
-GLOBAL void
+GLOBAL(void)
 jpeg_buffer_src(j_decompress_ptr cinfo, JPEGSOURCE* source)
 {
   cinfo->src = (void*) source;
@@ -86,12 +89,12 @@ jpeg_buffer_src(j_decompress_ptr cinfo, JPEGSOURCE* source)
 /* Error handler							*/
 /* -------------------------------------------------------------------- */
 
-METHODDEF void
+METHODDEF(void)
 error(j_common_ptr cinfo)
 {
   JPEGERROR* error;
   error = (JPEGERROR*) cinfo->err;
-  /*(*cinfo->err->output_message) (cinfo);*/
+  /* (*cinfo->err->output_message) (cinfo); DEBUG */
   longjmp(error->setjmp_buffer, 1);
 }
 
@@ -139,22 +142,49 @@ ImagingJpegDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 
     switch (state->state) {
 
-      case 1:
+    case 1:
 	/* Read JPEG header, until we find an image body. */
-	ok = jpeg_read_header(&context->cinfo, FALSE);
-	if (ok == JPEG_SUSPENDED || ok == JPEG_HEADER_TABLES_ONLY)
+	do {
+	    
+	    /* Note that we cannot return unless we have decoded
+	       as much data as possible. */
+	    ok = jpeg_read_header(&context->cinfo, FALSE);
+
+	} while (ok == JPEG_HEADER_TABLES_ONLY);
+
+	if (ok == JPEG_SUSPENDED)
 	    break;
+
 	/* Decoder settings */
+
+	/* jpegmode indicates whats in the file; if not set, we'll
+	   trust the decoder */
+	if (strcmp(context->jpegmode, "L") == 0)
+	    context->cinfo.jpeg_color_space = JCS_GRAYSCALE;
+	else if (strcmp(context->jpegmode, "RGB") == 0)
+	    context->cinfo.jpeg_color_space = JCS_RGB;
+	else if (strcmp(context->jpegmode, "YCC") == 0)
+	    context->cinfo.jpeg_color_space = JCS_YCbCr;
+	else if (strcmp(context->jpegmode, "CMYK") == 0)
+	    context->cinfo.jpeg_color_space = JCS_CMYK;
+	else if (strcmp(context->jpegmode, "YCCK") == 0) {
+	    context->cinfo.jpeg_color_space = JCS_YCCK;
+	}
+
+	/* rawmode indicates what we want from the decoder.  if not
+	   set, conversions are disabled */
 	if (strcmp(context->rawmode, "L") == 0)
 	    context->cinfo.out_color_space = JCS_GRAYSCALE;
 	else if (strcmp(context->rawmode, "RGB") == 0)
 	    context->cinfo.out_color_space = JCS_RGB;
-	else if (strcmp(context->rawmode, "YCC") == 0)
-	    context->cinfo.out_color_space = JCS_YCbCr;
 	else if (strcmp(context->rawmode, "CMYK") == 0)
 	    context->cinfo.out_color_space = JCS_CMYK;
-	else if (strcmp(context->rawmode, "YCCK") == 0)
-	    context->cinfo.out_color_space = JCS_YCCK;
+	else {
+	    /* Disable decoder conversions */
+	    context->cinfo.jpeg_color_space = JCS_UNKNOWN;
+	    context->cinfo.out_color_space = JCS_UNKNOWN;
+	}
+
 	if (context->scale > 1) {
 	    context->cinfo.scale_num = 1;
 	    context->cinfo.scale_denom = context->scale;
@@ -167,7 +197,7 @@ ImagingJpegDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	state->state++;
 	/* fall through */
 
-      case 2:
+    case 2:
 	/* Decompress a single line of data */
 	ok = 1;
 	while (state->y < state->ysize) {
@@ -184,7 +214,7 @@ ImagingJpegDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	state->state++;
 	/* fall through */
 
-      case 3:
+    case 3:
 	/* Finish decompression */
 	if (!jpeg_finish_decompress(&context->cinfo))
 	    break;

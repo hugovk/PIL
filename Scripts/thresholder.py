@@ -9,6 +9,7 @@
 from Tkinter import *
 import Image, ImageTk
 import sys
+import os
 
 #
 # an image viewer
@@ -54,6 +55,11 @@ class UI(Frame):
 # --------------------------------------------------------------------
 # main
 
+if os.name == 'mac' and len(sys.argv) == 1:
+	import macfs
+	fss, ok = macfs.StandardGetFile()
+	if not ok: sys.exit(0)
+	sys.argv.append(fss.as_pathname())
 root = Tk()
 
 im = Image.open(sys.argv[1])

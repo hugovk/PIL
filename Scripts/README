@@ -40,8 +40,8 @@ when updating the screen; see the sources for details.
 player.py
 
 A simple image sequence player.  You can use either a sequence format
-like FLI/FLC, GIF, ARG, or MNG, or give a number of images which are
-interpreted as frames in a sequence.  All frames should have the same
+like FLI/FLC, GIF, or ARG, or give a number of images which are
+interpreted as frames in a sequence.  All frames must have the same
 size.
 
 --------------------------------------------------------------------
@@ -64,3 +64,13 @@ image2py.py
 Convert an image to a Python module containing an IMAGE variable.
 Note that the module using the module must include JPEG and ZIP
 decoders, unless the -u option is used.
+
+--------------------------------------------------------------------
+olesummary.py
+
+Uses the OleFileIO module to dump the summary information from an OLE
+structured storage file.  This works with most OLE files, including
+Word documents, FlashPix images, etc.
+
+Note that datetime fields currently show the number of seconds since
+January 1st, 1601.

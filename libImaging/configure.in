@@ -1,0 +1,137 @@
+#
+# The Python Imaging Library.
+# $Id: configure.in,v 1.1 1996/03/25 08:51:56 fredrik Exp fl $
+#
+# configuration file for the Python Imaging Library
+#
+# history:
+# 95-12-01 fl	Created
+# 97-01-16 fl	Added --with-jpeg, --with-zlib
+# 98-01-31 fl	Minor fixes
+#
+# Copyright (c) Fredrik Lundh 1995-97.
+# Copyright (c) Secret Labs AB 1997.
+#
+
+dnl Process this file with autoconf 2.0 or later to make a configure script.
+AC_INIT(Imaging.h)
+
+AC_ARG_PROGRAM
+
+AC_REVISION($Id: configure.in,v 1.1 1996/03/25 08:51:56 fredrik Exp fl $)
+AC_CONFIG_HEADER(ImConfig.h)
+
+# checks for alternative programs
+AC_MSG_CHECKING(for --without-gcc)
+AC_ARG_WITH(gcc, [--without-gcc             never use gcc], [
+	case $withval in
+	no)	CC=cc
+		without_gcc=yes;;
+	yes)	CC=gcc
+		without_gcc=no;;
+	*)	CC=$withval
+		without_gcc=$withval;;
+	esac], [without_gcc=no])
+AC_MSG_RESULT($without_gcc)
+
+# If the user switches compilers, we can't believe the cache
+if test ! -z "$ac_cv_prog_CC" -a ! -z "$CC" -a "$CC" != "$ac_cv_prog_CC"
+then
+  AC_ERROR(cached CC is different -- throw away $cache_file
+(it is also a good idea to do 'make clean' before compiling))
+fi
+
+# check for programs
+AC_PROG_CC
+AC_PROG_RANLIB
+AC_SUBST(AR)
+AC_CHECK_PROGS(AR, ar aal, ar)
+
+AC_SUBST(OPT)
+# Optimizer/debugger flags passed between Makefiles
+if test -z "$OPT"
+then OPT=-O
+fi
+
+# Set name for machine-dependent library files
+AC_SUBST(MACHDEP)
+AC_MSG_CHECKING(MACHDEP)
+if test -z "$MACHDEP"
+then
+	ac_sys_system=`uname -s | tr -d ' ' | tr '[[A-Z]]' '[[a-z]]'`
+	ac_sys_release=`uname -r | tr -d ' ' | sed 's/\..*//'`
+	MACHDEP="$ac_sys_system$ac_sys_release"
+	case MACHDEP in
+	'')	MACHDEP=unknown;;
+	esac
+fi
+AC_MSG_RESULT($MACHDEP)
+
+# checks for libraries
+AC_ARG_WITH(jpeg, [--with-jpeg=DIRECTORY     IJG JPEG library location], [
+AC_DEFINE(WITH_JPEG)
+if test -d "$withval"
+then LDFLAGS="$LDFLAGS -L$withval"
+fi
+], [])
+AC_CHECK_LIB(jpeg, jpeg_destroy_compress)
+# AC_CHECK_LIB(mpeg, OpenMPEG)
+
+AC_ARG_WITH(zlib, [--with-zlib=DIRECTORY     ZLIB library location], [
+AC_DEFINE(WITH_ZLIB)
+if test -d "$withval"
+then LDFLAGS="$LDFLAGS -L$withval"
+fi
+], [])
+AC_CHECK_LIB(z, deflate)
+
+# checks for header files
+AC_HEADER_STDC
+
+# checks for compiler/platform characteristics
+AC_C_INLINE
+
+AC_C_BIGENDIAN
+
+AC_CHECK_SIZEOF(char)
+AC_CHECK_SIZEOF(short)
+AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(long)
+
+AC_CHECK_SIZEOF(float)
+AC_CHECK_SIZEOF(double)
+
+AC_C_CONST
+
+have_prototypes=no
+AC_MSG_CHECKING(for prototypes)
+AC_TRY_COMPILE([int foo(int x) { return 0; }], [return foo(10);],
+AC_DEFINE(HAVE_PROTOTYPES) have_prototypes=yes)
+AC_MSG_RESULT($have_prototypes)
+
+# checks for library functions
+AC_FUNC_MMAP
+
+
+# checks for system services
+
+
+# check for --with-libm=...
+AC_SUBST(LIBM)
+LIBM=-lm
+AC_ARG_WITH(libm, [--with-libm=STRING        math library], [
+if test "$withval" != yes
+then LIBM=$withval
+else AC_ERROR(proper usage is --with-libm=STRING)
+fi])
+
+# check for --with-libc=...
+AC_SUBST(LIBC)
+AC_ARG_WITH(libc, [--with-libc=STRING        C library], [
+if test "$withval" != yes
+then LIBC=$withval
+else AC_ERROR(proper usage is --with-libc=STRING)
+fi])
+
+# generate output files
+AC_OUTPUT(Makefile)

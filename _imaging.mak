@@ -61,16 +61,19 @@ ALL : "zlib - Win32 Release" "jpeg - Win32 Release" ".\_imaging.dll"
 CLEAN : 
 	-@erase "$(INTDIR)\_imagingmodule.obj"
 	-@erase "$(INTDIR)\Bands.obj"
+	-@erase "$(INTDIR)\BitDecode.obj"
 	-@erase "$(INTDIR)\Blend.obj"
 	-@erase "$(INTDIR)\Chops.obj"
 	-@erase "$(INTDIR)\Convert.obj"
 	-@erase "$(INTDIR)\Copy.obj"
+	-@erase "$(INTDIR)\Crack.obj"
 	-@erase "$(INTDIR)\Crc32.obj"
 	-@erase "$(INTDIR)\Crop.obj"
 	-@erase "$(INTDIR)\decode.obj"
 	-@erase "$(INTDIR)\Dib.obj"
 	-@erase "$(INTDIR)\display.obj"
 	-@erase "$(INTDIR)\Draw.obj"
+	-@erase "$(INTDIR)\Effects.obj"
 	-@erase "$(INTDIR)\encode.obj"
 	-@erase "$(INTDIR)\EpsEncode.obj"
 	-@erase "$(INTDIR)\File.obj"
@@ -86,6 +89,7 @@ CLEAN :
 	-@erase "$(INTDIR)\JpegDecode.obj"
 	-@erase "$(INTDIR)\JpegEncode.obj"
 	-@erase "$(INTDIR)\LzwDecode.obj"
+	-@erase "$(INTDIR)\map.obj"
 	-@erase "$(INTDIR)\Matrix.obj"
 	-@erase "$(INTDIR)\MspDecode.obj"
 	-@erase "$(INTDIR)\Negative.obj"
@@ -102,10 +106,10 @@ CLEAN :
 	-@erase "$(INTDIR)\RawDecode.obj"
 	-@erase "$(INTDIR)\RawEncode.obj"
 	-@erase "$(INTDIR)\Storage.obj"
-	-@erase "$(INTDIR)\String.obj"
 	-@erase "$(INTDIR)\SunRleDecode.obj"
 	-@erase "$(INTDIR)\TgaRleDecode.obj"
 	-@erase "$(INTDIR)\Unpack.obj"
+	-@erase "$(INTDIR)\UnpackYCC.obj"
 	-@erase "$(INTDIR)\XbmDecode.obj"
 	-@erase "$(INTDIR)\XbmEncode.obj"
 	-@erase "$(INTDIR)\ZipDecode.obj"
@@ -119,10 +123,10 @@ CLEAN :
 
 CPP=cl.exe
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /Ob2 /I "../Include" /I "../PC" /I "./libImaging" /I "./jpeg-6" /I "./zlib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
-CPP_PROJ=/nologo /MD /W3 /GX /O2 /Ob2 /I "../Include" /I "../PC" /I\
- "./libImaging" /I "./jpeg-6" /I "./zlib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS"\
- /Fp"$(INTDIR)/_imaging.pch" /YX /Fo"$(INTDIR)/" /c 
+# ADD CPP /nologo /MD /W3 /GX /O2 /Ob2 /I "../Python-1.4/Include" /I "../Python-1.4/PC" /I "./libImaging" /I "./jpeg-6a" /I "./zlib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
+CPP_PROJ=/nologo /MD /W3 /GX /O2 /Ob2 /I "../Python-1.4/Include" /I\
+ "../Python-1.4/PC" /I "./libImaging" /I "./jpeg-6a" /I "./zlib" /D "WIN32" /D\
+ "NDEBUG" /D "_WINDOWS" /Fp"$(INTDIR)/_imaging.pch" /YX /Fo"$(INTDIR)/" /c 
 CPP_OBJS=.\Release/
 CPP_SBRS=.\.
 
@@ -170,16 +174,19 @@ DEF_FILE= \
 LINK32_OBJS= \
 	"$(INTDIR)\_imagingmodule.obj" \
 	"$(INTDIR)\Bands.obj" \
+	"$(INTDIR)\BitDecode.obj" \
 	"$(INTDIR)\Blend.obj" \
 	"$(INTDIR)\Chops.obj" \
 	"$(INTDIR)\Convert.obj" \
 	"$(INTDIR)\Copy.obj" \
+	"$(INTDIR)\Crack.obj" \
 	"$(INTDIR)\Crc32.obj" \
 	"$(INTDIR)\Crop.obj" \
 	"$(INTDIR)\decode.obj" \
 	"$(INTDIR)\Dib.obj" \
 	"$(INTDIR)\display.obj" \
 	"$(INTDIR)\Draw.obj" \
+	"$(INTDIR)\Effects.obj" \
 	"$(INTDIR)\encode.obj" \
 	"$(INTDIR)\EpsEncode.obj" \
 	"$(INTDIR)\File.obj" \
@@ -195,6 +202,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\JpegDecode.obj" \
 	"$(INTDIR)\JpegEncode.obj" \
 	"$(INTDIR)\LzwDecode.obj" \
+	"$(INTDIR)\map.obj" \
 	"$(INTDIR)\Matrix.obj" \
 	"$(INTDIR)\MspDecode.obj" \
 	"$(INTDIR)\Negative.obj" \
@@ -211,16 +219,16 @@ LINK32_OBJS= \
 	"$(INTDIR)\RawDecode.obj" \
 	"$(INTDIR)\RawEncode.obj" \
 	"$(INTDIR)\Storage.obj" \
-	"$(INTDIR)\String.obj" \
 	"$(INTDIR)\SunRleDecode.obj" \
 	"$(INTDIR)\TgaRleDecode.obj" \
 	"$(INTDIR)\Unpack.obj" \
+	"$(INTDIR)\UnpackYCC.obj" \
 	"$(INTDIR)\XbmDecode.obj" \
 	"$(INTDIR)\XbmEncode.obj" \
 	"$(INTDIR)\ZipDecode.obj" \
 	"$(INTDIR)\ZipEncode.obj" \
-	"..\vc40\python14.lib" \
-	".\jpeg-6\jpeg.lib" \
+	"..\Python-1.4\vc40\python14.lib" \
+	".\jpeg-6a\jpeg.lib" \
 	".\zlib\zlib.lib"
 
 ".\_imaging.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
@@ -248,16 +256,19 @@ ALL : "zlib - Win32 Debug" "jpeg - Win32 Debug" ".\_imaging.dll"
 CLEAN : 
 	-@erase "$(INTDIR)\_imagingmodule.obj"
 	-@erase "$(INTDIR)\Bands.obj"
+	-@erase "$(INTDIR)\BitDecode.obj"
 	-@erase "$(INTDIR)\Blend.obj"
 	-@erase "$(INTDIR)\Chops.obj"
 	-@erase "$(INTDIR)\Convert.obj"
 	-@erase "$(INTDIR)\Copy.obj"
+	-@erase "$(INTDIR)\Crack.obj"
 	-@erase "$(INTDIR)\Crc32.obj"
 	-@erase "$(INTDIR)\Crop.obj"
 	-@erase "$(INTDIR)\decode.obj"
 	-@erase "$(INTDIR)\Dib.obj"
 	-@erase "$(INTDIR)\display.obj"
 	-@erase "$(INTDIR)\Draw.obj"
+	-@erase "$(INTDIR)\Effects.obj"
 	-@erase "$(INTDIR)\encode.obj"
 	-@erase "$(INTDIR)\EpsEncode.obj"
 	-@erase "$(INTDIR)\File.obj"
@@ -273,6 +284,7 @@ CLEAN :
 	-@erase "$(INTDIR)\JpegDecode.obj"
 	-@erase "$(INTDIR)\JpegEncode.obj"
 	-@erase "$(INTDIR)\LzwDecode.obj"
+	-@erase "$(INTDIR)\map.obj"
 	-@erase "$(INTDIR)\Matrix.obj"
 	-@erase "$(INTDIR)\MspDecode.obj"
 	-@erase "$(INTDIR)\Negative.obj"
@@ -289,10 +301,10 @@ CLEAN :
 	-@erase "$(INTDIR)\RawDecode.obj"
 	-@erase "$(INTDIR)\RawEncode.obj"
 	-@erase "$(INTDIR)\Storage.obj"
-	-@erase "$(INTDIR)\String.obj"
 	-@erase "$(INTDIR)\SunRleDecode.obj"
 	-@erase "$(INTDIR)\TgaRleDecode.obj"
 	-@erase "$(INTDIR)\Unpack.obj"
+	-@erase "$(INTDIR)\UnpackYCC.obj"
 	-@erase "$(INTDIR)\vc40.idb"
 	-@erase "$(INTDIR)\vc40.pdb"
 	-@erase "$(INTDIR)\XbmDecode.obj"
@@ -310,10 +322,11 @@ CLEAN :
 
 CPP=cl.exe
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /O2 /Ob2 /I "../Include" /I "../PC" /I "./libImaging" /I "./jpeg-6" /I "./zlib" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
-CPP_PROJ=/nologo /MDd /W3 /Gm /GX /Zi /O2 /Ob2 /I "../Include" /I "../PC" /I\
- "./libImaging" /I "./jpeg-6" /I "./zlib" /D "WIN32" /D "_DEBUG" /D "_WINDOWS"\
- /Fp"$(INTDIR)/_imaging.pch" /YX /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c 
+# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /O2 /Ob2 /I "../Python-1.4/Include" /I "../Python-1.4/PC" /I "./libImaging" /I "./jpeg-6a" /I "./zlib" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
+CPP_PROJ=/nologo /MDd /W3 /Gm /GX /Zi /O2 /Ob2 /I "../Python-1.4/Include" /I\
+ "../Python-1.4/PC" /I "./libImaging" /I "./jpeg-6a" /I "./zlib" /D "WIN32" /D\
+ "_DEBUG" /D "_WINDOWS" /Fp"$(INTDIR)/_imaging.pch" /YX /Fo"$(INTDIR)/"\
+ /Fd"$(INTDIR)/" /c 
 CPP_OBJS=.\Debug/
 CPP_SBRS=.\.
 
@@ -361,16 +374,19 @@ DEF_FILE= \
 LINK32_OBJS= \
 	"$(INTDIR)\_imagingmodule.obj" \
 	"$(INTDIR)\Bands.obj" \
+	"$(INTDIR)\BitDecode.obj" \
 	"$(INTDIR)\Blend.obj" \
 	"$(INTDIR)\Chops.obj" \
 	"$(INTDIR)\Convert.obj" \
 	"$(INTDIR)\Copy.obj" \
+	"$(INTDIR)\Crack.obj" \
 	"$(INTDIR)\Crc32.obj" \
 	"$(INTDIR)\Crop.obj" \
 	"$(INTDIR)\decode.obj" \
 	"$(INTDIR)\Dib.obj" \
 	"$(INTDIR)\display.obj" \
 	"$(INTDIR)\Draw.obj" \
+	"$(INTDIR)\Effects.obj" \
 	"$(INTDIR)\encode.obj" \
 	"$(INTDIR)\EpsEncode.obj" \
 	"$(INTDIR)\File.obj" \
@@ -386,6 +402,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\JpegDecode.obj" \
 	"$(INTDIR)\JpegEncode.obj" \
 	"$(INTDIR)\LzwDecode.obj" \
+	"$(INTDIR)\map.obj" \
 	"$(INTDIR)\Matrix.obj" \
 	"$(INTDIR)\MspDecode.obj" \
 	"$(INTDIR)\Negative.obj" \
@@ -402,16 +419,16 @@ LINK32_OBJS= \
 	"$(INTDIR)\RawDecode.obj" \
 	"$(INTDIR)\RawEncode.obj" \
 	"$(INTDIR)\Storage.obj" \
-	"$(INTDIR)\String.obj" \
 	"$(INTDIR)\SunRleDecode.obj" \
 	"$(INTDIR)\TgaRleDecode.obj" \
 	"$(INTDIR)\Unpack.obj" \
+	"$(INTDIR)\UnpackYCC.obj" \
 	"$(INTDIR)\XbmDecode.obj" \
 	"$(INTDIR)\XbmEncode.obj" \
 	"$(INTDIR)\ZipDecode.obj" \
 	"$(INTDIR)\ZipEncode.obj" \
-	"..\vc40\python14.lib" \
-	".\jpeg-6\jpeg.lib" \
+	"..\Python-1.4\vc40\python14.lib" \
+	".\jpeg-6a\jpeg.lib" \
 	".\zlib\zlib.lib"
 
 ".\_imaging.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
@@ -618,11 +635,11 @@ LIB32_OBJS= \
 # PROP BASE Target_Dir "jpeg"
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "jpeg-6"
-# PROP Intermediate_Dir "jpeg-6\Release"
+# PROP Output_Dir "jpeg-6a"
+# PROP Intermediate_Dir "jpeg-6a\Release"
 # PROP Target_Dir "jpeg"
-OUTDIR=.\jpeg-6
-INTDIR=.\jpeg-6\Release
+OUTDIR=.\jpeg-6a
+INTDIR=.\jpeg-6a\Release
 
 ALL : "$(OUTDIR)\jpeg.lib"
 
@@ -687,7 +704,7 @@ CPP=cl.exe
 # ADD CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
 CPP_PROJ=/nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS"\
  /Fp"$(INTDIR)/jpeg.pch" /YX /Fo"$(INTDIR)/" /c 
-CPP_OBJS=".\jpeg-6\Release/"
+CPP_OBJS=".\jpeg-6a\Release/"
 CPP_SBRS=.\.
 
 .c{$(CPP_OBJS)}.obj:
@@ -781,11 +798,11 @@ LIB32_OBJS= \
 # PROP BASE Target_Dir "jpeg"
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "jpeg-6"
-# PROP Intermediate_Dir "jpeg-6\Debug"
+# PROP Output_Dir "jpeg-6a"
+# PROP Intermediate_Dir "jpeg-6a\Debug"
 # PROP Target_Dir "jpeg"
-OUTDIR=.\jpeg-6
-INTDIR=.\jpeg-6\Debug
+OUTDIR=.\jpeg-6a
+INTDIR=.\jpeg-6a\Debug
 
 ALL : "$(OUTDIR)\jpeg.lib"
 
@@ -850,7 +867,7 @@ CPP=cl.exe
 # ADD CPP /nologo /MDd /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
 CPP_PROJ=/nologo /MDd /W3 /GX /Z7 /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS"\
  /Fp"$(INTDIR)/jpeg.pch" /YX /Fo"$(INTDIR)/" /c 
-CPP_OBJS=".\jpeg-6\Debug/"
+CPP_OBJS=".\jpeg-6a\Debug/"
 CPP_SBRS=.\.
 
 .c{$(CPP_OBJS)}.obj:
@@ -952,7 +969,7 @@ LIB32_OBJS= \
 ################################################################################
 # Begin Source File
 
-SOURCE=..\vc40\python14.lib
+SOURCE="\pythonware\src\Python-1.4\vc40\python14.lib"
 
 !IF  "$(CFG)" == "_imaging - Win32 Release"
 
@@ -966,52 +983,53 @@ SOURCE=..\vc40\python14.lib
 
 SOURCE=.\encode.c
 DEP_CPP_ENCOD=\
-	"..\Include\abstract.h"\
-	"..\Include\accessobject.h"\
-	"..\Include\allobjects.h"\
-	"..\Include\bltinmodule.h"\
-	"..\Include\ceval.h"\
-	"..\Include\classobject.h"\
-	"..\Include\cobject.h"\
-	"..\Include\complexobject.h"\
-	"..\Include\fileobject.h"\
-	"..\Include\floatobject.h"\
-	"..\Include\funcobject.h"\
-	"..\Include\import.h"\
-	"..\Include\intobject.h"\
-	"..\Include\intrcheck.h"\
-	"..\Include\listobject.h"\
-	"..\Include\longobject.h"\
-	"..\Include\mappingobject.h"\
-	"..\Include\methodobject.h"\
-	"..\Include\modsupport.h"\
-	"..\Include\moduleobject.h"\
-	"..\Include\mymalloc.h"\
-	"..\Include\myproto.h"\
-	"..\Include\object.h"\
-	"..\Include\objimpl.h"\
-	"..\Include\pydebug.h"\
-	"..\Include\pyerrors.h"\
-	"..\Include\pythonrun.h"\
-	"..\Include\rangeobject.h"\
-	"..\Include\rename2.h"\
-	"..\Include\sliceobject.h"\
-	"..\Include\stringobject.h"\
-	"..\Include\sysmodule.h"\
-	"..\Include\thread.h"\
-	"..\Include\traceback.h"\
-	"..\Include\tupleobject.h"\
-	".\../Include\Python.h"\
-	".\../PC\config.h"\
-	".\./jpeg-6\jpeglib.h"\
+	"..\Python-1.4\Include\abstract.h"\
+	"..\Python-1.4\Include\accessobject.h"\
+	"..\Python-1.4\Include\allobjects.h"\
+	"..\Python-1.4\Include\bltinmodule.h"\
+	"..\Python-1.4\Include\ceval.h"\
+	"..\Python-1.4\Include\classobject.h"\
+	"..\Python-1.4\Include\cobject.h"\
+	"..\Python-1.4\Include\complexobject.h"\
+	"..\Python-1.4\Include\fileobject.h"\
+	"..\Python-1.4\Include\floatobject.h"\
+	"..\Python-1.4\Include\funcobject.h"\
+	"..\Python-1.4\Include\import.h"\
+	"..\Python-1.4\Include\intobject.h"\
+	"..\Python-1.4\Include\intrcheck.h"\
+	"..\Python-1.4\Include\listobject.h"\
+	"..\Python-1.4\Include\longobject.h"\
+	"..\Python-1.4\Include\mappingobject.h"\
+	"..\Python-1.4\Include\methodobject.h"\
+	"..\Python-1.4\Include\modsupport.h"\
+	"..\Python-1.4\Include\moduleobject.h"\
+	"..\Python-1.4\Include\mymalloc.h"\
+	"..\Python-1.4\Include\myproto.h"\
+	"..\Python-1.4\Include\object.h"\
+	"..\Python-1.4\Include\objimpl.h"\
+	"..\Python-1.4\Include\pydebug.h"\
+	"..\Python-1.4\Include\pyerrors.h"\
+	"..\Python-1.4\Include\pythonrun.h"\
+	"..\Python-1.4\Include\rangeobject.h"\
+	"..\Python-1.4\Include\rename2.h"\
+	"..\Python-1.4\Include\sliceobject.h"\
+	"..\Python-1.4\Include\stringobject.h"\
+	"..\Python-1.4\Include\sysmodule.h"\
+	"..\Python-1.4\Include\thread.h"\
+	"..\Python-1.4\Include\traceback.h"\
+	"..\Python-1.4\Include\tupleobject.h"\
+	".\../Python-1.4/Include\Python.h"\
+	".\../Python-1.4/PC\config.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\./libImaging\Gif.h"\
 	".\./libImaging\Imaging.h"\
 	".\./libImaging\Jpeg.h"\
 	".\./libImaging\Zip.h"\
 	".\./zlib\zlib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	".\libimaging\ImConfig.h"\
 	".\libimaging\ImPlatform.h"\
 	".\zlib\zconf.h"\
@@ -1026,44 +1044,45 @@ DEP_CPP_ENCOD=\
 
 SOURCE=.\decode.c
 DEP_CPP_DECOD=\
-	"..\Include\abstract.h"\
-	"..\Include\accessobject.h"\
-	"..\Include\allobjects.h"\
-	"..\Include\bltinmodule.h"\
-	"..\Include\ceval.h"\
-	"..\Include\classobject.h"\
-	"..\Include\cobject.h"\
-	"..\Include\complexobject.h"\
-	"..\Include\fileobject.h"\
-	"..\Include\floatobject.h"\
-	"..\Include\funcobject.h"\
-	"..\Include\import.h"\
-	"..\Include\intobject.h"\
-	"..\Include\intrcheck.h"\
-	"..\Include\listobject.h"\
-	"..\Include\longobject.h"\
-	"..\Include\mappingobject.h"\
-	"..\Include\methodobject.h"\
-	"..\Include\modsupport.h"\
-	"..\Include\moduleobject.h"\
-	"..\Include\mymalloc.h"\
-	"..\Include\myproto.h"\
-	"..\Include\object.h"\
-	"..\Include\objimpl.h"\
-	"..\Include\pydebug.h"\
-	"..\Include\pyerrors.h"\
-	"..\Include\pythonrun.h"\
-	"..\Include\rangeobject.h"\
-	"..\Include\rename2.h"\
-	"..\Include\sliceobject.h"\
-	"..\Include\stringobject.h"\
-	"..\Include\sysmodule.h"\
-	"..\Include\thread.h"\
-	"..\Include\traceback.h"\
-	"..\Include\tupleobject.h"\
-	".\../Include\Python.h"\
-	".\../PC\config.h"\
-	".\./jpeg-6\jpeglib.h"\
+	"..\Python-1.4\Include\abstract.h"\
+	"..\Python-1.4\Include\accessobject.h"\
+	"..\Python-1.4\Include\allobjects.h"\
+	"..\Python-1.4\Include\bltinmodule.h"\
+	"..\Python-1.4\Include\ceval.h"\
+	"..\Python-1.4\Include\classobject.h"\
+	"..\Python-1.4\Include\cobject.h"\
+	"..\Python-1.4\Include\complexobject.h"\
+	"..\Python-1.4\Include\fileobject.h"\
+	"..\Python-1.4\Include\floatobject.h"\
+	"..\Python-1.4\Include\funcobject.h"\
+	"..\Python-1.4\Include\import.h"\
+	"..\Python-1.4\Include\intobject.h"\
+	"..\Python-1.4\Include\intrcheck.h"\
+	"..\Python-1.4\Include\listobject.h"\
+	"..\Python-1.4\Include\longobject.h"\
+	"..\Python-1.4\Include\mappingobject.h"\
+	"..\Python-1.4\Include\methodobject.h"\
+	"..\Python-1.4\Include\modsupport.h"\
+	"..\Python-1.4\Include\moduleobject.h"\
+	"..\Python-1.4\Include\mymalloc.h"\
+	"..\Python-1.4\Include\myproto.h"\
+	"..\Python-1.4\Include\object.h"\
+	"..\Python-1.4\Include\objimpl.h"\
+	"..\Python-1.4\Include\pydebug.h"\
+	"..\Python-1.4\Include\pyerrors.h"\
+	"..\Python-1.4\Include\pythonrun.h"\
+	"..\Python-1.4\Include\rangeobject.h"\
+	"..\Python-1.4\Include\rename2.h"\
+	"..\Python-1.4\Include\sliceobject.h"\
+	"..\Python-1.4\Include\stringobject.h"\
+	"..\Python-1.4\Include\sysmodule.h"\
+	"..\Python-1.4\Include\thread.h"\
+	"..\Python-1.4\Include\traceback.h"\
+	"..\Python-1.4\Include\tupleobject.h"\
+	".\../Python-1.4/Include\Python.h"\
+	".\../Python-1.4/PC\config.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\./libImaging\Bit.h"\
 	".\./libImaging\Gif.h"\
 	".\./libImaging\Imaging.h"\
 	".\./libImaging\Jpeg.h"\
@@ -1071,10 +1090,10 @@ DEP_CPP_DECOD=\
 	".\./libImaging\Raw.h"\
 	".\./libImaging\Zip.h"\
 	".\./zlib\zlib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	".\libimaging\ImConfig.h"\
 	".\libimaging\ImPlatform.h"\
 	".\zlib\zconf.h"\
@@ -1089,43 +1108,43 @@ DEP_CPP_DECOD=\
 
 SOURCE=.\display.c
 DEP_CPP_DISPL=\
-	"..\Include\abstract.h"\
-	"..\Include\accessobject.h"\
-	"..\Include\allobjects.h"\
-	"..\Include\bltinmodule.h"\
-	"..\Include\ceval.h"\
-	"..\Include\classobject.h"\
-	"..\Include\cobject.h"\
-	"..\Include\complexobject.h"\
-	"..\Include\fileobject.h"\
-	"..\Include\floatobject.h"\
-	"..\Include\funcobject.h"\
-	"..\Include\import.h"\
-	"..\Include\intobject.h"\
-	"..\Include\intrcheck.h"\
-	"..\Include\listobject.h"\
-	"..\Include\longobject.h"\
-	"..\Include\mappingobject.h"\
-	"..\Include\methodobject.h"\
-	"..\Include\modsupport.h"\
-	"..\Include\moduleobject.h"\
-	"..\Include\mymalloc.h"\
-	"..\Include\myproto.h"\
-	"..\Include\object.h"\
-	"..\Include\objimpl.h"\
-	"..\Include\pydebug.h"\
-	"..\Include\pyerrors.h"\
-	"..\Include\pythonrun.h"\
-	"..\Include\rangeobject.h"\
-	"..\Include\rename2.h"\
-	"..\Include\sliceobject.h"\
-	"..\Include\stringobject.h"\
-	"..\Include\sysmodule.h"\
-	"..\Include\thread.h"\
-	"..\Include\traceback.h"\
-	"..\Include\tupleobject.h"\
-	".\../Include\Python.h"\
-	".\../PC\config.h"\
+	"..\Python-1.4\Include\abstract.h"\
+	"..\Python-1.4\Include\accessobject.h"\
+	"..\Python-1.4\Include\allobjects.h"\
+	"..\Python-1.4\Include\bltinmodule.h"\
+	"..\Python-1.4\Include\ceval.h"\
+	"..\Python-1.4\Include\classobject.h"\
+	"..\Python-1.4\Include\cobject.h"\
+	"..\Python-1.4\Include\complexobject.h"\
+	"..\Python-1.4\Include\fileobject.h"\
+	"..\Python-1.4\Include\floatobject.h"\
+	"..\Python-1.4\Include\funcobject.h"\
+	"..\Python-1.4\Include\import.h"\
+	"..\Python-1.4\Include\intobject.h"\
+	"..\Python-1.4\Include\intrcheck.h"\
+	"..\Python-1.4\Include\listobject.h"\
+	"..\Python-1.4\Include\longobject.h"\
+	"..\Python-1.4\Include\mappingobject.h"\
+	"..\Python-1.4\Include\methodobject.h"\
+	"..\Python-1.4\Include\modsupport.h"\
+	"..\Python-1.4\Include\moduleobject.h"\
+	"..\Python-1.4\Include\mymalloc.h"\
+	"..\Python-1.4\Include\myproto.h"\
+	"..\Python-1.4\Include\object.h"\
+	"..\Python-1.4\Include\objimpl.h"\
+	"..\Python-1.4\Include\pydebug.h"\
+	"..\Python-1.4\Include\pyerrors.h"\
+	"..\Python-1.4\Include\pythonrun.h"\
+	"..\Python-1.4\Include\rangeobject.h"\
+	"..\Python-1.4\Include\rename2.h"\
+	"..\Python-1.4\Include\sliceobject.h"\
+	"..\Python-1.4\Include\stringobject.h"\
+	"..\Python-1.4\Include\sysmodule.h"\
+	"..\Python-1.4\Include\thread.h"\
+	"..\Python-1.4\Include\traceback.h"\
+	"..\Python-1.4\Include\tupleobject.h"\
+	".\../Python-1.4/Include\Python.h"\
+	".\../Python-1.4/PC\config.h"\
 	".\./libImaging\Imaging.h"\
 	".\./libImaging\ImDib.h"\
 	".\libimaging\ImConfig.h"\
@@ -1141,43 +1160,43 @@ DEP_CPP_DISPL=\
 
 SOURCE=.\_imagingmodule.c
 DEP_CPP__IMAG=\
-	"..\Include\abstract.h"\
-	"..\Include\accessobject.h"\
-	"..\Include\allobjects.h"\
-	"..\Include\bltinmodule.h"\
-	"..\Include\ceval.h"\
-	"..\Include\classobject.h"\
-	"..\Include\cobject.h"\
-	"..\Include\complexobject.h"\
-	"..\Include\fileobject.h"\
-	"..\Include\floatobject.h"\
-	"..\Include\funcobject.h"\
-	"..\Include\import.h"\
-	"..\Include\intobject.h"\
-	"..\Include\intrcheck.h"\
-	"..\Include\listobject.h"\
-	"..\Include\longobject.h"\
-	"..\Include\mappingobject.h"\
-	"..\Include\methodobject.h"\
-	"..\Include\modsupport.h"\
-	"..\Include\moduleobject.h"\
-	"..\Include\mymalloc.h"\
-	"..\Include\myproto.h"\
-	"..\Include\object.h"\
-	"..\Include\objimpl.h"\
-	"..\Include\pydebug.h"\
-	"..\Include\pyerrors.h"\
-	"..\Include\pythonrun.h"\
-	"..\Include\rangeobject.h"\
-	"..\Include\rename2.h"\
-	"..\Include\sliceobject.h"\
-	"..\Include\stringobject.h"\
-	"..\Include\sysmodule.h"\
-	"..\Include\thread.h"\
-	"..\Include\traceback.h"\
-	"..\Include\tupleobject.h"\
-	".\../Include\Python.h"\
-	".\../PC\config.h"\
+	"..\Python-1.4\Include\abstract.h"\
+	"..\Python-1.4\Include\accessobject.h"\
+	"..\Python-1.4\Include\allobjects.h"\
+	"..\Python-1.4\Include\bltinmodule.h"\
+	"..\Python-1.4\Include\ceval.h"\
+	"..\Python-1.4\Include\classobject.h"\
+	"..\Python-1.4\Include\cobject.h"\
+	"..\Python-1.4\Include\complexobject.h"\
+	"..\Python-1.4\Include\fileobject.h"\
+	"..\Python-1.4\Include\floatobject.h"\
+	"..\Python-1.4\Include\funcobject.h"\
+	"..\Python-1.4\Include\import.h"\
+	"..\Python-1.4\Include\intobject.h"\
+	"..\Python-1.4\Include\intrcheck.h"\
+	"..\Python-1.4\Include\listobject.h"\
+	"..\Python-1.4\Include\longobject.h"\
+	"..\Python-1.4\Include\mappingobject.h"\
+	"..\Python-1.4\Include\methodobject.h"\
+	"..\Python-1.4\Include\modsupport.h"\
+	"..\Python-1.4\Include\moduleobject.h"\
+	"..\Python-1.4\Include\mymalloc.h"\
+	"..\Python-1.4\Include\myproto.h"\
+	"..\Python-1.4\Include\object.h"\
+	"..\Python-1.4\Include\objimpl.h"\
+	"..\Python-1.4\Include\pydebug.h"\
+	"..\Python-1.4\Include\pyerrors.h"\
+	"..\Python-1.4\Include\pythonrun.h"\
+	"..\Python-1.4\Include\rangeobject.h"\
+	"..\Python-1.4\Include\rename2.h"\
+	"..\Python-1.4\Include\sliceobject.h"\
+	"..\Python-1.4\Include\stringobject.h"\
+	"..\Python-1.4\Include\sysmodule.h"\
+	"..\Python-1.4\Include\thread.h"\
+	"..\Python-1.4\Include\traceback.h"\
+	"..\Python-1.4\Include\tupleobject.h"\
+	".\../Python-1.4/Include\Python.h"\
+	".\../Python-1.4/PC\config.h"\
 	".\./libImaging\Imaging.h"\
 	".\libimaging\ImConfig.h"\
 	".\libimaging\ImPlatform.h"\
@@ -1449,13 +1468,13 @@ DEP_CPP_HISTO=\
 
 SOURCE=.\libimaging\JpegDecode.c
 DEP_CPP_JPEGD=\
-	".\./jpeg-6\jpeglib.h"\
+	".\./jpeg-6a\jpeglib.h"\
 	".\./libImaging\Imaging.h"\
 	".\./libImaging\Jpeg.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	".\libimaging\ImConfig.h"\
 	".\libimaging\ImPlatform.h"\
 	
@@ -1470,13 +1489,13 @@ DEP_CPP_JPEGD=\
 
 SOURCE=.\libimaging\JpegEncode.c
 DEP_CPP_JPEGE=\
-	".\./jpeg-6\jpeglib.h"\
+	".\./jpeg-6a\jpeglib.h"\
 	".\./libImaging\Imaging.h"\
 	".\./libImaging\Jpeg.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	".\libimaging\ImConfig.h"\
 	".\libimaging\ImPlatform.h"\
 	
@@ -1716,21 +1735,6 @@ DEP_CPP_STORA=\
 ################################################################################
 # Begin Source File
 
-SOURCE=.\libimaging\String.c
-DEP_CPP_STRIN=\
-	".\./libImaging\Imaging.h"\
-	".\libimaging\ImConfig.h"\
-	".\libimaging\ImPlatform.h"\
-	
-
-"$(INTDIR)\String.obj" : $(SOURCE) $(DEP_CPP_STRIN) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-# End Source File
-################################################################################
-# Begin Source File
-
 SOURCE=.\libimaging\Unpack.c
 DEP_CPP_UNPAC=\
 	".\./libImaging\Imaging.h"\
@@ -1789,11 +1793,47 @@ SOURCE=.\_imaging.def
 # Begin Source File
 
 SOURCE=.\path.c
-NODEP_CPP_PATH_=\
-	".\Python.h"\
+DEP_CPP_PATH_=\
+	"..\Python-1.4\Include\abstract.h"\
+	"..\Python-1.4\Include\accessobject.h"\
+	"..\Python-1.4\Include\allobjects.h"\
+	"..\Python-1.4\Include\bltinmodule.h"\
+	"..\Python-1.4\Include\ceval.h"\
+	"..\Python-1.4\Include\classobject.h"\
+	"..\Python-1.4\Include\cobject.h"\
+	"..\Python-1.4\Include\complexobject.h"\
+	"..\Python-1.4\Include\fileobject.h"\
+	"..\Python-1.4\Include\floatobject.h"\
+	"..\Python-1.4\Include\funcobject.h"\
+	"..\Python-1.4\Include\import.h"\
+	"..\Python-1.4\Include\intobject.h"\
+	"..\Python-1.4\Include\intrcheck.h"\
+	"..\Python-1.4\Include\listobject.h"\
+	"..\Python-1.4\Include\longobject.h"\
+	"..\Python-1.4\Include\mappingobject.h"\
+	"..\Python-1.4\Include\methodobject.h"\
+	"..\Python-1.4\Include\modsupport.h"\
+	"..\Python-1.4\Include\moduleobject.h"\
+	"..\Python-1.4\Include\mymalloc.h"\
+	"..\Python-1.4\Include\myproto.h"\
+	"..\Python-1.4\Include\object.h"\
+	"..\Python-1.4\Include\objimpl.h"\
+	"..\Python-1.4\Include\pydebug.h"\
+	"..\Python-1.4\Include\pyerrors.h"\
+	"..\Python-1.4\Include\pythonrun.h"\
+	"..\Python-1.4\Include\rangeobject.h"\
+	"..\Python-1.4\Include\rename2.h"\
+	"..\Python-1.4\Include\sliceobject.h"\
+	"..\Python-1.4\Include\stringobject.h"\
+	"..\Python-1.4\Include\sysmodule.h"\
+	"..\Python-1.4\Include\thread.h"\
+	"..\Python-1.4\Include\traceback.h"\
+	"..\Python-1.4\Include\tupleobject.h"\
+	".\../Python-1.4/Include\Python.h"\
+	".\../Python-1.4/PC\config.h"\
 	
 
-"$(INTDIR)\path.obj" : $(SOURCE) "$(INTDIR)"
+"$(INTDIR)\path.obj" : $(SOURCE) $(DEP_CPP_PATH_) "$(INTDIR)"
 
 
 # End Source File
@@ -1949,6 +1989,7 @@ DEP_CPP_TGARL=\
 
 SOURCE=.\libimaging\GifEncode.c
 DEP_CPP_GIFEN=\
+	".\./libImaging\Gif.h"\
 	".\./libImaging\Imaging.h"\
 	".\libimaging\ImConfig.h"\
 	".\libimaging\ImPlatform.h"\
@@ -1957,6 +1998,126 @@ DEP_CPP_GIFEN=\
 "$(INTDIR)\GifEncode.obj" : $(SOURCE) $(DEP_CPP_GIFEN) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
+
+# End Source File
+################################################################################
+# Begin Source File
+
+SOURCE=.\libimaging\UnpackYCC.c
+DEP_CPP_UNPACK=\
+	".\./libImaging\Imaging.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
+	
+
+"$(INTDIR)\UnpackYCC.obj" : $(SOURCE) $(DEP_CPP_UNPACK) "$(INTDIR)"
+   $(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+# End Source File
+################################################################################
+# Begin Source File
+
+SOURCE=.\libimaging\Effects.c
+DEP_CPP_EFFEC=\
+	".\./libImaging\Imaging.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
+	
+
+"$(INTDIR)\Effects.obj" : $(SOURCE) $(DEP_CPP_EFFEC) "$(INTDIR)"
+   $(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+# End Source File
+################################################################################
+# Begin Source File
+
+SOURCE=.\libimaging\Crack.c
+DEP_CPP_CRACK=\
+	".\./libImaging\Imaging.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
+	
+
+"$(INTDIR)\Crack.obj" : $(SOURCE) $(DEP_CPP_CRACK) "$(INTDIR)"
+   $(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+# End Source File
+################################################################################
+# Begin Source File
+
+SOURCE=.\libimaging\BitDecode.c
+DEP_CPP_BITDE=\
+	".\./libImaging\Bit.h"\
+	".\./libImaging\Imaging.h"\
+	".\libimaging\ImConfig.h"\
+	".\libimaging\ImPlatform.h"\
+	
+
+"$(INTDIR)\BitDecode.obj" : $(SOURCE) $(DEP_CPP_BITDE) "$(INTDIR)"
+   $(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+# End Source File
+################################################################################
+# Begin Source File
+
+SOURCE=.\map.c
+DEP_CPP_MAP_C=\
+	"..\Python-1.4\Include\abstract.h"\
+	"..\Python-1.4\Include\accessobject.h"\
+	"..\Python-1.4\Include\allobjects.h"\
+	"..\Python-1.4\Include\bltinmodule.h"\
+	"..\Python-1.4\Include\ceval.h"\
+	"..\Python-1.4\Include\classobject.h"\
+	"..\Python-1.4\Include\cobject.h"\
+	"..\Python-1.4\Include\complexobject.h"\
+	"..\Python-1.4\Include\fileobject.h"\
+	"..\Python-1.4\Include\floatobject.h"\
+	"..\Python-1.4\Include\funcobject.h"\
+	"..\Python-1.4\Include\import.h"\
+	"..\Python-1.4\Include\intobject.h"\
+	"..\Python-1.4\Include\intrcheck.h"\
+	"..\Python-1.4\Include\listobject.h"\
+	"..\Python-1.4\Include\longobject.h"\
+	"..\Python-1.4\Include\mappingobject.h"\
+	"..\Python-1.4\Include\methodobject.h"\
+	"..\Python-1.4\Include\modsupport.h"\
+	"..\Python-1.4\Include\moduleobject.h"\
+	"..\Python-1.4\Include\mymalloc.h"\
+	"..\Python-1.4\Include\myproto.h"\
+	"..\Python-1.4\Include\object.h"\
+	"..\Python-1.4\Include\objimpl.h"\
+	"..\Python-1.4\Include\pydebug.h"\
+	"..\Python-1.4\Include\pyerrors.h"\
+	"..\Python-1.4\Include\pythonrun.h"\
+	"..\Python-1.4\Include\rangeobject.h"\
+	"..\Python-1.4\Include\rename2.h"\
+	"..\Python-1.4\Include\sliceobject.h"\
+	"..\Python-1.4\Include\stringobject.h"\
+	"..\Python-1.4\Include\sysmodule.h"\
+	"..\Python-1.4\Include\thread.h"\
+	"..\Python-1.4\Include\traceback.h"\
+	"..\Python-1.4\Include\tupleobject.h"\
+	".\../Python-1.4/Include\Python.h"\
+	".\../Python-1.4/PC\config.h"\
+	
+
+!IF  "$(CFG)" == "_imaging - Win32 Release"
+
+
+"$(INTDIR)\map.obj" : $(SOURCE) $(DEP_CPP_MAP_C) "$(INTDIR)"
+
+
+!ELSEIF  "$(CFG)" == "_imaging - Win32 Debug"
+
+
+"$(INTDIR)\map.obj" : $(SOURCE) $(DEP_CPP_MAP_C) "$(INTDIR)"
+
+
+!ENDIF 
 
 # End Source File
 # End Target
@@ -2004,19 +2165,6 @@ DEP_CPP_COMPR=\
 # Begin Source File
 
 SOURCE=.\zlib\deflate.c
-
-!IF  "$(CFG)" == "zlib - Win32 Release"
-
-DEP_CPP_DEFLA=\
-	".\zlib\deflate.h"\
-	
-
-"$(INTDIR)\deflate.obj" : $(SOURCE) $(DEP_CPP_DEFLA) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ELSEIF  "$(CFG)" == "zlib - Win32 Debug"
-
 DEP_CPP_DEFLA=\
 	".\./zlib\zlib.h"\
 	".\zlib\deflate.h"\
@@ -2027,8 +2175,6 @@ DEP_CPP_DEFLA=\
 "$(INTDIR)\deflate.obj" : $(SOURCE) $(DEP_CPP_DEFLA) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ENDIF 
 
 # End Source File
 ################################################################################
@@ -2160,19 +2306,6 @@ DEP_CPP_INFUT=\
 # Begin Source File
 
 SOURCE=.\zlib\trees.c
-
-!IF  "$(CFG)" == "zlib - Win32 Release"
-
-DEP_CPP_TREES=\
-	".\zlib\deflate.h"\
-	
-
-"$(INTDIR)\trees.obj" : $(SOURCE) $(DEP_CPP_TREES) "$(INTDIR)"
-   $(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ELSEIF  "$(CFG)" == "zlib - Win32 Debug"
-
 DEP_CPP_TREES=\
 	".\./zlib\zlib.h"\
 	".\zlib\deflate.h"\
@@ -2183,8 +2316,6 @@ DEP_CPP_TREES=\
 "$(INTDIR)\trees.obj" : $(SOURCE) $(DEP_CPP_TREES) "$(INTDIR)"
    $(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ENDIF 
 
 # End Source File
 ################################################################################
@@ -2232,14 +2363,14 @@ DEP_CPP_ZUTIL=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jcapimin.c"
+SOURCE=".\jpeg-6a\Jcapimin.c"
 DEP_CPP_JCAPI=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2251,14 +2382,14 @@ DEP_CPP_JCAPI=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jcapistd.c"
+SOURCE=".\jpeg-6a\Jcapistd.c"
 DEP_CPP_JCAPIS=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2270,14 +2401,14 @@ DEP_CPP_JCAPIS=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jccoefct.c"
+SOURCE=".\jpeg-6a\Jccoefct.c"
 DEP_CPP_JCCOE=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2289,14 +2420,14 @@ DEP_CPP_JCCOE=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jccolor.c"
+SOURCE=".\jpeg-6a\Jccolor.c"
 DEP_CPP_JCCOL=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2308,15 +2439,15 @@ DEP_CPP_JCCOL=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jcdctmgr.c"
+SOURCE=".\jpeg-6a\Jcdctmgr.c"
 DEP_CPP_JCDCT=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jdct.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jdct.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2328,15 +2459,15 @@ DEP_CPP_JCDCT=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jchuff.c"
+SOURCE=".\jpeg-6a\Jchuff.c"
 DEP_CPP_JCHUF=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jchuff.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jchuff.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2348,14 +2479,14 @@ DEP_CPP_JCHUF=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jcinit.c"
+SOURCE=".\jpeg-6a\Jcinit.c"
 DEP_CPP_JCINI=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2367,14 +2498,14 @@ DEP_CPP_JCINI=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jcmainct.c"
+SOURCE=".\jpeg-6a\Jcmainct.c"
 DEP_CPP_JCMAI=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2386,14 +2517,14 @@ DEP_CPP_JCMAI=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jcmarker.c"
+SOURCE=".\jpeg-6a\Jcmarker.c"
 DEP_CPP_JCMAR=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2405,14 +2536,14 @@ DEP_CPP_JCMAR=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jcmaster.c"
+SOURCE=".\jpeg-6a\Jcmaster.c"
 DEP_CPP_JCMAS=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2424,14 +2555,14 @@ DEP_CPP_JCMAS=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jcomapi.c"
+SOURCE=".\jpeg-6a\Jcomapi.c"
 DEP_CPP_JCOMA=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2443,14 +2574,14 @@ DEP_CPP_JCOMA=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jcparam.c"
+SOURCE=".\jpeg-6a\Jcparam.c"
 DEP_CPP_JCPAR=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2462,15 +2593,15 @@ DEP_CPP_JCPAR=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jcphuff.c"
+SOURCE=".\jpeg-6a\Jcphuff.c"
 DEP_CPP_JCPHU=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jchuff.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jchuff.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2482,14 +2613,14 @@ DEP_CPP_JCPHU=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jcprepct.c"
+SOURCE=".\jpeg-6a\Jcprepct.c"
 DEP_CPP_JCPRE=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2501,14 +2632,14 @@ DEP_CPP_JCPRE=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jcsample.c"
+SOURCE=".\jpeg-6a\Jcsample.c"
 DEP_CPP_JCSAM=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2520,14 +2651,14 @@ DEP_CPP_JCSAM=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jctrans.c"
+SOURCE=".\jpeg-6a\Jctrans.c"
 DEP_CPP_JCTRA=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2539,14 +2670,14 @@ DEP_CPP_JCTRA=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jdapimin.c"
+SOURCE=".\jpeg-6a\Jdapimin.c"
 DEP_CPP_JDAPI=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2558,14 +2689,14 @@ DEP_CPP_JDAPI=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jdapistd.c"
+SOURCE=".\jpeg-6a\Jdapistd.c"
 DEP_CPP_JDAPIS=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2577,14 +2708,14 @@ DEP_CPP_JDAPIS=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jdatadst.c"
+SOURCE=".\jpeg-6a\Jdatadst.c"
 DEP_CPP_JDATA=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2596,14 +2727,14 @@ DEP_CPP_JDATA=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jdatasrc.c"
+SOURCE=".\jpeg-6a\Jdatasrc.c"
 DEP_CPP_JDATAS=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2615,14 +2746,14 @@ DEP_CPP_JDATAS=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jdcoefct.c"
+SOURCE=".\jpeg-6a\Jdcoefct.c"
 DEP_CPP_JDCOE=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2634,14 +2765,14 @@ DEP_CPP_JDCOE=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jdcolor.c"
+SOURCE=".\jpeg-6a\Jdcolor.c"
 DEP_CPP_JDCOL=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2653,15 +2784,15 @@ DEP_CPP_JDCOL=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jddctmgr.c"
+SOURCE=".\jpeg-6a\Jddctmgr.c"
 DEP_CPP_JDDCT=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jdct.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jdct.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2673,15 +2804,15 @@ DEP_CPP_JDDCT=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jdhuff.c"
+SOURCE=".\jpeg-6a\Jdhuff.c"
 DEP_CPP_JDHUF=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jdhuff.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jdhuff.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2693,14 +2824,14 @@ DEP_CPP_JDHUF=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jdinput.c"
+SOURCE=".\jpeg-6a\Jdinput.c"
 DEP_CPP_JDINP=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2712,14 +2843,14 @@ DEP_CPP_JDINP=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jdmainct.c"
+SOURCE=".\jpeg-6a\Jdmainct.c"
 DEP_CPP_JDMAI=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2731,14 +2862,14 @@ DEP_CPP_JDMAI=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jdmarker.c"
+SOURCE=".\jpeg-6a\Jdmarker.c"
 DEP_CPP_JDMAR=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2750,14 +2881,14 @@ DEP_CPP_JDMAR=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jdmaster.c"
+SOURCE=".\jpeg-6a\Jdmaster.c"
 DEP_CPP_JDMAS=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2769,14 +2900,14 @@ DEP_CPP_JDMAS=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jdmerge.c"
+SOURCE=".\jpeg-6a\Jdmerge.c"
 DEP_CPP_JDMER=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2788,15 +2919,15 @@ DEP_CPP_JDMER=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jdphuff.c"
+SOURCE=".\jpeg-6a\Jdphuff.c"
 DEP_CPP_JDPHU=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jdhuff.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jdhuff.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2808,14 +2939,14 @@ DEP_CPP_JDPHU=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jdpostct.c"
+SOURCE=".\jpeg-6a\Jdpostct.c"
 DEP_CPP_JDPOS=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2827,14 +2958,14 @@ DEP_CPP_JDPOS=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jdsample.c"
+SOURCE=".\jpeg-6a\Jdsample.c"
 DEP_CPP_JDSAM=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2846,14 +2977,14 @@ DEP_CPP_JDSAM=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jdtrans.c"
+SOURCE=".\jpeg-6a\Jdtrans.c"
 DEP_CPP_JDTRA=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2865,15 +2996,15 @@ DEP_CPP_JDTRA=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jerror.c"
+SOURCE=".\jpeg-6a\Jerror.c"
 DEP_CPP_JERRO=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jversion.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
+	".\jpeg-6a\jversion.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2885,15 +3016,15 @@ DEP_CPP_JERRO=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jfdctflt.c"
+SOURCE=".\jpeg-6a\Jfdctflt.c"
 DEP_CPP_JFDCT=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jdct.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jdct.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2905,15 +3036,15 @@ DEP_CPP_JFDCT=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jfdctfst.c"
+SOURCE=".\jpeg-6a\Jfdctfst.c"
 DEP_CPP_JFDCTF=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jdct.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jdct.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2925,15 +3056,15 @@ DEP_CPP_JFDCTF=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jfdctint.c"
+SOURCE=".\jpeg-6a\Jfdctint.c"
 DEP_CPP_JFDCTI=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jdct.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jdct.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2945,15 +3076,15 @@ DEP_CPP_JFDCTI=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jidctflt.c"
+SOURCE=".\jpeg-6a\Jidctflt.c"
 DEP_CPP_JIDCT=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jdct.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jdct.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2965,15 +3096,15 @@ DEP_CPP_JIDCT=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jidctfst.c"
+SOURCE=".\jpeg-6a\Jidctfst.c"
 DEP_CPP_JIDCTF=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jdct.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jdct.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -2985,15 +3116,15 @@ DEP_CPP_JIDCTF=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jidctint.c"
+SOURCE=".\jpeg-6a\Jidctint.c"
 DEP_CPP_JIDCTI=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jdct.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jdct.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3005,15 +3136,15 @@ DEP_CPP_JIDCTI=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jidctred.c"
+SOURCE=".\jpeg-6a\Jidctred.c"
 DEP_CPP_JIDCTR=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jdct.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jdct.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3025,15 +3156,15 @@ DEP_CPP_JIDCTR=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jmemnobs.c"
+SOURCE=".\jpeg-6a\Jmemnobs.c"
 DEP_CPP_JMEMN=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmemsys.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmemsys.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3045,17 +3176,17 @@ DEP_CPP_JMEMN=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jpegtran.c"
+SOURCE=".\jpeg-6a\Jpegtran.c"
 DEP_CPP_JPEGT=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\cderror.h"\
-	".\Jpeg-6\cdjpeg.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
-	".\Jpeg-6\jversion.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\cderror.h"\
+	".\jpeg-6a\cdjpeg.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
+	".\jpeg-6a\jversion.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3067,14 +3198,14 @@ DEP_CPP_JPEGT=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jquant1.c"
+SOURCE=".\jpeg-6a\Jquant1.c"
 DEP_CPP_JQUAN=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3086,14 +3217,14 @@ DEP_CPP_JQUAN=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jquant2.c"
+SOURCE=".\jpeg-6a\Jquant2.c"
 DEP_CPP_JQUANT=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3105,14 +3236,14 @@ DEP_CPP_JQUANT=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jutils.c"
+SOURCE=".\jpeg-6a\Jutils.c"
 DEP_CPP_JUTIL=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 
@@ -3124,15 +3255,15 @@ DEP_CPP_JUTIL=\
 ################################################################################
 # Begin Source File
 
-SOURCE=".\Jpeg-6\Jmemmgr.c"
+SOURCE=".\jpeg-6a\Jmemmgr.c"
 DEP_CPP_JMEMM=\
-	".\./jpeg-6\jpeglib.h"\
-	".\Jpeg-6\jconfig.h"\
-	".\Jpeg-6\jerror.h"\
-	".\Jpeg-6\jinclude.h"\
-	".\Jpeg-6\jmemsys.h"\
-	".\Jpeg-6\jmorecfg.h"\
-	".\Jpeg-6\jpegint.h"\
+	".\./jpeg-6a\jpeglib.h"\
+	".\jpeg-6a\jconfig.h"\
+	".\jpeg-6a\jerror.h"\
+	".\jpeg-6a\jinclude.h"\
+	".\jpeg-6a\jmemsys.h"\
+	".\jpeg-6a\jmorecfg.h"\
+	".\jpeg-6a\jpegint.h"\
 	{$(INCLUDE)}"\sys\types.h"\
 	
 

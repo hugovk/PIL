@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: Unpack.c,v 1.9 1997/01/14 16:40:04 fl Exp $
+ * $Id: Unpack.c,v 1.6 1996/08/15 13:12:44 fredrik Exp $
  *
  * code to unpack raw data from various file formats
  *
@@ -12,8 +12,15 @@
  *	96-12-10 fl	Added complete set of PNG unpackers
  *	96-12-29 fl	Set alpha byte in RGB unpackers
  *	97-01-05 fl	Added remaining TGA unpackers
+ *	97-01-18 fl	Added inverting band unpackers
+ *	97-01-25 fl	Added FlashPix unpackers
+ *	97-05-31 fl	Added floating point unpackers
+ *	98-02-08 fl	Added I unpacker
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Secret Labs AB 1997-98.
+ * Copyright (c) Fredrik Lundh 1996-97.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -23,6 +30,8 @@
 #define	R 0
 #define	G 1
 #define	B 2
+#define	X 3
+
 #define	A 3
 
 #define	C 0
@@ -379,6 +388,20 @@ unpackLA16B(UINT8* out, const UINT8* in, int pixels)
 }
 
 static void
+unpackRGBAI(UINT8* out, const UINT8* in, int pixels)
+{
+    int i;
+    /* RGBA, inverted RGB bytes (FlashPix) */
+    for (i = 0; i < pixels; i++) {
+	out[R] = ~in[0];
+	out[G] = ~in[1];
+	out[B] = ~in[2];
+	out[A] = in[3];
+	out += 4; in += 4;
+    }
+}
+
+static void
 unpackRGBA16B(UINT8* out, const UINT8* in, int pixels)
 {
     int i;
@@ -424,11 +447,102 @@ unpackCMYKI(UINT8* out, const UINT8* in, int pixels)
 }
 
 static void
+copy1(UINT8* out, const UINT8* in, int pixels)
+{
+    /* L, P */
+    memcpy(out, in, pixels);
+}
+
+static void
 copy4(UINT8* out, const UINT8* in, int pixels)
 {
     /* RGBA, CMYK quadruples */
     memcpy(out, in, 4 * pixels);
 }
+
+
+/* Unpack to "F" image (now this is pretty ugly!) */
+
+/* bytewise copy */
+
+#define C16N\
+        (tmp[0]=in[0], tmp[1]=in[1]);
+#define C16S\
+        (tmp[1]=in[0], tmp[0]=in[1]);
+#define C32N\
+        (tmp[0]=in[0], tmp[1]=in[1], tmp[2]=in[2], tmp[3]=in[3]);
+#define C32S\
+        (tmp[3]=in[0], tmp[2]=in[1], tmp[1]=in[2], tmp[0]=in[3]);
+#define C64N\
+        (tmp[0]=in[0], tmp[1]=in[1], tmp[2]=in[2], tmp[3]=in[3],\
+         tmp[4]=in[4], tmp[5]=in[5], tmp[6]=in[6], tmp[7]=in[7]);
+#define C64S\
+        (tmp[7]=in[0], tmp[6]=in[1], tmp[5]=in[2], tmp[4]=in[3],\
+         tmp[3]=in[4], tmp[2]=in[5], tmp[1]=in[6], tmp[0]=in[7]);
+
+#ifdef WORDS_BIGENDIAN
+#define C16B C16N
+#define C16L C16S
+#define C32B C32N
+#define C32L C32S
+#define C64B C64N
+#define C64L C64S
+#else
+#define C16B C16S
+#define C16L C16N
+#define C32B C32S
+#define C32L C32N
+#define C64B C64S
+#define C64L C64N
+#endif
+
+#define UNPACK_F(NAME, GET, TYPE)\
+static void NAME(UINT8* out_, const UINT8* in, int pixels)\
+{\
+    int i;\
+    FLOAT32* out = (FLOAT32*) out_;\
+    for (i = 0; i < pixels; i++, in += sizeof(TYPE))\
+        out[i] = (FLOAT32) ((TYPE) GET);\
+}
+
+#define UNPACK_C(NAME, COPY, TYPE)\
+static void NAME(UINT8* out_, const UINT8* in, int pixels)\
+{\
+    int i;\
+    FLOAT32* out = (FLOAT32*) out_;\
+    TYPE tmp_;\
+    UINT8* tmp = (UINT8*) &tmp_;\
+    for (i = 0; i < pixels; i++, in += sizeof(TYPE)) {\
+        COPY;\
+        out[i] = (FLOAT32) tmp_;\
+    }\
+}
+
+UNPACK_F(unpackF8,    in[0], UINT8)
+UNPACK_F(unpackF8S,   in[0], INT8)
+UNPACK_C(unpackF16,   C16L,  UINT16)
+UNPACK_C(unpackF16S,  C16L,  INT16)
+UNPACK_C(unpackF16B,  C16B,  UINT16)
+UNPACK_C(unpackF16BS, C16B,  INT16)
+UNPACK_C(unpackF16N,  C16N,  UINT16)
+UNPACK_C(unpackF16NS, C16N,  INT16)
+UNPACK_C(unpackF32,   C32L,  UINT32)
+UNPACK_C(unpackF32S,  C32L,  INT32)
+UNPACK_C(unpackF32B,  C32B,  UINT32)
+UNPACK_C(unpackF32BS, C32B,  INT32)
+UNPACK_C(unpackF32N,  C32N,  UINT32)
+UNPACK_C(unpackF32NS, C32N,  INT32)
+UNPACK_C(unpackF32F,  C32L,  FLOAT32)
+UNPACK_C(unpackF32BF, C32B,  FLOAT32)
+UNPACK_C(unpackF32NF, C32N,  FLOAT32)
+#ifdef FLOAT64
+UNPACK_C(unpackF64F,  C64L,  FLOAT64)
+UNPACK_C(unpackF64BF, C64B,  FLOAT64)
+UNPACK_C(unpackF64NF, C64N,  FLOAT64)
+#endif
+
+
+/* Misc. unpackers */
 
 static void
 band0(UINT8* out, const UINT8* in, int pixels)
@@ -474,6 +588,50 @@ band3(UINT8* out, const UINT8* in, int pixels)
     }
 }
 
+static void
+band0I(UINT8* out, const UINT8* in, int pixels)
+{
+    int i;
+    /* band 0 only */
+    for (i = 0; i < pixels; i++) {
+	out[0] = ~in[i];
+	out += 4;
+    }
+}
+
+static void
+band1I(UINT8* out, const UINT8* in, int pixels)
+{
+    int i;
+    /* band 1 only */
+    for (i = 0; i < pixels; i++) {
+	out[1] = ~in[i];
+	out += 4;
+    }
+}
+
+static void
+band2I(UINT8* out, const UINT8* in, int pixels)
+{
+    int i;
+    /* band 2 only */
+    for (i = 0; i < pixels; i++) {
+	out[2] = ~in[i];
+	out += 4;
+    }
+}
+
+static void
+band3I(UINT8* out, const UINT8* in, int pixels)
+{
+    /* band 3 only */
+    int i;
+    for (i = 0; i < pixels; i++) {
+	out[3] = ~in[i];
+	out += 4;
+    }
+}
+
 static struct {
     const char* rawmode;
     int bits;
@@ -489,7 +647,7 @@ static struct {
     /* greyscale */
     {"L;2",  	2,	unpackL2},
     {"L;4",  	4,	unpackL4},
-    {"L",   	8,	(ImagingShuffler) memcpy},
+    {"L",   	8,	copy1},
     {"L;I",   	8,	unpackLI},
     {"L;16",  	16,	unpackL16},
     {"L;16B",  	16,	unpackL16B},
@@ -500,7 +658,7 @@ static struct {
     {"P;2L",   	2,	unpackP2L},
     {"P;4",   	4,	unpackP4},
     {"P;4L",   	4,	unpackP4L},
-    {"P",	8,	(ImagingShuffler) memcpy},
+    {"P",	8,	copy1},
 
     /* true colour */
     {"RGB",	24,	ImagingUnpackRGB},
@@ -510,6 +668,7 @@ static struct {
     {"BGR",	24,	ImagingUnpackBGR},
     {"BGRX",	32,	ImagingUnpackBGRX},
     {"BGR;5",	16,	ImagingUnpackBGR5},
+    {"YCC;P",	24,	ImagingUnpackYCC},
     {"R",   	8,	band0},
     {"G",   	8,	band1},
     {"B",   	8,	band2},
@@ -518,8 +677,10 @@ static struct {
     {"LA",	16,	unpackLA},
     {"LA;16B",	32,	unpackLA16B},
     {"RGBA",	32,	copy4},
+    {"RGBA;I",	32,	unpackRGBAI},
     {"RGBA;16B",64,	unpackRGBA16B},
     {"ABGR",	32,	unpackABGR},
+    {"YCCA;P",	32,	ImagingUnpackYCCA},
     {"A",   	8,	band3},
 
     /* colour separation */
@@ -529,11 +690,43 @@ static struct {
     {"M",   	8,	band1},
     {"Y",   	8,	band2},
     {"K",   	8,	band3},
+    {"C;I",   	8,	band0I},
+    {"M;I",   	8,	band1I},
+    {"Y;I",   	8,	band2I},
+    {"K;I",   	8,	band3I},
 
     /* video (YCrCb) */
     {"YCC",	24,	ImagingUnpackRGB},
     {"YCCX",	32,	copy4},
     {"YCCK",	32,	copy4},
+
+    /* integer */
+    {"I",	32,	copy4},
+
+    /* floating point variations */
+    {"F",	32,	copy4},
+    {"F;8",	8,	unpackF8},
+    {"F;8S",	8,	unpackF8S},
+    {"F;16",	16,	unpackF16},
+    {"F;16S",	16,	unpackF16S},
+    {"F;16B",	16,	unpackF16B},
+    {"F;16BS",	16,	unpackF16BS},
+    {"F;16N",	16,	unpackF16N},
+    {"F;16NS",	16,	unpackF16NS},
+    {"F;32",	32,	unpackF32},
+    {"F;32S",	32,	unpackF32S},
+    {"F;32B",	32,	unpackF32B},
+    {"F;32BS",	32,	unpackF32BS},
+    {"F;32N",	32,	unpackF32N},
+    {"F;32NS",	32,	unpackF32NS},
+    {"F;32F",	32,	unpackF32F},
+    {"F;32BF",	32,	unpackF32BF},
+    {"F;32NF",	32,	unpackF32NF},
+#ifdef FLOAT64
+    {"F;64F",	64,	unpackF64F},
+    {"F;64BF",	64,	unpackF64BF},
+    {"F;64NF",	64,	unpackF64NF},
+#endif
 
     {NULL} /* sentinel */
 };

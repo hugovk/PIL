@@ -1,6 +1,6 @@
 /* 
  * The Python Imaging Library
- * $Id: Blend.c,v 1.7 1996/11/07 12:11:30 fredrik Exp $
+ * $Id: Blend.c,v 1.5 1996/10/04 19:45:07 fredrik Exp fredrik $
  *
  * interpolate between two existing images
  *
@@ -9,24 +9,26 @@
  *	96-05-18 fl:	Simplified blend expression
  *	96-10-05 fl:	Fixed expression bug, special case for interpolation
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for details on usage and redistribution.
  */
 
 
 #include "Imaging.h"
 
-
 Imaging
 ImagingBlend(Imaging imIn1, Imaging imIn2, float alpha)
 {
     Imaging imOut;
-    unsigned x, y;
+    int x, y;
 
     /* Check arguments */
     if (!imIn1 || !imIn2)
 	return ImagingError_Argument(NULL);
-    if (imIn1->type  != imIn2->type  ||
-	imIn1->depth != imIn2->depth ||
+    if (imIn1->type  != 0 || imIn1->type  != imIn2->type  ||
+	imIn1->depth != 8 || imIn1->depth != imIn2->depth ||
 	imIn1->bands != imIn2->bands ||
 	imIn1->xsize != imIn2->xsize ||
 	imIn1->ysize != imIn2->ysize)

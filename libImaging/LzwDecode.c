@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: LzwDecode.c,v 1.5 1997/01/14 16:40:04 fl Exp $
+ * $Id: LzwDecode.c,v 1.3 1996/08/15 13:12:44 fredrik Exp $
  *
  * a fast, suspendable LZW decoder
  *
@@ -21,7 +21,10 @@
  *	96-03-28 fl	Revised API, integrated with PIL
  *	97-01-05 fl	Added filter support, added extra consistency checks
  *
- * Copyright (c) Fredrik Lundh 1995-97.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1995-97.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -36,10 +39,10 @@
 int
 ImagingLzwDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 {
-    unsigned char *p;
+    UINT8* p;
     int c, i;
     int thiscode;
-    LZWSTATE *context = (LZWSTATE*) state->context;
+    LZWSTATE* context = (LZWSTATE*) state->context;
 
     unsigned char *ptr = buf;
 

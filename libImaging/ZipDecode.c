@@ -1,13 +1,17 @@
 /*
  * The Python Imaging Library.
- * $Id: ZipDecode.c,v 1.2 1997/01/14 16:40:04 fl Exp $
+ * $Id: ZipDecode.c,v 1.3 1996/08/15 13:12:44 fredrik Exp $
  *
  * decoder for ZIP (deflated) image data.
  *
  * history:
  *	96-12-14 fl	Created (for PNG)
+ *	97-01-15 fl	Prepared to read TIFF/ZIP
  *
- * Copyright (c) Fredrik Lundh 1996.  All rights reserved.
+ * Copyright (c) Fredrik Lundh 1996.
+ * Copyright (c) Secret Labs AB 1997.
+ *
+ * See the README file for information on usage and redistribution.
  */
 
 
@@ -34,9 +38,11 @@ ImagingZipDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
     if (!state->state) {
 
 	/* Initialization */
+	if (context->mode == ZIP_PNG || context->mode == ZIP_PNG_PALETTE)
+	    context->prefix = 1; /* PNG */
 
-	/* Expand standard buffer to make room for the filter selector,
-	   and allocate a buffer to hold the previous line */
+	/* Expand standard buffer to make room for the (optional) filter
+	   prefix, and allocate a buffer to hold the previous line */
 	free(state->buffer);
 	state->buffer = (UINT8*) malloc(state->bytes+1);
 	context->previous = (UINT8*) malloc(state->bytes+1);
@@ -55,7 +61,7 @@ ImagingZipDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 
 	err = inflateInit(&context->z_stream);
 	if (err < 0) {
-	    state->errcode == IMAGING_CODEC_CONFIG;
+	    state->errcode = IMAGING_CODEC_CONFIG;
 	    return -1;
 	}
 
@@ -72,7 +78,7 @@ ImagingZipDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
     while (context->z_stream.avail_in > 0) {
 
 	context->z_stream.next_out = state->buffer;
-	context->z_stream.avail_out = state->bytes+1;
+	context->z_stream.avail_out = state->bytes + context->prefix;
 
 	err = inflate(&context->z_stream, Z_NO_FLUSH);
 
@@ -89,74 +95,84 @@ ImagingZipDecode(Imaging im, ImagingCodecState state, UINT8* buf, int bytes)
 	    return -1;
 	}
 
-	n = state->bytes+1 - context->z_stream.avail_out;
+	n = state->bytes + context->prefix - context->z_stream.avail_out;
 
-	if (n < state->bytes+1) {
+	if (n < state->bytes + context->prefix) {
 	    /* FIXME: if n is not zero, we're in trouble.  But can
 	       that really happen?  My tests say it cannot... */
 	    break; /* need more input data */
 	}
 
-	/* Apply appropriate PNG filter */
-	switch (state->buffer[0]) {
-	case 0:
+	/* Apply predictor */
+	switch (context->mode) {
+	case ZIP_PNG:
+	    switch (state->buffer[0]) {
+	    case 0:
+		break;
+	    case 1:
+		/* prior */
+		bpp = (state->bits + 7) / 8;
+		for (i = bpp+1; i <= state->bytes; i++)
+		    state->buffer[i] += state->buffer[i-bpp];
+		break;
+	    case 2:
+		/* up */
+		for (i = 1; i <= state->bytes; i++)
+		    state->buffer[i] += context->previous[i];
+		break;
+	    case 3:
+		/* average */
+		bpp = (state->bits + 7) / 8;
+		for (i = 1; i <= bpp; i++)
+		    state->buffer[i] += context->previous[i]/2;
+		for (; i <= state->bytes; i++)
+		    state->buffer[i] +=
+			(state->buffer[i-bpp] + context->previous[i])/2;
+		break;
+	    case 4:
+		/* paeth filtering */
+		bpp = (state->bits + 7) / 8;
+		for (i = 1; i <= bpp; i++)
+		    state->buffer[i] += context->previous[i];
+		for (; i <= state->bytes; i++) {
+		    int a, b, c;
+		    int pa, pb, pc;
+
+		    /* fetch pixels */
+		    a = state->buffer[i-bpp];
+		    b = context->previous[i];
+		    c = context->previous[i-bpp];
+
+		    /* distances to surrounding pixels */
+		    pa = abs(b - c);
+		    pb = abs(a - c);
+		    pc = abs(a + b - 2*c);
+
+		    /* pick predictor with the shortest distance */
+		    state->buffer[i] +=
+			(pa <= pb && pa <= pc) ? a : (pb <= pc) ? b : c;
+
+		}
+		break;
+	    default:
+		state->errcode = IMAGING_CODEC_UNKNOWN;
+		free(context->previous);
+		inflateEnd(&context->z_stream);
+		return -1;
+	    }
 	    break;
-	case 1:
-	    /* prior */
+	case ZIP_TIFF_PREDICTOR:
 	    bpp = (state->bits + 7) / 8;
 	    for (i = bpp+1; i <= state->bytes; i++)
 		state->buffer[i] += state->buffer[i-bpp];
 	    break;
-	case 2:
-	    /* up */
-	    for (i = 1; i <= state->bytes; i++)
-		state->buffer[i] += context->previous[i];
-	    break;
-	case 3:
-	    /* average */
-	    bpp = (state->bits + 7) / 8;
-	    for (i = 1; i <= bpp; i++)
-		state->buffer[i] += context->previous[i]/2;
-	    for (; i <= state->bytes; i++)
-		state->buffer[i] +=
-		    (state->buffer[i-bpp] + context->previous[i])/2;
-	    break;
-	case 4:
-	    /* paeth filtering */
-	    bpp = (state->bits + 7) / 8;
-	    for (i = 1; i <= bpp; i++)
-		state->buffer[i] += context->previous[i];
-	    for (; i <= state->bytes; i++) {
-		int a, b, c;
-		int pa, pb, pc;
-
-		/* fetch pixels */
-		a = state->buffer[i-bpp];
-		b = context->previous[i];
-		c = context->previous[i-bpp];
-
-		/* distances to surrounding pixels */
-		pa = abs(b - c);
-		pb = abs(a - c);
-		pc = abs(a + b - 2*c);
-
-		/* pick predictor with the shortest distance */
-		state->buffer[i] +=
-		    (pa <= pb && pa <= pc) ? a : (pb <= pc) ? b : c;
-
-	    }
-	    break;
-	default:
-	    state->errcode = IMAGING_CODEC_UNKNOWN;
-	    free(context->previous);
-	    inflateEnd(&context->z_stream);
-	    return -1;
 	}
 
 	/* Stuff data into the image */
 	state->shuffle((UINT8*) im->image[state->y + state->yoff] + 
 		       state->xoff * im->pixelsize,
-		       state->buffer+1, state->xsize);
+		       state->buffer + context->prefix,
+		       state->xsize);
 
 	state->y++;
 
