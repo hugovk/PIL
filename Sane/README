@@ -1,10 +1,11 @@
-This is the latest version of my SANE module.  However, it's also been
-incorporated in Fredrik Lundh's Python Imaging Library (PIL), which is
-required to use the SANE module.  Unless I've privately informed you
-of a bugfix to the SANE module, I recommend that you download from
-http://www.pythonware.com/products/pil/ and install it to use SANE
-with Python.
 
--- 
-A.M. Kuchling			http://starship.python.net/crew/amk/
+The SANE module provides an interface to the SANE scanner and frame
+grabber interface for Linux.  This module was contributed by Andrew
+Kuchling.
 
+The most recent release can be found at:
+ftp://starship.skyport.net/pub/crew/amk/sane/
+
+To build this module, add the following line to Setup.in:
+
+_sane Sane/_sanemodule.c -IlibImaging -L/usr/local/lib/sane/ -lsane-dll

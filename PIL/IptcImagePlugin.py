@@ -8,7 +8,7 @@
 # 95-10-01 fl	Created
 # 98-03-09 fl	Cleaned up and added to PIL
 #
-# Copyright (c) Secret Labs AB 1997-98.
+# Copyright (c) Secret Labs AB 1997-2000.
 # Copyright (c) Fredrik Lundh 1995.
 #
 # See the README file for information on usage and redistribution.
@@ -123,7 +123,7 @@ class IptcImageFile(ImageFile.ImageFile):
 	# mode
 	layers = ord(self.info[(3,60)][0])
 	component = ord(self.info[(3,60)][1])
-	if self.info.has_key(3,65):
+	if self.info.has_key((3,65)):
 	    id = ord(self.info[(3,65)][0])-1
 	else:
 	    id = 0

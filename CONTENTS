@@ -4,6 +4,8 @@ Imaging/CHANGES
 Imaging/FORMATS
 Imaging/CONTENTS
 
+Imaging/BUILD
+
 Imaging/Setup.in
 Imaging/Makefile.pre.in
 

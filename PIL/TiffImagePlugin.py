@@ -210,7 +210,7 @@ class ImageFileDirectory:
     def load_rational(self, data):
         l = []
         for i in range(0, len(data), 8):
-            l.append(self.i32(data, i), self.i32(data, i+4))
+            l.append((self.i32(data, i), self.i32(data, i+4)))
         return tuple(l)
     load_dispatch[5] = (8, load_rational)
 
@@ -489,9 +489,9 @@ class TiffImageFile(ImageFile.ImageFile):
 		if not a:
 		    a = self._decoder(rawmode, l)
 		self.tile.append(
-		    self._compression,
+		    (self._compression,
 		    (0, min(y, ysize), w, min(y+h, ysize)),
-		    o, a)
+		    o, a))
 		y = y + h
 		if y >= self.size[1]:
 		    x = y = 0
@@ -508,9 +508,9 @@ class TiffImageFile(ImageFile.ImageFile):
 		# FIXME: this doesn't work if the image size
 		# is not a multiple of the tile size...
 		self.tile.append(
-		    self._compression,
+		    (self._compression,
 		    (x, y, x+w, y+h),
-		    o, a)
+		    o, a))
 		x = x + w
 		if x >= self.size[0]:
 		    x, y = 0, y + h

@@ -2,10 +2,10 @@
 The Python Imaging Library
 $Id: README$
 
-Release 1.0.1 (Aug 15, 1999)
+Release 1.1 (Jun 07, 2000)
 
 ====================================================================
-The Python Imaging Library 1.0.1
+The Python Imaging Library 1.1
 ====================================================================
 
 Contents
@@ -63,8 +63,8 @@ You can join the Image SIG by sending a mail to:
 
 Put "subscribe" in the message body to automatically subscribe to the
 list, or "help" to get additional information.  Alternatively, you can
-send your questions to the Python mailing list, python-list@cwi.nl, or
-post them to the newsgroup comp.lang.python.
+send your questions to the Python mailing list, python-list@python.org,
+or post them to the newsgroup comp.lang.python.
 
 + Commercial Support
 
@@ -82,34 +82,15 @@ Or send a mail to:
 	sales@pythonware.com
 
 --------------------------------------------------------------------
-News Highlights in 1.0 (as compared to 0.2):
+News Highlights in 1.1 (as compared to 1.0):
 --------------------------------------------------------------------
 
-+ Improved font support.  The pilfont package is now included
-  in the core distribution.
++ Adapted to 1.6
 
-+ Support for incremental parsing of image files.
++ To reduce module dependencies, the Tkinter support has been
+  moved to a separate binary module.
 
-+ Improved graphics support, including arc, chord, and pieslice
-  primitives.
-
-+ Conversion to "P" and "1" uses Floyd-Steinberg dithering.
-  Conversion to "P" can use "web" colours or adaptive palette.
-
-+ Added support for "YCbCr" image memories.
-
-+ Added support for 32-bit integer and floating point images
-  (modes "I" and "F"), including new decoders to deal with many
-  kinds of input data.
-
-+ The Tk interface now supports transparent images.
-  *** NOTE: if you're updating from 0.2, you need to update
-  *** your Tkinter build to properly handle the new interface.
-
-+ Added read support for IPTC/NAA Newsphoto, McIdas, PIXAR raster,
-  FlashPix, Microsoft Image Composer, and XV thumbnails.
-
-+ Lots and lots of bug fixes.
++ The usual crop of bug fixes.
 
 For more information on these and other changes, see the CHANGES
 document.
@@ -120,8 +101,8 @@ Software License
 
 The Python Imaging Library is
 
-Copyright (c) 1997-1999 by Secret Labs AB
-Copyright (c) 1995-1999 by Fredrik Lundh
+Copyright (c) 1997-2000 by Secret Labs AB
+Copyright (c) 1995-2000 by Fredrik Lundh
 
 By obtaining, using, and/or copying this software and/or its
 associated documentation, you agree that you have read, understood,
@@ -177,18 +158,18 @@ support.
    steps 3 to 6 as described below.  Step 7 will probably fail,
    though.
 
-3. Unpack the PIL distribution (the file Imaging-1.0.1.tar.gz)
+3. Unpack the PIL distribution (the file Imaging-1.1.tar.gz)
    in your Python extensions directory (or any other suitable
    directory).
 
 	$ cd Python-1.5/Extensions # example
-	$ gunzip Imaging-1.0.1.tar.gz
-	$ tar xvf Imaging-1.0.1.tar
+	$ gunzip Imaging-1.1.tar.gz
+	$ tar xvf Imaging-1.1.tar
 
 
 4. Now build the Imaging core library (libImaging.a):
 
-	$ cd Imaging-1.0.1/libImaging
+	$ cd Imaging-1.1/libImaging
 	$ ./configure
 	$ make
 
@@ -271,13 +252,10 @@ support.
 Build instructions for Windows
 --------------------------------------------------------------------
 
-The current release does not include Windows makefiles.  You can
-get a prebuilt version from:
+The current release does not include Windows makefiles.  For prebuilt
+versions, check the product site:
 
-	http://www.pythonware.com/downloads.htm
-
-That version is compatible with Python interpreters built using
-Microsoft Visual C++ 5.0.
+	http://www.pythonware.com/products/pil/
 
 Building your own copy under Visual Studio should be straightforward;
 create a new project based on the sample extensions provided with

@@ -30,10 +30,10 @@ _imaging  _imaging.c decode.c encode.c map.c display.c outline.c path.c \
 	-IlibImaging libImaging/libImaging.a \
 #
 # *** IJG JPEG library (libjpeg) location
-	-ljpeg \
+	-I/usr/local/include -L/usr/local/lib -ljpeg \
 #
 # *** ZLIB (libz) location
-	-lz
+	-I/usr/local/include -L/usr/local/lib -lz
 
 # --------------------------------------------------------------------
 # Tkinter bindings.  Comment away if you don't need ImageTk, or if
@@ -42,11 +42,11 @@ _imaging  _imaging.c decode.c encode.c map.c display.c outline.c path.c \
 
 _imagingtk  _imagingtk.c \
 	-IlibImaging Tk/tkImaging.c \
-	-ltcl8.0 -ltk8.0 \
+	-I/usr/local/include -L/usr/local/lib -ltcl8.0 -ltk8.0 \
         -L/usr/X11R6/lib -lX11 
 
 # --------------------------------------------------------------------
 # Sane driver.  uncomment to enable this driver (see Sane/README for
 # more info)
 
-_sane Sane/_sanemodule.c -IlibImaging -L/usr/lib/sane -lsane-dll
+# _sane Sane/_sanemodule.c -IlibImaging -L/usr/local/lib/sane/ -lsane-dll

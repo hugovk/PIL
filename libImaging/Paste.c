@@ -13,6 +13,7 @@
  * 98-02-02 fl	Fixed MULDIV255 macro for gcc
  * 99-02-02 fl	Added "RGBa" mask support
  * 99-02-06 fl	Rewritten.  Added support for masked fill operations.
+ * 99-12-08 fl	Fixed matte fill.
  *
  * Copyright (c) Fredrik Lundh 1996-97.
  * Copyright (c) Secret Labs AB 1997-99.
@@ -345,7 +346,7 @@ fill_mask_1(Imaging imOut, const void* ink_, Imaging imMask,
 }
 
 static inline void
-fill_mask_L(Imaging imOut, const void* ink_, Imaging imMask,
+fill_mask_L(Imaging imOut, const UINT8* ink, Imaging imMask,
             int dx, int dy, int sx, int sy,
             int xsize, int ysize, int pixelsize)
 {
@@ -353,8 +354,6 @@ fill_mask_L(Imaging imOut, const void* ink_, Imaging imMask,
 
     int x, y, i;
     unsigned int tmp1, tmp2;
-    INT32 ink = 0L;
-    memcpy(&ink, ink_, pixelsize);
 
     if (imOut->image8) {
 
@@ -362,7 +361,7 @@ fill_mask_L(Imaging imOut, const void* ink_, Imaging imMask,
             UINT8* out = imOut->image8[y+dy]+dx;
             UINT8* mask = imMask->image8[y+sy]+sx;
             for (x = 0; x < xsize; x++) {
-                *out = BLEND(*mask, *out, ink, tmp1, tmp2);
+                *out = BLEND(*mask, *out, ink[0], tmp1, tmp2);
                 out++, mask++;
             }
         }
@@ -374,7 +373,7 @@ fill_mask_L(Imaging imOut, const void* ink_, Imaging imMask,
             UINT8* mask = (UINT8*) imMask->image[y+sy]+sx;
             for (x = 0; x < xsize; x++) {
                 for (i = 0; i < pixelsize; i++) {
-                    *out = BLEND(*mask, *out, ink, tmp1, tmp2);
+                    *out = BLEND(*mask, *out, ink[i], tmp1, tmp2);
                     out++;
                 }
                 mask++;
@@ -384,7 +383,7 @@ fill_mask_L(Imaging imOut, const void* ink_, Imaging imMask,
 }
 
 static inline void
-fill_mask_RGBA(Imaging imOut, const void* ink_, Imaging imMask,
+fill_mask_RGBA(Imaging imOut, const UINT8* ink, Imaging imMask,
                int dx, int dy, int sx, int sy,
                int xsize, int ysize, int pixelsize)
 {
@@ -392,8 +391,6 @@ fill_mask_RGBA(Imaging imOut, const void* ink_, Imaging imMask,
 
     int x, y, i;
     unsigned int tmp1, tmp2;
-    INT32 ink = 0L;
-    memcpy(&ink, ink_, pixelsize);
 
     if (imOut->image8) {
 
@@ -402,7 +399,7 @@ fill_mask_RGBA(Imaging imOut, const void* ink_, Imaging imMask,
             UINT8* out = imOut->image8[y+dy]+dx;
             UINT8* mask = (UINT8*) imMask->image[y+sy]+sx;
             for (x = 0; x < xsize; x++) {
-                *out = BLEND(*mask, *out, ink, tmp1, tmp2);
+                *out = BLEND(*mask, *out, ink[0], tmp1, tmp2);
                 out++, mask += 4;
             }
         }
@@ -416,7 +413,7 @@ fill_mask_RGBA(Imaging imOut, const void* ink_, Imaging imMask,
             UINT8* mask = (UINT8*) imMask->image[y+sy]+sx;
             for (x = 0; x < xsize; x++) {
                 for (i = 0; i < pixelsize; i++) {
-                    *out = BLEND(*mask, *out, ink, tmp1, tmp2);
+                    *out = BLEND(*mask, *out, ink[i], tmp1, tmp2);
                     out++;
                 }
                 mask += 4;
@@ -426,7 +423,7 @@ fill_mask_RGBA(Imaging imOut, const void* ink_, Imaging imMask,
 }
 
 static inline void
-fill_mask_RGBa(Imaging imOut, const void* ink_, Imaging imMask,
+fill_mask_RGBa(Imaging imOut, const UINT8* ink, Imaging imMask,
                int dx, int dy, int sx, int sy,
                int xsize, int ysize, int pixelsize)
 {
@@ -434,8 +431,6 @@ fill_mask_RGBa(Imaging imOut, const void* ink_, Imaging imMask,
 
     int x, y, i;
     unsigned int tmp1;
-    INT32 ink = 0L;
-    memcpy(&ink, ink_, pixelsize);
 
     if (imOut->image8) {
 
@@ -444,7 +439,7 @@ fill_mask_RGBa(Imaging imOut, const void* ink_, Imaging imMask,
             UINT8* out = imOut->image8[y+dy]+dx;
             UINT8* mask = (UINT8*) imMask->image[y+sy]+sx;
             for (x = 0; x < xsize; x++) {
-                *out = PREBLEND(*mask, *out, ink, tmp1);
+                *out = PREBLEND(*mask, *out, ink[0], tmp1);
                 out++, mask += 4;
             }
         }
@@ -458,7 +453,7 @@ fill_mask_RGBa(Imaging imOut, const void* ink_, Imaging imMask,
             UINT8* mask = (UINT8*) imMask->image[y+sy]+sx;
             for (x = 0; x < xsize; x++) {
                 for (i = 0; i < pixelsize; i++) {
-                    *out = PREBLEND(*mask, *out, ink, tmp1);
+                    *out = PREBLEND(*mask, *out, ink[i], tmp1);
                     out++;
                 }
                 mask += 4;

@@ -4,15 +4,20 @@ $Id: CHANGES$
 
 ACKNOWLEDGEMENTS: PIL wouldn't be what it is without the help of,
 among others: David Ascher, Phil Austin, Anthony Baxter, Jan Blom,
-Roger Burnham, Gene Cash, Greg Coats, Greg Couch, Bill Crutchfield,
-Fred Drake, Tim Docker, Robin Friedrich, Mark Hammond, Bernhard
-Herzog, Rob Hooft, Jack Jansen, Edward Jones, Richard Jones, Skip
-Montanaro, Fredrik Nehr, Mr. Nitpicker, Håkan Karlsson, Matthias
-Klose, Magnus Källström, Eric Raymond, Bertil Reinhammar, Toby
-Sargeant, The Mad Scientist, Barry Scott, Les Schaffer, Joel Shprentz,
+Roger Burnham, Gene Cash, Kevin Cazabon, Greg Coats, Greg Couch, Bill
+Crutchfield, Fred Drake, Tim Docker, Robin Friedrich, Mark Hammond,
+Bernhard Herzog, Rob Hooft, Jack Jansen, Edward Jones, Richard Jones,
+Robert Kern, Skip Montanaro, Fredrik Nehr, Håkan Karlsson, Robert
+Kern, Matthias Klose, Magnus Källström, Eric Raymond, Bertil
+Reinhammar, Toby Sargeant, Barry Scott, Les Schaffer, Joel Shprentz,
 Perry Stoll, Paul Svensson, Ivan Tkatchev, and Charles Waldman.
 
-*** Changes from release 1.0 to 1.0.1 ***
+*** Changes from release 1.0 to 1.1 ***
+
++ Adapted to Python 1.6 ("append" and other method changes)
+
++ Fixed Image.paste when pasting with solid colour and matte
+  layers ("L" or "RGBA" masks) (bug reported by Robert Kern)
 
 + To make it easier to distribute prebuilt versions of PIL,
   the tkinit binding stuff has been moved to a separate

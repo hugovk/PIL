@@ -126,7 +126,7 @@ class PcfFontFile(FontFile.FontFile):
         # read property description
         p = []
         for i in range(nprops):
-            p.append(i32(fp.read(4)), ord(fp.read(1)), i32(fp.read(4)))
+            p.append((i32(fp.read(4)), ord(fp.read(1)), i32(fp.read(4))))
         if nprops & 3:
             fp.seek(4 - (nprops & 3), 1) # pad
 
@@ -162,7 +162,10 @@ class PcfFontFile(FontFile.FontFile):
                 descent = ord(fp.read(1)) - 128
                 xsize = right - left
                 ysize = ascent + descent
-                append((xsize, ysize, left, right, width, ascent, descent, 0))
+                append(
+		    (xsize, ysize, left, right, width,
+		     ascent, descent, 0)
+		    )
 
         else:
 
@@ -174,7 +177,10 @@ class PcfFontFile(FontFile.FontFile):
                 ascent = i16(fp.read(2))
                 descent = i16(fp.read(2))
                 attributes = i16(fp.read(2))
-                append((xsize, ysize, left, right, width, ascent, descent, attributes))
+                append(
+		    (xsize, ysize, left, right, width,
+		     ascent, descent, attributes)
+		    )
 
         return metrics
 

@@ -59,6 +59,8 @@ OPEN = {
     "B2 image": ("P", "P;2"),
     "B4 image": ("P", "P;4"),
     "X 24 image": ("RGB", "RGB"),
+    "L 32 S image": ("I", "I;32"),
+    "L 32 F image": ("F", "F;32"),
     # old p3cfunc formats
     "RGB3 image": ("RGB", "RGB;T"),
     "RYB3 image": ("RGB", "RYB;T"),
