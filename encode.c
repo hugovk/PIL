@@ -1,6 +1,6 @@
 /*
  * The Python Imaging Library.
- * $Id: encode.c 2184 2004-11-15 20:00:59Z fredrik $
+ * $Id: encode.c 2751 2006-06-18 19:50:45Z fredrik $
  *
  * standard encoder interfaces for the Imaging library
  *
@@ -26,7 +26,8 @@
 #include "Python.h"
 
 #if PY_VERSION_HEX < 0x01060000
-#define PyObject_DEL(op) PyMem_DEL((op))
+#define PyObject_New PyObject_NEW
+#define PyObject_Del PyMem_DEL
 #endif
 
 #include "Imaging.h"
@@ -59,7 +60,7 @@ PyImaging_EncoderNew(int contextsize)
 
     ImagingEncoderType.ob_type = &PyType_Type;
 
-    encoder = PyObject_NEW(ImagingEncoderObject, &ImagingEncoderType);
+    encoder = PyObject_New(ImagingEncoderObject, &ImagingEncoderType);
     if (encoder == NULL)
 	return NULL;
 
@@ -93,7 +94,7 @@ _dealloc(ImagingEncoderObject* encoder)
     free(encoder->state.buffer);
     free(encoder->state.context);
     Py_XDECREF(encoder->lock);
-    PyObject_DEL(encoder);
+    PyObject_Del(encoder);
 }
 
 static PyObject* 

@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library
-# $Id: ImageDraw.py 2134 2004-10-06 08:55:20Z fredrik $
+# $Id: ImageDraw.py 2817 2006-10-07 15:34:03Z fredrik $
 #
 # drawing interface operations
 #
@@ -22,9 +22,10 @@
 # 2004-08-26 fl   Made Draw() a factory function, added getdraw() support
 # 2004-09-04 fl   Added width support to line primitive
 # 2004-09-10 fl   Added font mode handling
+# 2006-06-19 fl   Added font bearing support (getmask2)
 #
-# Copyright (c) 1997-2004 by Secret Labs AB
-# Copyright (c) 1996-2004 by Fredrik Lundh
+# Copyright (c) 1997-2006 by Secret Labs AB
+# Copyright (c) 1996-2006 by Fredrik Lundh
 #
 # See the README file for information on usage and redistribution.
 #
@@ -93,7 +94,7 @@ class ImageDraw:
         if warnings:
             warnings.warn(
                 "'setink' is deprecated; use keyword arguments instead",
-                DeprecationWarning
+                DeprecationWarning, stacklevel=2
                 )
         if Image.isStringType(ink):
             ink = ImageColor.getcolor(ink, self.mode)
@@ -109,7 +110,7 @@ class ImageDraw:
         if warnings:
             warnings.warn(
                 "'setfill' is deprecated; use keyword arguments instead",
-                DeprecationWarning
+                DeprecationWarning, stacklevel=2
                 )
         self.fill = onoff
 
@@ -259,9 +260,13 @@ class ImageDraw:
             ink = fill
         if ink is not None:
             try:
-                mask = font.getmask(text, self.fontmode)
-            except TypeError:
-                mask = font.getmask(text)
+                mask, offset = font.getmask2(text, self.fontmode)
+                xy = xy[0] + offset[0], xy[1] + offset[1]
+            except AttributeError:
+                try:
+                    mask = font.getmask(text, self.fontmode)
+                except TypeError:
+                    mask = font.getmask(text)
             self.draw.draw_bitmap(xy, mask, ink)
 
     ##
@@ -294,3 +299,80 @@ try:
 except:
     Outline = None
 
+##
+# (Experimental) A more advanced 2D drawing interface for PIL images,
+# based on the WCK interface.
+#
+# @param im The image to draw in.
+# @param hints An optional list of hints.
+# @return A (drawing context, drawing resource factory) tuple.
+
+def getdraw(im=None, hints=None):
+    # FIXME: this needs more work!
+    # FIXME: come up with a better 'hints' scheme.
+    handler = None
+    if not hints or "nicest" in hints:
+        try:
+            import _imagingagg
+            handler = _imagingagg
+        except ImportError:
+            pass
+    if handler is None:
+        import ImageDraw2
+        handler = ImageDraw2
+    if im:
+        im = handler.Draw(im)
+    return im, handler
+
+##
+# (experimental) Fills a bounded region with a given color.
+#
+# @param image Target image.
+# @param xy Seed position (a 2-item coordinate tuple).
+# @param value Fill color.
+# @param border Optional border value.  If given, the region consists of
+#     pixels with a color different from the border color.  If not given,
+#     the region consists of pixels having the same color as the seed
+#     pixel.
+
+def floodfill(image, xy, value, border=None):
+    "Fill bounded region."
+    # based on an implementation by Eric S. Raymond
+    pixel = image.load()
+    x, y = xy
+    try:
+        background = pixel[x, y]
+        if background == value:
+            return # seed point already has fill color
+        pixel[x, y] = value
+    except IndexError:
+        return # seed point outside image
+    edge = [(x, y)]
+    if border is None:
+        while edge:
+            newedge = []
+            for (x, y) in edge:
+                for (s, t) in ((x+1, y), (x-1, y), (x, y+1), (x, y-1)):
+                    try:
+                        p = pixel[s, t]
+                    except IndexError:
+                        pass
+                    else:
+                        if p == background:
+                            pixel[s, t] = value
+                            newedge.append((s, t))
+            edge = newedge
+    else:
+        while edge:
+            newedge = []
+            for (x, y) in edge:
+                for (s, t) in ((x+1, y), (x-1, y), (x, y+1), (x, y-1)):
+                    try:
+                        p = pixel[s, t]
+                    except IndexError:
+                        pass
+                    else:
+                        if p != value and p != border:
+                            pixel[s, t] = value
+                            newedge.append((s, t))
+            edge = newedge

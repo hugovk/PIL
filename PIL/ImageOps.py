@@ -1,6 +1,6 @@
 #
 # The Python Imaging Library.
-# $Id: ImageOps.py 2134 2004-10-06 08:55:20Z fredrik $
+# $Id: ImageOps.py 2760 2006-06-19 13:31:40Z fredrik $
 #
 # standard image operations
 #
@@ -9,6 +9,7 @@
 # 2001-10-23 fl   Added autocontrast operator
 # 2001-12-18 fl   Added Kevin's fit operator
 # 2004-03-14 fl   Fixed potential division by zero in equalize
+# 2005-05-05 fl   Fixed equalize for low number of values
 #
 # Copyright (c) 2001-2004 by Secret Labs AB
 # Copyright (c) 2001-2004 by Fredrik Lundh
@@ -49,7 +50,7 @@ def _color(color, mode):
 def _lut(image, lut):
     if image.mode == "P":
         # FIXME: apply to lookup table, not image data
-        raise NotImplemented, "mode P support coming soon"
+        raise NotImplementedError("mode P support coming soon")
     elif image.mode in ("L", "RGB"):
         if image.mode == "RGB" and len(lut) == 256:
             lut = lut + lut + lut
@@ -180,7 +181,8 @@ def crop(image, border=0):
 # Deform the image.
 #
 # @param image The image to deform.
-# @param deformer A deformer object.
+# @param deformer A deformer object.  Any object that implements a
+#     <b>getmesh</b> method can be used.
 # @param resample What resampling filter to use.
 # @return An image.
 
@@ -207,13 +209,18 @@ def equalize(image, mask=None):
     h = image.histogram(mask)
     lut = []
     for b in range(0, len(h), 256):
-        step = reduce(operator.add, h[b:b+256]) / 255
-        if step == 0:
-            step = 1
-        n = 0
-        for i in range(256):
-            lut.append(n / step)
-            n = n + h[i+b]
+        histo = filter(None, h[b:b+256])
+        if len(histo) <= 1:
+            lut.extend(range(256))
+        else:
+            step = (reduce(operator.add, histo) - histo[-1]) / 255
+            if not step:
+                lut.extend(range(256))
+            else:
+                n = step / 2
+                for i in range(256):
+                    lut.append(n / step)
+                    n = n + h[i+b]
     return _lut(image, lut)
 
 ##
