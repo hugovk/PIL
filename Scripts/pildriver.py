@@ -40,7 +40,7 @@ of its upper-left-hand corner and displays the cropped portion.
 30 degrees, and saves the result as rotated.png (in PNG format).
 """
 # by Eric S. Raymond <esr@thyrsus.com>
-# $Id: pildriver.py 2134 2004-10-06 08:55:20Z fredrik $
+# $Id: pildriver.py 2813 2006-10-07 10:11:35Z fredrik $
 
 # TO DO:
 # 1. Add PILFont capabilities, once that's documented.
@@ -99,7 +99,7 @@ class PILDriver:
         if hasattr(self, 'format'):     # If it's an image, do a real copy
             dup = self.stack[0].copy()
         else:
-             dup = self.stack[0]
+            dup = self.stack[0]
         self.stack = [dup] + self.stack
 
     def do_swap(self):
@@ -249,9 +249,10 @@ class PILDriver:
         yoff = int(self.do_pop())
         ground = self.do_pop()
         if figure.mode == "RGBA":
-            self.push(ground.paste(figure, (xoff, yoff), figure))
+            ground.paste(figure, (xoff, yoff), figure)
         else:
-            self.push(ground.paste(figure, (xoff, yoff)))
+            ground.paste(figure, (xoff, yoff))
+        self.push(ground)
 
     def do_resize(self):
         """usage: resize <int:xsize> <int:ysize> <image:pic1>
@@ -261,7 +262,7 @@ class PILDriver:
         ysize = int(self.do_pop())
         xsize = int(self.do_pop())
         image = self.do_pop()
-        self.push(image.resize(xsize, ysize))
+        self.push(image.resize((xsize, ysize)))
 
     def do_rotate(self):
         """usage: rotate <int:angle> <image:pic1>

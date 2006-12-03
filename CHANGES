@@ -1,28 +1,159 @@
 The Python Imaging Library
-$Id: CHANGES-115 2331 2005-03-23 20:16:42Z fredrik $
+$Id: CHANGES 2934 2006-12-03 12:14:00Z fredrik $
 
 ACKNOWLEDGEMENTS: PIL wouldn't be what it is without the help of,
 among others: David Ascher, Phil Austin, Douglas Bagnall, Larry Bates,
 Anthony Baxter, William Baxter, Denis Benoit, Jan Blom, Duncan Booth,
 Jeff Breidenbach, Roger Burnham, Gene Cash, Kevin Cazabon, Fred Clare,
 Greg Coats, Chris Cogdon, Greg Couch, Bill Crutchfield, Abel Deuring,
-Tim Docker, Fred Drake, Graham Dumpleton, Matthew Ellis, Robin
-Friedrich, Pier Paolo Glave, Federico Di Gregorio, Markus Gritsch,
-Daniel Haertle, Greg Hamilton, Mark Hammond, Bernhard Herzog, Rob
-Hooft, Bob Ippolito, Jack Jansen, Bill Janssen, Edward Jones, Richard
-Jones, Håkan Karlsson, Robert Kern, Bob Klimek, Matthias Klose, Andrew
-Kuchling, Magnus Källström, Victor Lacina, Ben Last, Hamish Lawson,
-Andrew MacIntyre, Gordon McMillan, Skip Montanaro, Fredrik Nehr,
-Luciano Nocera, Piet van Oostrum, Richard Oudkerk, Paul Pharr, Andres
-Polit, Eric Raymond, Bertil Reinhammar, Nicholas Riley, Toby Sargeant,
-Barry Scott, Les Schaffer, Joel Shprentz, Klamer Shutte, Gene
-Skonicki, Niki Spahiev, D. Alan Stewart, Perry Stoll, Paul Svensson,
-Ulrik Svensson, Ivan Tkatchev, Rune Uhlin, Dmitry Vasiliev, Sasha
-Voynow, Charles Waldman, and Dan Wolfe.
+Tim Docker, Fred Drake, Graham Dumpleton, Matthew Ellis, Eric
+Etheridge, Robin Friedrich, Pier Paolo Glave, Federico Di Gregorio,
+Markus Gritsch, Daniel Haertle, Greg Hamilton, Mark Hammond, Bernhard
+Herzog, Rob Hooft, Bob Ippolito, Jack Jansen, Bill Janssen, Edward
+Jones, Richard Jones, Håkan Karlsson, Robert Kern, David Kirtley, Bob
+Klimek, Matthias Klose, Andrew Kuchling, Magnus Källström, Victor
+Lacina, Ben Last, Hamish Lawson, Cesare Leonardi, Andrew MacIntyre,
+Jan Matejek, Naveen Michaud-Agrawal, Gordon McMillan, Skip Montanaro,
+Fredrik Nehr, Russell Nelson, Luciano Nocera, Travis Oliphant, Piet
+van Oostrum, Richard Oudkerk, Paul Pharr, Andres Polit, Eric Raymond,
+Victor Reijs, Bertil Reinhammar, Nicholas Riley, Don Rozenberg, Toby
+Sargeant, Barry Scott, Les Schaffer, Joel Shprentz, Klamer Shutte,
+Gene Skonicki, Niki Spahiev, D. Alan Stewart, Perry Stoll, Paul
+Svensson, Ulrik Svensson, Miki Tebeka, Ivan Tkatchev, Dan Torop, Adam
+Twardoch, Rune Uhlin, Dmitry Vasiliev, Sasha Voynow, Charles Waldman,
+Dan Wolfe, and Ka-Ping Yee.
+
+*** Changes from release 1.1.5 to 1.1.6 ***
+
+(1.1.6 released)
+
++ Fixed some 64-bit compatibility warnings for Python 2.5.
+
++ Added threading support for the Sane driver (from Abel Deuring).
+
+(1.1.6b2 released)
+
++ Added experimental "floodfill" function to the ImageDraw module
+  (based on code by Eric Raymond).
+
++ The default arguments for "frombuffer" doesn't match "fromstring"
+  and the documentation; this is a bug, and will most likely be fixed
+  in a future version.  In this release, PIL prints a warning message
+  instead.  To silence the warning, change any calls of the form
+  "frombuffer(mode, size, data)" to
+
+      frombuffer(mode, size, data, "raw", mode, 0, 1)
+
++ Added "fromarray" function, which takes an object implementing the
+  NumPy array interface and creates a PIL Image from it. (from Travis
+  Oliphant).
+
++ Added NumPy array interface support (__array_interface__) to the
+  Image class (based on code by Travis Oliphant).
+
+  This allows you to easily convert between PIL image memories and
+  NumPy arrays:
+
+	import numpy, Image
+
+	im = Image.open('lena.jpg')
+
+	a = numpy.asarray(im) # a is readonly
+
+	im = Image.fromarray(a)
+
++ Fixed CMYK polarity for JPEG images, by treating all images as
+  "Adobe CMYK" images. (thanks to Cesare Leonardi and Kevin Cazabon
+  for samples, debugging, and patches).
+
+(1.1.6b1 released)
+
++ Added 'expand' option to the Image 'rotate' method.  If true, the
+  output image is made large enough to hold the entire rotated image.
+
++ Changed the ImageDraw 'line' method to always draw the last pixel in
+  a polyline, independent of line angle.
+
++ Fixed bearing calculation and clipping in the ImageFont truetype
+  renderer; this could lead to clipped text, or crashes in the low-
+  level _imagingft module.  (based on input from Adam Twardoch and
+  others).
+
++ Added ImageQt wrapper module, for converting PIL Image objects to
+  QImage objects in an efficient way.
+
++ Fixed 'getmodebands' to return the number of bands also for "PA"
+  and "LA" modes.  Added 'getmodebandnames' helper that return the
+  band names.
+
+(1.1.6a2 released)
+
++ Added float/double support to the TIFF loader (from Russell
+  Nelson).
+
++ Fixed broken use of realloc() in path.c (from Jan Matejek)
+
++ Added save support for Spider images (from William Baxter).
+
++ Fixed broken 'paste' and 'resize' operations in pildriver
+  (from Bill Janssen).
+
++ Added support for duplex scanning to the Sane interface (Abel
+  Deuring).
+
+(1.1.6a1 released)
+
++ Fixed a memory leak in "convert(mode)", when converting from
+  L to P.
+
++ Added pixel access object.  The "load" method now returns a
+  access object that can be used to directly get and set pixel
+  values, using ordinary [x, y] notation:
+
+	pixel = im.load()
+	v = pixel[x, y]	
+	pixel[x, y] = v	
+
+  If you're accessing more than a few pixels, this is a lot
+  faster than using getpixel/putpixel.
+
++ Fixed building on Cygwin (from Miki Tebeka).
+
++ Fixed "point(callable)" on unloaded images (reported by Håkan
+  Karlsson).
+
++ Fixed size bug in ImageWin.ImageWindow constructor (from Victor
+  Reijs)
+
++ Fixed ImageMath float() and int() operations for Python 2.4
+  (reported by Don Rozenberg).
+
++ Fixed "RuntimeError: encoder error -8 in tostring" problem for
+  wide "RGB", "I", and "F" images.
+
++ Fixed line width calculation.
+
+(1.1.6a0 released)
+
++ Fixed byte order issue in Image.paste(ink) (from Ka-Ping Yee).
+
++ Fixed off-by-0.5 errors in the ANTIALIAS code (based on input
+  from Douglas Bagnall).
+
++ Added buffer interface support to the Path constructor.  If
+  a buffer is provided, it is assumed to contain a flat array
+  of float coordinates (e.g. array.array('f', seq)).
+
++ Added new ImageMath module.
+
++ Fixed ImageOps.equalize when used with a small number of distinct
+  values (reported by David Kirtley).
+
++ Fixed potential integer division in PSDraw.image (from Eric Etheridge).
 
 *** Changes from release 1.1 to 1.1.5 ***
 
-(1.1.5c2 released)
+(1.1.5c2 and 1.1.5 final released)
 
 + Added experimental PERSPECTIVE transform method (from Jeff Breiden-
   bach).

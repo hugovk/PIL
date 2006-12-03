@@ -26,12 +26,18 @@ PERFORMANCE OF THIS SOFTWARE.
 #include "Imaging.h"
 #include <sane/sane.h>
 
+#include <sys/time.h>
+
 static PyObject *ErrorObject;
 
 typedef struct {
 	PyObject_HEAD
 	SANE_Handle h;
 } SaneDevObject;
+
+#ifdef WITH_THREAD
+PyThreadState *_save;
+#endif
 
 /* Raise a SANE exception */
 PyObject * 
@@ -95,7 +101,10 @@ SaneDev_get_parameters(SaneDevObject *self, PyObject *args)
       PyErr_SetString(ErrorObject, "SaneDev object is closed");
       return NULL;
     }
+  Py_BEGIN_ALLOW_THREADS
   st=sane_get_parameters(self->h, &p);
+  Py_END_ALLOW_THREADS
+  
   if (st) return PySane_Error(st);
   switch (p.format)
     {
@@ -141,7 +150,14 @@ SaneDev_start(SaneDevObject *self, PyObject *args)
       PyErr_SetString(ErrorObject, "SaneDev object is closed");
       return NULL;
     }
+  /* sane_start can take several seconds, if the user initiates
+     a new scan, while the scan head of a flatbed scanner moves
+     back to the start position after finishing a previous scan.
+     Hence it is worth to allow threads here.
+  */
+  Py_BEGIN_ALLOW_THREADS
   st=sane_start(self->h);
+  Py_END_ALLOW_THREADS
   if (st) return PySane_Error(st);
   Py_INCREF(Py_None);
   return Py_None;
@@ -239,7 +255,9 @@ SaneDev_get_option(SaneDevObject *self, PyObject *args)
   void *v;
   
   if (!PyArg_ParseTuple(args, "i", &n))
-    return NULL;
+    {
+      return NULL;
+    }
   if (self->h==NULL)
     {
       PyErr_SetString(ErrorObject, "SaneDev object is closed");
@@ -250,7 +268,11 @@ SaneDev_get_option(SaneDevObject *self, PyObject *args)
   st=sane_control_option(self->h, n, SANE_ACTION_GET_VALUE,
 			 v, NULL);
 
-  if (st) {free(v); return PySane_Error(st);}
+  if (st) 
+    {
+      free(v); 
+      return PySane_Error(st);
+    }
   
   switch(d->type)
     {
@@ -329,7 +351,8 @@ SaneDev_set_option(SaneDevObject *self, PyObject *args)
 	  free(v);
 	  return NULL;
 	}
-      strcpy(v, PyString_AsString(value));
+      strncpy(v, PyString_AsString(value), d->size-1);
+      ((char*)v)[d->size-1] = 0;
       break;
     case(SANE_TYPE_BUTTON): 
     case(SANE_TYPE_GROUP):
@@ -387,10 +410,12 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
       INT16 i16;
     } 
   endian;
+  PyObject *pyNoCancel = NULL;
+  int noCancel = 0;
     
   endian.i16 = 1;
   
-  if (!PyArg_ParseTuple(args, "i", &L))
+  if (!PyArg_ParseTuple(args, "l|O", &L, &pyNoCancel))
     return NULL;
   if (self->h==NULL)
     {
@@ -398,6 +423,9 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
       return NULL;
     }
   im=(Imaging)L;
+  
+  if (pyNoCancel)
+    noCancel = PyObject_IsTrue(pyNoCancel);
 
   st=SANE_STATUS_GOOD; px=py=0;
   /* xxx not yet implemented
@@ -407,6 +435,8 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
        we need to call sane_get_parameters here, and we can create
        the result Image object here.
   */
+  
+  Py_UNBLOCK_THREADS
   sane_get_parameters(self->h, &p);
   if (p.format == SANE_FRAME_GRAY)
     {
@@ -443,6 +473,7 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
                 if (st && (st!=SANE_STATUS_EOF))
                   {
                     sane_cancel(self->h);
+                    Py_BLOCK_THREADS
                     return PySane_Error(st);
                   }
                 bufpos -= lastlen;
@@ -483,6 +514,7 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
                 if (st && (st!=SANE_STATUS_EOF))
                   {
                     sane_cancel(self->h);
+                    Py_BLOCK_THREADS
                     return PySane_Error(st);
                   }
                 remain -= len;
@@ -514,6 +546,7 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
                 if (st && (st!=SANE_STATUS_EOF))
                   {
                     sane_cancel(self->h);
+                    Py_BLOCK_THREADS
                     return PySane_Error(st);
                   }
                 remain -= len;
@@ -528,6 +561,7 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
                depths than 1, 8, 16 should not be used
             */
             sane_cancel(self->h);
+            Py_BLOCK_THREADS
             snprintf(errmsg, 80, "unsupported pixel depth: %i", p.depth);
             PyErr_SetString(ErrorObject, errmsg);
             return NULL;
@@ -557,6 +591,7 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
                         if (st && (st!=SANE_STATUS_EOF))
                           {
                             sane_cancel(self->h);
+                            Py_BLOCK_THREADS
                             return PySane_Error(st);
                           }
                         bufpos -= lastlen;
@@ -632,8 +667,9 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
                         bufpos -= lastlen;
                         if (remain == 0)
                           {
-                            PyErr_SetString(ErrorObject, "internal _sane error: premature end of scan");
                             sane_cancel(self->h);
+                            Py_BLOCK_THREADS
+                            PyErr_SetString(ErrorObject, "internal _sane error: premature end of scan");
                             return NULL;
                           }
                         st = sane_read(self->h, buffer,
@@ -641,6 +677,7 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
                         if (st && (st!=SANE_STATUS_EOF))
                           {
                             sane_cancel(self->h);
+                            Py_BLOCK_THREADS
                             return PySane_Error(st);
                           }
                         lastlen = len;
@@ -666,6 +703,7 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
               }
             break;
           default:
+            Py_BLOCK_THREADS
             sane_cancel(self->h);
             snprintf(errmsg, 80, "unsupported pixel depth: %i", p.depth);
             PyErr_SetString(ErrorObject, errmsg);
@@ -690,6 +728,7 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
           if (st)
             {
               sane_cancel(self->h);
+              Py_BLOCK_THREADS
               return PySane_Error(st);
             }
           remain = p.bytes_per_line * im->ysize;
@@ -710,6 +749,7 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
                 break;
               default:
                 sane_cancel(self->h);
+                Py_BLOCK_THREADS
                 snprintf(errmsg, 80, "unknown/invalid frame format: %i", p.format);
                 PyErr_SetString(ErrorObject, errmsg);
                 return NULL;
@@ -756,6 +796,7 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
                         if (st && (st!=SANE_STATUS_EOF))
                           {
                             sane_cancel(self->h);
+                            Py_BLOCK_THREADS
                             return PySane_Error(st);
                           }
                         remain -= len;
@@ -785,8 +826,9 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
                         bufpos -= lastlen;
                         if (remain == 0)
                           {
-                            PyErr_SetString(ErrorObject, "internal _sane error: premature end of scan");
                             sane_cancel(self->h);
+                            Py_BLOCK_THREADS
+                            PyErr_SetString(ErrorObject, "internal _sane error: premature end of scan");
                             return NULL;
                           }
                         st = sane_read(self->h, buffer,
@@ -794,6 +836,7 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
                         if (st && (st!=SANE_STATUS_EOF))
                           {
                             sane_cancel(self->h);
+                            Py_BLOCK_THREADS
                             return PySane_Error(st);
                           }
                         if (st == SANE_STATUS_EOF)
@@ -826,6 +869,7 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
                 break;
               default:
                 sane_cancel(self->h);
+                Py_BLOCK_THREADS
                 snprintf(errmsg, 80, "unsupported pixel depth: %i", p.depth);
                 PyErr_SetString(ErrorObject, errmsg);
                 return NULL;
@@ -843,16 +887,35 @@ SaneDev_snap(SaneDevObject *self, PyObject *args)
               while (st == SANE_STATUS_GOOD);
               if (st != SANE_STATUS_EOF)
                 {
+                   Py_BLOCK_THREADS
                    sane_cancel(self->h);
                    return PySane_Error(st);
                 }
               
               st = sane_start(self->h);
-              if (st) return PySane_Error(st);
+              if (st) 
+                {
+                   Py_BLOCK_THREADS
+                   return PySane_Error(st);
+                }
             }
         }
     }
-  sane_cancel(self->h);
+  /* enforce SANE_STATUS_EOF. Can be necessary for ADF scans for some backends */
+  do {
+       st = sane_read(self->h, buffer, READSIZE, &len);
+     }
+  while (st == SANE_STATUS_GOOD);
+  if (st != SANE_STATUS_EOF)
+    {
+      sane_cancel(self->h);
+      Py_BLOCK_THREADS
+      return PySane_Error(st);
+    }
+  
+  if (!noCancel)
+    sane_cancel(self->h);
+  Py_BLOCK_THREADS
   Py_INCREF(Py_None);
   return Py_None;
 }
@@ -953,8 +1016,10 @@ SaneDev_arr_snap(SaneDevObject *self, PyObject *args)
   
   while (st!=SANE_STATUS_EOF)
     {
+      Py_BEGIN_ALLOW_THREADS
       st = sane_read(self->h, buffer, 
 		     READSIZE < total_remain ? READSIZE : total_remain, &len);
+      Py_END_ALLOW_THREADS
 #ifdef WRITE_PGM
       printf("p5_write: read %d of %d\n", len, READSIZE);
       fwrite(buffer, 1, len, fp);
@@ -1141,7 +1206,7 @@ PySane_OPTION_IS_ACTIVE(PyObject *self, PyObject *args)
   SANE_Int cap;
   long lg;
   
-  if (!PyArg_ParseTuple(args, "i", &lg))
+  if (!PyArg_ParseTuple(args, "l", &lg))
     return NULL;
   cap=lg;
   return PyInt_FromLong( SANE_OPTION_IS_ACTIVE(cap));
@@ -1153,7 +1218,7 @@ PySane_OPTION_IS_SETTABLE(PyObject *self, PyObject *args)
   SANE_Int cap;
   long lg;
   
-  if (!PyArg_ParseTuple(args, "i", &lg))
+  if (!PyArg_ParseTuple(args, "l", &lg))
     return NULL;
   cap=lg;
   return PyInt_FromLong( SANE_OPTION_IS_SETTABLE(cap));
