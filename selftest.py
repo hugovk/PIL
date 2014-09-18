@@ -1,4 +1,4 @@
-# $Id: selftest.py 2134 2004-10-06 08:55:20Z fredrik $
+# $Id: selftest.py 2813 2006-10-07 10:11:35Z fredrik $
 # minimal sanity check
 
 import sys
@@ -8,6 +8,7 @@ sys.path.insert(1, "PIL")
 import Image
 import ImageDraw
 import ImageFilter
+import ImageMath
 
 try:
     Image.core.ping
@@ -55,7 +56,7 @@ def testimage():
     >>> im = Image.open("Images/lena.ppm")
     >>> print im.im # internal image attribute
     None
-    >>> im.load()
+    >>> a = im.load()
     >>> type(im.im)
     <type 'ImagingCore'>
 
@@ -135,6 +136,13 @@ def testimage():
     >>> im.getpixel((0, 0))
     (255, 0, 0)
 
+    In 1.1.6, you can use the ImageMath module to do image
+    calculations.
+
+    >>> im = ImageMath.eval("float(im + 20)", im=im.convert("L"))
+    >>> im.mode, im.size
+    ('F', (128, 128))
+
     PIL can do many other things, but I'll leave that for another
     day.  If you're curious, check the handbook, available from:
 
@@ -151,4 +159,3 @@ if __name__ == "__main__":
         print "*** %s tests of %d failed." % status
     else:
         print "%s tests passed." % status[1]
-
